@@ -1,0 +1,7 @@
+prog     -> (expr)*
+expr     -> (call | terminal) end
+call     -> ident args
+args     -> terminal (space terminal)*
+terminal -> ident | integer
+ident    -> :identifier
+end      -> :newline
