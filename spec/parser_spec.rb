@@ -14,7 +14,7 @@ describe Emerald::Parser do
     it "can parse a call" do
       src = "foo 1 1"
       ast = Emerald::Parser.new(Emerald::Scanner.new(src).tokens).parse
-      result = [[:call, [[:identifier, "foo"], [:integer, "1"], [:integer, "1"]]]]
+      result = [[:call, [:identifier, "foo"], [:integer, "1"], [:integer, "1"]]]
       expect(ast).to eq(result)
     end
   end

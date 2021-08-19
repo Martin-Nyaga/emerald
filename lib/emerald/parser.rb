@@ -28,7 +28,7 @@ module Emerald
       if match?(:identifier)
         ident = previous_token
         args = args_expr
-        [:call, [ident, *args]]
+        [:call, ident, *args]
       end
     end
 

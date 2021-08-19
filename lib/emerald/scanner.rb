@@ -17,7 +17,7 @@ module Emerald
 
         (type, match) = matches.last
         result << [type, match[0]] unless type == :space
-        src.delete_prefix!(match[0])
+        @src = src.delete_prefix(match[0])
       end
       result
     end
@@ -25,7 +25,7 @@ module Emerald
     def token_types
       [
         [:integer, /^\d+/],
-        [:identifier, /^[a-z]+[a-z_0-9]*/],
+        [:identifier, /^[\+\-\/\*]|^[a-z]+[a-z_0-9]*/],
         [:space, /^\s/]
       ]
     end
