@@ -18,4 +18,16 @@ describe Emerald::Parser do
       expect(ast).to eq(result)
     end
   end
+
+  context "multiline" do
+    it "can parse a multiline program" do
+      src = "foo 1 1\nbar 1 1"
+      ast = Emerald::Parser.new(Emerald::Scanner.new(src).tokens).parse
+      result = [
+        [:call, [:identifier, "foo"], [:integer, "1"], [:integer, "1"]],
+        [:call, [:identifier, "bar"], [:integer, "1"], [:integer, "1"]]
+      ]
+      expect(ast).to eq(result)
+    end
+  end
 end

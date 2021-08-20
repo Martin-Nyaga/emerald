@@ -1,4 +1,5 @@
 require "emerald/runtime"
+require "pp"
 
 module Emerald
   class Interpreter
@@ -14,16 +15,12 @@ module Emerald
       had_error
     end
 
-    def self.run_file(file)
-      interpreter = new
-      program = File.read(file)
-      interpreter.interprete(program)
-    end
-
     def interprete(program)
       clear_error
       tokens = Emerald::Scanner.new(program).tokens
+      pp tokens
       ast = Emerald::Parser.new(tokens).parse
+      pp ast
       interprete_ast(ast).last
     rescue => e
       log_error e
@@ -68,7 +65,7 @@ module Emerald
 
     def log_error(e)
       @had_error = true
-      STDERR.puts e
+      STDERR.puts "#{e.class}: #{e.message}"
     end
   end
 end

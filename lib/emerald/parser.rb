@@ -14,8 +14,13 @@ module Emerald
 
     def prog
       ast = []
-      while !eof? && result = expr
-        ast << result
+      ast << expr
+      while match?(:newline) && !eof?
+        if result = expr
+          ast << result
+        else
+          break
+        end
       end
       ast
     end
@@ -74,6 +79,10 @@ module Emerald
     def advance
       assert_not_eof!
       @position += 1
+    end
+
+    def consume(type, message)
+      raise SyntaxError.new(message) unless match(type)
     end
 
     def eof?

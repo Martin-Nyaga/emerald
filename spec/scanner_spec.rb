@@ -32,4 +32,14 @@ describe Emerald::Scanner do
     result = [[:identifier, "foo"], [:integer, "1"], [:integer, "1"]]
     expect(tokens).to eq(result)
   end
+
+  it "can tokenise a multiline statement" do
+    tokens = Emerald::Scanner.new("foo 1 1\n+ 3 3").tokens
+    result = [
+      [:identifier, "foo"], [:integer, "1"], [:integer, "1"],
+      [:newline, "\n"],
+      [:identifier, "+"], [:integer, "3"], [:integer, "3"]
+    ]
+    expect(tokens).to eq(result)
+  end
 end

@@ -1,4 +1,4 @@
-prog     -> (expr)*
+prog     -> expr (end expr)* end*
 expr     -> (call | terminal) end
 call     -> ident args
 args     -> terminal (space terminal)*

@@ -1,19 +1,27 @@
 module Emerald
   class Runtime
     def define_builtins(env)
-      Math.new.define_builtins(env)
+      Math.define_builtins(env)
+      IO.define_builtins(env)
     end
 
     class Math
-      def define_builtins(env)
-        env["+"] = Function.new("+", -> (a, b) { a + b })
-        env["-"] = Function.new("+", -> (a, b) { a - b })
-        env["/"] = Function.new("+", -> (a, b) { a / b })
-        env["*"] = Function.new("+", -> (a, b) { a * b })
+      def self.define_builtins(env)
+        env["+"] = Callable.new("+", -> (a, b) { a + b })
+        env["-"] = Callable.new("+", -> (a, b) { a - b })
+        env["/"] = Callable.new("+", -> (a, b) { a / b })
+        env["*"] = Callable.new("+", -> (a, b) { a * b })
       end
     end
 
-    class Function
+    class IO
+      def self.define_builtins(env)
+        env["print"] = Callable.new("print", -> (val) { print val })
+        env["puts"] = Callable.new("puts", -> (val) { p val })
+      end
+    end
+
+    class Callable
       attr_reader :name, :callable, :arity
       def initialize(name, callable)
         @name = name
