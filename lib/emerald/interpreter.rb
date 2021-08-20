@@ -18,9 +18,7 @@ module Emerald
     def interprete(program)
       clear_error
       tokens = Emerald::Scanner.new(program).tokens
-      pp tokens
       ast = Emerald::Parser.new(tokens).parse
-      pp ast
       interprete_ast(ast).last
     rescue => e
       log_error e
@@ -44,9 +42,14 @@ module Emerald
       case node[0]
       when :integer
         node[1].to_i
+      when :define
+        (_, (_, ident), value_node) = node
+        value = interprete_node(value_node)
+        env[ident] = value
       when :identifier
-        result = env[node[1]]
-        raise NameError.new("No identifier with name #{node[1]} found") if result.nil?
+        (_, name) = node
+        result = env[name]
+        raise NameError.new("No identifier with name #{name} found") if result.nil?
         result
       when :call
         fn = interprete_node(node[1])

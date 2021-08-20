@@ -42,4 +42,19 @@ describe Emerald::Scanner do
     ]
     expect(tokens).to eq(result)
   end
+
+  it "can tokenise a parenthesized call" do
+    tokens = Emerald::Scanner.new("foo (+ 1 1) 1").tokens
+    result = [
+      [:identifier, "foo"], [:left_bracket, "("], [:identifier, "+"],
+      [:integer, "1"], [:integer, "1"], [:right_bracket, ")"], [:integer, "1"]
+    ]
+    expect(tokens).to eq(result)
+  end
+
+  it "can tokenise a definition" do
+    tokens = Emerald::Scanner.new("def foo 12").tokens
+    result = [[:define, "def"], [:identifier, "foo"], [:integer, "12"]]
+    expect(tokens).to eq(result)
+  end
 end

@@ -16,7 +16,7 @@ module Emerald
 
     class IO
       def self.define_builtins(env)
-        env["print"] = Callable.new("print", -> (val) { print val })
+        env["print"] = Callable.new("print", -> (val) { print val; val })
         env["puts"] = Callable.new("puts", -> (val) { p val })
       end
     end

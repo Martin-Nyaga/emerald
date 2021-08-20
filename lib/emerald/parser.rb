@@ -15,18 +15,24 @@ module Emerald
     def prog
       ast = []
       ast << expr
-      while match?(:newline) && !eof?
+      while !eof? && match?(:newline)
         if result = expr
           ast << result
-        else
-          break
         end
       end
       ast
     end
 
     def expr
-      call_expr || terminal_expr
+      call_expr || definition_expr || terminal_expr
+    end
+
+    def definition_expr
+      if match?(:define)
+        ident = consume!(:identifier, "Expected identifier, got #{current_text}")
+        value = terminal_expr
+        [:define, ident, value]
+      end
     end
 
     def call_expr
@@ -46,7 +52,7 @@ module Emerald
     end
 
     def terminal_expr
-      identifier_expr || integer_expr
+      identifier_expr || integer_expr || parenthesized_expr
     end
 
     def integer_expr
@@ -55,6 +61,14 @@ module Emerald
 
     def identifier_expr
       return previous_token if match?(:identifier)
+    end
+
+    def parenthesized_expr
+      if match?(:left_bracket)
+        ast = expr
+        consume!(:right_bracket, "expected ), got #{current_text}")
+        ast
+      end
     end
 
   private
@@ -66,9 +80,12 @@ module Emerald
       tokens[position]
     end
 
+    def current_text
+      '"' + current_token[1] + '"'
+    end
+
     def match?(type)
-      assert_not_eof!
-      if current_token[0] == type
+      if check?(type)
         advance
         true
       else
@@ -76,13 +93,20 @@ module Emerald
       end
     end
 
+    def check?(type)
+      return false if eof?
+      current_token[0] == type
+    end
+
     def advance
-      assert_not_eof!
+      return if eof?
       @position += 1
     end
 
-    def consume(type, message)
-      raise SyntaxError.new(message) unless match(type)
+    def consume!(type, message)
+      assert_not_eof!
+      raise SyntaxError.new(message) unless match?(type)
+      previous_token
     end
 
     def eof?
