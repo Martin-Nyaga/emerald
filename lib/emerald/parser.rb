@@ -20,6 +20,9 @@ module Emerald
           ast << result
         end
       end
+      if !eof?
+        raise SyntaxError.new("Unexpected input #{current_text}")
+      end
       ast
     end
 
