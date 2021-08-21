@@ -3,7 +3,8 @@ expr          -> (call | definition | terminal) end
 definition    -> :define identifier terminal
 call          -> ident args
 args          -> terminal (space terminal)*
-terminal      -> ident | integer | parenthesized
+terminal      -> ident | integer | parenthesized | array
 ident         -> :identifier
 end           -> :newline
-parenthesized -> :left_bracket call :right_bracket
+parenthesized -> :left_round_bracket call :right_round_bracket
+array         -> :left_square_bracket terminal* right_square_bracket

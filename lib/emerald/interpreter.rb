@@ -18,7 +18,11 @@ module Emerald
     def interprete(program)
       clear_error
       tokens = Emerald::Scanner.new(program).tokens
+      pp tokens
+      pp "-"
       ast = Emerald::Parser.new(tokens).parse
+      pp ast
+      pp "-"
       interprete_ast(ast).last
     rescue => e
       log_error e
@@ -59,6 +63,9 @@ module Emerald
         else
           fn[]
         end
+      when :array
+        (_, *elements) = node
+        interprete_ast(elements)
       end
     end
 

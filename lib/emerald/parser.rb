@@ -52,7 +52,7 @@ module Emerald
     end
 
     def terminal_expr
-      identifier_expr || integer_expr || parenthesized_expr
+      identifier_expr || integer_expr || parenthesized_expr || array_expr
     end
 
     def integer_expr
@@ -64,10 +64,21 @@ module Emerald
     end
 
     def parenthesized_expr
-      if match?(:left_bracket)
+      if match?(:left_round_bracket)
         ast = expr
-        consume!(:right_bracket, "expected ), got #{current_text}")
+        consume!(:right_round_bracket, "expected ), got #{current_text}")
         ast
+      end
+    end
+
+    def array_expr
+      if match?(:left_square_bracket)
+        elements = []
+        while result = terminal_expr
+          elements << result
+        end
+        consume!(:right_square_bracket, "expected ], got #{current_text}")
+        [:array, *elements]
       end
     end
 

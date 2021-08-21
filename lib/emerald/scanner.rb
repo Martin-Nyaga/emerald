@@ -42,8 +42,10 @@ module Emerald
     Token.new(:identifier, /\A[\+\-\/\*]|\A[a-z]+[a-z_0-9]*/),
     Token.new(:integer, /\A[0-9]+/),
     Token.new(:newline, /\A[\n]|\A[\r\n]/),
-    Token.new(:left_bracket, /\A\(/),
-    Token.new(:right_bracket, /\A\)/),
+    Token.new(:left_round_bracket, /\A\(/),
+    Token.new(:right_round_bracket, /\A\)/),
+    Token.new(:left_square_bracket, /\A\[/),
+    Token.new(:right_square_bracket, /\A\]/),
     Token.new(:space, /\A[ \t]/),
   ]
 

@@ -38,7 +38,6 @@ describe Emerald::Parser do
     end
   end
 
-
   context "parenthesized" do
     it "can parse a parenthesized call" do
       src = "foo (+ 1 1) 1"
@@ -57,6 +56,15 @@ describe Emerald::Parser do
       src = "def foo 12"
       ast = Emerald::Parser.new(Emerald::Scanner.new(src).tokens).parse
       result = [[:define, [:identifier, "foo"], [:integer, "12"]]]
+      expect(ast).to eq(result)
+    end
+  end
+
+  context "array" do
+    it "can parse array syntax" do
+      src = "print [1 2]"
+      ast = Emerald::Parser.new(Emerald::Scanner.new(src).tokens).parse
+      result = [[:call, [:identifier, "print"], [:array, [:integer, "1"], [:integer, "2"]]]]
       expect(ast).to eq(result)
     end
   end

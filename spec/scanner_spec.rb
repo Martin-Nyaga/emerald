@@ -46,8 +46,8 @@ describe Emerald::Scanner do
   it "can tokenise a parenthesized call" do
     tokens = Emerald::Scanner.new("foo (+ 1 1) 1").tokens
     result = [
-      [:identifier, "foo"], [:left_bracket, "("], [:identifier, "+"],
-      [:integer, "1"], [:integer, "1"], [:right_bracket, ")"], [:integer, "1"]
+      [:identifier, "foo"], [:left_round_bracket, "("], [:identifier, "+"],
+      [:integer, "1"], [:integer, "1"], [:right_round_bracket, ")"], [:integer, "1"]
     ]
     expect(tokens).to eq(result)
   end
@@ -55,6 +55,15 @@ describe Emerald::Scanner do
   it "can tokenise a definition" do
     tokens = Emerald::Scanner.new("def foo 12").tokens
     result = [[:define, "def"], [:identifier, "foo"], [:integer, "12"]]
+    expect(tokens).to eq(result)
+  end
+
+  it "can tokenise array syntax" do
+    tokens = Emerald::Scanner.new("print [1 2]").tokens
+    result = [
+      [:identifier, "print"], [:left_square_bracket, "["], [:integer, "1"],
+      [:integer, "2"], [:right_square_bracket, "]"]
+    ]
     expect(tokens).to eq(result)
   end
 end
