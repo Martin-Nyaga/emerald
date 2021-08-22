@@ -59,8 +59,26 @@ module Emerald
     end
 
     def fn_body_expr
+      single_line_body_expr || multiline_body_expr
+    end
+
+    def single_line_body_expr
       if match?(:fat_arrow)
         [expr]
+      end
+    end
+
+    def multiline_body_expr
+      if match?(:do)
+        ast = []
+        skip(:newline)
+        while result = expr
+          skip(:newline)
+          ast << result
+        end
+        skip(:newline)
+        consume!(:end, "Expected end, got #{current_text}")
+        ast
       end
     end
 
@@ -147,6 +165,10 @@ module Emerald
       assert_not_eof!
       raise SyntaxError.new(message) unless match?(type)
       previous_token
+    end
+
+    def skip(type)
+      while match?(type); end
     end
 
     def eof?

@@ -82,5 +82,25 @@ describe Emerald::Scanner do
       ]
       expect(tokens).to eq(result)
     end
+
+    it "can tokenise multi-line anonymous function syntax" do
+      tokens = Emerald::Scanner.new("fn a do\n print a\n end").tokens
+      result = [
+        [:fn, "fn"], [:identifier, "a"], [:do, "do"], [:newline, "\n"],
+        [:identifier, "print"], [:identifier, "a"], [:newline, "\n"],
+        [:end, "end"]
+      ]
+      expect(tokens).to eq(result)
+    end
+
+    it "can tokenise multi-line named function syntax" do
+      tokens = Emerald::Scanner.new("defn say a do \nprint a \n end").tokens
+      result = [
+        [:defn, "defn"], [:identifier, "say"], [:identifier, "a"],
+        [:do, "do"], [:newline, "\n"], [:identifier, "print"], [:identifier, "a"],
+        [:newline, "\n"], [:end, "end"]
+      ]
+      expect(tokens).to eq(result)
+    end
   end
 end

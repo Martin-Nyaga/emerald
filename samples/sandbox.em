@@ -1,12 +1,3 @@
-defn print_three (a b c) => print [bar baz a b c]
-
-defn print_three (a b c) do
-  print [bar baz a b c]
-end
-
-fn (a b c) do
-  a + b + c
-end
 
 fn (a b c) => a + b + c
 
@@ -24,7 +15,7 @@ end
 print_three 1 2 3
 
 
-describe "MyModule" do
+describe "MyModule" fn do
   context "MyThing" do
     it "Can do the thing I want" do
       Assert.assert (foo bar baz)
@@ -35,15 +26,24 @@ end
 defn fib (x) 
   when x == 0 => 0
   when x == 1 => 1
-  else        => + (fib (- x 1)) (fib (- x 2))
+  else => + (fib (- x 1)) (fib (- x 2))
 end
+
+defn fib (x) 
+  when = 0 x => 0 end
+  when = 1 x => 1 end
+  else do
+    + (fib (- x 1)) (fib (- x 2))
+  end
+end
+
+defn fizbuzz n
 
 it "can tokenise a parenthesized call" do
   def tokens Emerald::Scanner.tokenise "foo"
   def result [:identifier "foo"]
   Assert.equal tokens result
 end
-
 
 module Emerald do
   module Token

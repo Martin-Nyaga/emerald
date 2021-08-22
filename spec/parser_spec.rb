@@ -84,5 +84,32 @@ describe Emerald::Parser do
         [:identifier, "print"], [:identifier, "a"]]]]]
       expect(ast).to eq(result)
     end
+
+    it "can parse a multi-line anonymous function definition" do
+      src = "fn a b do\n print a\nprint b\n end"
+      ast = Emerald::Parser.new(Emerald::Scanner.new(src).tokens).parse
+      result = [
+        [:fn,
+          [[:identifier, "a"], [:identifier, "b"]],
+          [
+            [:call, [:identifier, "print"], [:identifier, "a"]],
+            [:call, [:identifier, "print"], [:identifier, "b"]]]]]
+      expect(ast).to eq(result)
+    end
+
+    it "can parse a multi-line named function definition" do
+      src = "defn say a b do\n print a \n print b\n end"
+      ast = Emerald::Parser.new(Emerald::Scanner.new(src).tokens).parse
+      result = [[:defn, [:identifier, "say"], [[:identifier, "a"]], [[:call,
+        [:identifier, "print"], [:identifier, "a"]]]]]
+      result = [
+        [:defn,
+          [:identifier, "say"],
+          [[:identifier, "a"], [:identifier, "b"]],
+          [
+            [:call, [:identifier, "print"], [:identifier, "a"]],
+            [:call, [:identifier, "print"], [:identifier, "b"]]]]]
+      expect(ast).to eq(result)
+    end
   end
 end

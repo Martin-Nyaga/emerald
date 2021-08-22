@@ -1,14 +1,16 @@
-prog          -> expr (end expr)* end*
-expr          -> (def | defn | fn | call | terminal) end
-def           -> :def identifier terminal
-def           -> :defn identifier parameters fn_body
-fn            -> :fn parameters fn_body
-parameters    -> identifier+
-fn_body       -> :fat_arrow expr
-call          -> ident args
-args          -> terminal (space terminal)*
-terminal      -> identifier | integer | parenthesized | array
-identifier    -> :identifier
-end           -> :newline
-parenthesized -> :left_round_bracket call :right_round_bracket
-array         -> :left_square_bracket terminal* right_square_bracket
+prog             -> expr (end expr)* end*
+expr             -> (def | defn | fn | call | terminal) end
+def              -> :def identifier terminal
+defn             -> :defn identifier parameters fn_body
+fn               -> :fn parameters fn_body
+parameters       -> identifier+
+fn_body          -> single_line_body || multiline_body
+single_line_body -> :fat_arrow expr
+multiline_body   -> :do prog :end
+call             -> ident args
+args             -> terminal (space terminal)*
+terminal         -> identifier | integer | parenthesized | array
+identifier       -> :identifier
+end              -> :newline
+parenthesized    -> :left_round_bracket call :right_round_bracket
+array            -> :left_square_bracket terminal* right_square_bracket

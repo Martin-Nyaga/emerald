@@ -6,9 +6,23 @@ println (+ foo bar)
 println [1 2 3]
 println [1 foo (+ 1 2)]
 
-def hello (fn a => println 1)
+def hello (fn a => print 1)
 map hello [1 2 3]
 println
 
 defn square a => * a a
 println (map square [1 2 3 4 5])
+
+defn print_three a b c => print [a b c]
+print_three 1 2 3
+println
+
+defn print_multiline a b c do 
+  println a
+  println b
+  println c
+end
+print_multiline 9 10 11
+
+println (map (fn a do (* a a) end) [1 2 3 4])
+println (map (fn a => (* a a)) [1 2 3 4])
