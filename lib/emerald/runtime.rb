@@ -23,10 +23,10 @@ module Emerald
 
     class Callable
       attr_reader :name, :callable, :arity
-      def initialize(name, callable)
+      def initialize(name, callable, arity = callable.arity)
         @name = name
         @callable = callable
-        @arity = callable.arity
+        @arity = arity
       end
 
       def call(*args)

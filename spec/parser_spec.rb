@@ -68,4 +68,13 @@ describe Emerald::Parser do
       expect(ast).to eq(result)
     end
   end
+
+  context "function" do
+    it "can parse a single line anonymous function definition" do
+      src = "fn a => print a"
+      ast = Emerald::Parser.new(Emerald::Scanner.new(src).tokens).parse
+      result = [[:fn, [[:identifier, "a"]], [[:call, [:identifier, "print"], [:identifier, "a"]]]]]
+      expect(ast).to eq(result)
+    end
+  end
 end

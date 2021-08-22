@@ -62,6 +62,15 @@ module Emerald
       when :array
         (_, *elements) = node
         Emerald::Types::Array.new(interprete_ast(elements))
+      when :fn
+        (_, params, body) = node
+        arity = params.count
+        Emerald::Runtime::Callable.new("anonymous", proc { |*args|
+          params.zip(args).each { |((_, arg_name), arg_value)| env[arg_name] = arg_value }
+          result = interprete_ast(body)
+          args.each { |(_, arg_name)| env.delete(arg_name) }
+          result.last
+        }, arity)
       end
     end
 

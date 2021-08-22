@@ -66,4 +66,10 @@ describe Emerald::Scanner do
     ]
     expect(tokens).to eq(result)
   end
+
+  it "can tokenise single line function syntax" do
+    tokens = Emerald::Scanner.new("fn a => print a").tokens
+    result = [[:fn, "fn"], [:identifier, "a"], [:fat_arrow, "=>"], [:identifier, "print"], [:identifier, "a"]]
+    expect(tokens).to eq(result)
+  end
 end

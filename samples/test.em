@@ -5,3 +5,5 @@ def bar 13
 println (+ foo bar)
 println [1 2 3]
 println [1 foo (+ 1 2)]
+
+def hello (fn a => print 1)

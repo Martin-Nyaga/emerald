@@ -1,10 +1,13 @@
 prog          -> expr (end expr)* end*
-expr          -> (call | definition | terminal) end
+expr          -> (definition | fn | call | terminal) end
 definition    -> :define identifier terminal
+fn            -> :fn parameters fn_body
+parameters    -> identifier+
+fn_body       -> :fat_arrow expr
 call          -> ident args
 args          -> terminal (space terminal)*
-terminal      -> ident | integer | parenthesized | array
-ident         -> :identifier
+terminal      -> identifier | integer | parenthesized | array
+identifier    -> :identifier
 end           -> :newline
 parenthesized -> :left_round_bracket call :right_round_bracket
 array         -> :left_square_bracket terminal* right_square_bracket
