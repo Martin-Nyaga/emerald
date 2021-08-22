@@ -27,7 +27,7 @@ module Emerald
     end
 
     def expr
-      def_expr || defn_expr || fn_expr || call_expr || terminal_expr
+      def_expr || defn_expr || fn_expr || if_expr || call_expr || terminal_expr
     end
 
     def def_expr
@@ -79,6 +79,37 @@ module Emerald
         skip(:newline)
         consume!(:end, "Expected end, got #{current_text}")
         ast
+      end
+    end
+
+    def multiline_body_with_possible_else_expr
+      if match?(:do)
+        default_branch = []
+        skip(:newline)
+        while result = expr
+          skip(:newline)
+          default_branch << result
+        end
+        skip(:newline)
+        else_branch = []
+        if match?(:else)
+          skip(:newline)
+          while result = expr
+            skip(:newline)
+            else_branch << result
+          end
+        end
+        skip(:newline)
+        consume!(:end, "Expected end, got #{current_text}")
+        [default_branch, else_branch]
+      end
+    end
+
+    def if_expr
+      if match?(:if)
+        condition = terminal_expr || call_expr
+        (true_branch, false_branch) = return_value = multiline_body_with_possible_else_expr
+        [:if, condition, true_branch, false_branch]
       end
     end
 

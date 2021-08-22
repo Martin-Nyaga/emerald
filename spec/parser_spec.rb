@@ -100,8 +100,6 @@ describe Emerald::Parser do
     it "can parse a multi-line named function definition" do
       src = "defn say a b do\n print a \n print b\n end"
       ast = Emerald::Parser.new(Emerald::Scanner.new(src).tokens).parse
-      result = [[:defn, [:identifier, "say"], [[:identifier, "a"]], [[:call,
-        [:identifier, "print"], [:identifier, "a"]]]]]
       result = [
         [:defn,
           [:identifier, "say"],
@@ -132,6 +130,28 @@ describe Emerald::Parser do
       src = "nil"
       ast = Emerald::Parser.new(Emerald::Scanner.new(src).tokens).parse
       result = [[:nil]]
+      expect(ast).to eq(result)
+    end
+  end
+
+  context "if statement" do
+    it "can parse a multiline if statement" do
+      src = "if true do\n print a \nend"
+      ast = Emerald::Parser.new(Emerald::Scanner.new(src).tokens).parse
+      result = [
+        [:if, [:true],
+          [[:call, [:identifier, "print"], [:identifier, "a"]]],
+          []]]
+      expect(ast).to eq(result)
+    end
+
+    it "can parse a multiline if else" do
+      src = "if true do\n print a \nelse \nprint b \n end"
+      ast = Emerald::Parser.new(Emerald::Scanner.new(src).tokens).parse
+      result = [
+        [:if, [:true],
+          [[:call, [:identifier, "print"], [:identifier, "a"]]],
+          [[:call, [:identifier, "print"], [:identifier, "b"]]]]]
       expect(ast).to eq(result)
     end
   end

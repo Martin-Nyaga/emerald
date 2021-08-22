@@ -1,5 +1,5 @@
 prog             -> expr (end expr)* end*
-expr             -> (def | defn | fn | call | terminal) end
+expr             -> (def | defn | fn | if | call | terminal) end
 def              -> :def identifier terminal
 defn             -> :defn identifier parameters fn_body
 fn               -> :fn parameters fn_body
@@ -7,8 +7,11 @@ parameters       -> identifier+
 fn_body          -> single_line_body || multiline_body
 single_line_body -> :fat_arrow expr
 multiline_body   -> :do prog :end
-call             -> ident args
+multiline_body_with_possible_else
+                 -> :do prog (:else prog)? :end
+call             -> identifier args
 args             -> terminal (terminal)*
+if               -> :if (terminal | call) multiline_body_with_possible_else
 terminal         -> identifier | integer | boolean | nil | parenthesized | array
 identifier       -> :identifier
 boolean          -> :true | :false

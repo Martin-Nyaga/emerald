@@ -29,3 +29,9 @@ println (map (fn a => * a a) [1 2 3 4])
 println true
 println false
 println nil
+
+if true do
+  println 1 
+else
+  println 2
+end

@@ -8,10 +8,10 @@ module Emerald
 
     class Math
       def self.define_builtins(env)
-        env.set '+', Emerald::Types::Function.from_lambda('+', ->(a, b) { a + b })
-        env.set '-', Emerald::Types::Function.from_lambda('-', ->(a, b) { a - b })
-        env.set '/', Emerald::Types::Function.from_lambda('/', ->(a, b) { a / b })
-        env.set '*', Emerald::Types::Function.from_lambda('*', ->(a, b) { a * b })
+        [:+, :-, :*, :/, :>, :>=, :<, :<=, :==].each do |op|
+          env.set op.to_s,
+            Emerald::Types::Function.from_lambda(op.to_s, ->(a, b) { a.send(op, b) })
+        end
       end
     end
 
@@ -25,6 +25,7 @@ module Emerald
             else
               puts
             end
+            args[0]
           end
         env.set 'println', println_fn
       end

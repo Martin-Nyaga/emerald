@@ -69,6 +69,13 @@ module Emerald
         (_, (_, name), params, body) = node
         fn = define_function(env, name, params, body)
         env.set name, fn
+      when :if
+        (_, condition, body, else_body) = node
+        if interprete_node(condition, env)
+          interprete_ast(body, env).last
+        else
+          else_body.any? ? interprete_ast(else_body, env).last : nil
+        end
       end
     end
 

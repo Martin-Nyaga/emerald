@@ -122,9 +122,24 @@ describe Emerald::Scanner do
     end
   end
 
-  xcontext "if statements" do
+  context "if statements" do
     it "can tokenise an multiline if statement" do
-      tokens = Emerald::Scanner.new("if (= 1) say a do \nprint a \n end").tokens
+      tokens = Emerald::Scanner.new("if true do \nprint a \n end").tokens
+      result = [[:if, "if"], [:true, "true"], [:do, "do"], [:newline, "\n"],
+        [:identifier, "print"], [:identifier, "a"], [:newline, "\n"],
+        [:end, "end"]]
+      expect(tokens).to eq(result)
+    end
+
+    it "can tokenise else" do
+      tokens = Emerald::Scanner.new("if true do \nprint a \n else\n print b\n end").tokens
+      result = [
+        [:if, "if"], [:true, "true"], [:do, "do"], [:newline, "\n"],
+        [:identifier, "print"], [:identifier, "a"], [:newline, "\n"],
+        [:else, "else"], [:newline, "\n"],
+        [:identifier, "print"], [:identifier, "b"], [:newline, "\n"],
+        [:end, "end"]]
+      expect(tokens).to eq(result)
     end
   end
 end

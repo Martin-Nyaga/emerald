@@ -15,7 +15,11 @@ module Emerald
           end
         else
           code = File.read(ARGV[0])
-          Emerald::Interpreter.new.interprete(code)
+          if options[:ast]
+            pp Emerald::Parser.new(Emerald::Scanner.new(code).tokens).parse
+          else
+            Emerald::Interpreter.new.interprete(code)
+          end
         end
       end
 
