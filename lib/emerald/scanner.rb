@@ -44,6 +44,9 @@ module Emerald
     Token.new(:defn, /\Adefn/, true),
     Token.new(:do, /\Ado/, true),
     Token.new(:end, /\Aend/, true),
+    Token.new(:true, /\Atrue/, true),
+    Token.new(:false, /\Afalse/, true),
+    Token.new(:nil, /\Anil/, true),
 
     Token.new(:identifier, /\A[\+\-\/\*]|\A[a-z]+[a-zA-Z_0-9]*/),
     Token.new(:integer, /\A[0-9]+/),

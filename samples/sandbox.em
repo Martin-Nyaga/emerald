@@ -14,8 +14,7 @@ end
 
 print_three 1 2 3
 
-
-describe "MyModule" fn do
+describe "MyModule" do
   context "MyThing" do
     it "Can do the thing I want" do
       Assert.assert (foo bar baz)
@@ -27,14 +26,6 @@ defn fib (x)
   when x == 0 => 0
   when x == 1 => 1
   else => + (fib (- x 1)) (fib (- x 2))
-end
-
-defn fib (x) 
-  when = 0 x => 0 end
-  when = 1 x => 1 end
-  else do
-    + (fib (- x 1)) (fib (- x 2))
-  end
 end
 
 defn fizbuzz n
@@ -61,9 +52,11 @@ module Emerald do
   module Scanner do
     defn tokenise text do
       def match last sorted_maches
-      if match
-        (next_match match text)
-        (raise SyntaxError "Unexpected input")
+      if match do
+        next_match match text
+      else
+        raise SyntaxError "Unexpected input"
+      end
     end
 
     defn next_match match text do

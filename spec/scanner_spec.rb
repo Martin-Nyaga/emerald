@@ -103,4 +103,28 @@ describe Emerald::Scanner do
       expect(tokens).to eq(result)
     end
   end
+
+  context "true/false/nil" do
+    it "can tokenise true" do
+      tokens = Emerald::Scanner.new("true").tokens
+      result = [[:true, "true"]]
+      expect(tokens).to eq(result)
+    end
+    it "can tokenise false" do
+      tokens = Emerald::Scanner.new("false").tokens
+      result = [[:false, "false"]]
+      expect(tokens).to eq(result)
+    end
+    it "can tokenise nil" do
+      tokens = Emerald::Scanner.new("nil").tokens
+      result = [[:nil, "nil"]]
+      expect(tokens).to eq(result)
+    end
+  end
+
+  xcontext "if statements" do
+    it "can tokenise an multiline if statement" do
+      tokens = Emerald::Scanner.new("if (= 1) say a do \nprint a \n end").tokens
+    end
+  end
 end

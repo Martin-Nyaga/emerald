@@ -69,7 +69,7 @@ describe Emerald::Parser do
     end
   end
 
-  context "function" do
+  context "functions" do
     it "can parse a single line anonymous function definition" do
       src = "fn a => print a"
       ast = Emerald::Parser.new(Emerald::Scanner.new(src).tokens).parse
@@ -109,6 +109,29 @@ describe Emerald::Parser do
           [
             [:call, [:identifier, "print"], [:identifier, "a"]],
             [:call, [:identifier, "print"], [:identifier, "b"]]]]]
+      expect(ast).to eq(result)
+    end
+  end
+
+  context "true/false/nil" do
+    it "can parse true" do
+      src = "true"
+      ast = Emerald::Parser.new(Emerald::Scanner.new(src).tokens).parse
+      result = [[:true]]
+      expect(ast).to eq(result)
+    end
+
+    it "can parse false" do
+      src = "false"
+      ast = Emerald::Parser.new(Emerald::Scanner.new(src).tokens).parse
+      result = [[:false]]
+      expect(ast).to eq(result)
+    end
+
+    it "can parse nil" do
+      src = "nil"
+      ast = Emerald::Parser.new(Emerald::Scanner.new(src).tokens).parse
+      result = [[:nil]]
       expect(ast).to eq(result)
     end
   end

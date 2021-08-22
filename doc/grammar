@@ -9,8 +9,10 @@ single_line_body -> :fat_arrow expr
 multiline_body   -> :do prog :end
 call             -> ident args
 args             -> terminal (terminal)*
-terminal         -> identifier | integer | parenthesized | array
+terminal         -> identifier | integer | boolean | nil | parenthesized | array
 identifier       -> :identifier
+boolean          -> :true | :false
+nil              -> :nil
 end              -> :newline
 parenthesized    -> :left_round_bracket call :right_round_bracket
 array            -> :left_square_bracket terminal* right_square_bracket

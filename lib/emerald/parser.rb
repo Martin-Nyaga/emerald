@@ -99,7 +99,16 @@ module Emerald
     end
 
     def terminal_expr
-      identifier_expr || integer_expr || parenthesized_expr || array_expr
+      identifier_expr || boolean_expr || nil_expr || integer_expr ||
+      parenthesized_expr || array_expr
+    end
+
+    def boolean_expr
+      return [previous_token.first] if match?(:true) || match?(:false)
+    end
+
+    def nil_expr
+      return [previous_token.first] if match?(:nil)
     end
 
     def integer_expr

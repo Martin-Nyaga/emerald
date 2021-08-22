@@ -19,9 +19,12 @@ module Emerald
       def self.define_builtins(env)
         env.set 'print', Emerald::Types::Function.from_lambda('print', ->(val) { print val.inspect; val })
         println_fn =
-          Emerald::Types::Function.from_block('println', 0..1) do |arg|
-            if arg then p arg else puts end
-            arg
+          Emerald::Types::Function.from_block('println', 0..1) do |*args|
+            if args.length == 1
+              p args[0]
+            else
+              puts
+            end
           end
         env.set 'println', println_fn
       end

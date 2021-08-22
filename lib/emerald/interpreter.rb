@@ -40,15 +40,16 @@ module Emerald
 
     def interprete_node(node, env)
       case node[0]
-      when :integer
-        node[1].to_i
+      when :integer then node[1].to_i
+      when :identifier then env.get(node[1])
+      when :true then true
+      when :false then false
+      when :nil then nil
       when :def
         (_, (_, ident), value_node) = node
         value = interprete_node(value_node, env)
         env.set(ident, value)
         ident
-      when :identifier
-        env.get(node[1])
       when :call
         fn = interprete_node(node[1], env)
         # TODO: Handle non-function calls

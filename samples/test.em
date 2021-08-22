@@ -26,3 +26,6 @@ print_multiline 9 10 11
 
 println (map (fn a do (* a a) end) [1 2 3 4])
 println (map (fn a => * a a) [1 2 3 4])
+println true
+println false
+println nil
