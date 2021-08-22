@@ -45,6 +45,7 @@ module Emerald
         (_, (_, ident), value_node) = node
         value = interprete_node(value_node, env)
         env.set(ident, value)
+        ident
       when :identifier
         env.get(node[1])
       when :call

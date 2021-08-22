@@ -27,6 +27,10 @@ module Emerald
         callable.call(*args)
       end
       alias [] call
+
+      def inspect
+        "<fn: #{name}>"
+      end
     end
   end
 end

@@ -3,6 +3,7 @@ module Emerald
     def define_builtins(env)
       Math.define_builtins(env)
       IO.define_builtins(env)
+      Emerald::Types::Array.define_builtins(env)
     end
 
     class Math

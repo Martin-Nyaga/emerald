@@ -7,3 +7,4 @@ println [1 2 3]
 println [1 foo (+ 1 2)]
 
 def hello (fn a => print 1)
+map hello [1 2 3]
