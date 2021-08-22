@@ -1,3 +1,6 @@
-#! /usr/bin/env sh
+#! /usr/bin/env ruby
 
-ruby -Ilib -r "emerald" -e "Emerald::Main.run" $*
+$:.unshift File.expand_path("../lib", __dir__)
+require "emerald"
+
+Emerald::Main.run
