@@ -7,35 +7,18 @@ module Emerald
 
     class Math
       def self.define_builtins(env)
-        env["+"] = Callable.new("+", -> (a, b) { a + b })
-        env["-"] = Callable.new("+", -> (a, b) { a - b })
-        env["/"] = Callable.new("+", -> (a, b) { a / b })
-        env["*"] = Callable.new("+", -> (a, b) { a * b })
+        env.set '+', Emerald::Types::Function.from_lambda('+', ->(a, b) { a + b })
+        env.set '-', Emerald::Types::Function.from_lambda('+', ->(a, b) { a - b })
+        env.set '/', Emerald::Types::Function.from_lambda('+', ->(a, b) { a / b })
+        env.set '*', Emerald::Types::Function.from_lambda('+', ->(a, b) { a * b })
       end
     end
 
     class IO
       def self.define_builtins(env)
-        env["print"] = Callable.new("print", -> (val) { print val.inspect; val })
-        env["println"] = Callable.new("println", -> (val) { p val; val })
+        env.set 'print', Emerald::Types::Function.from_lambda('print', ->(val) { print val.inspect; val })
+        env.set 'println', Emerald::Types::Function.from_lambda('println', ->(val) { p val; val })
       end
-    end
-
-    class Callable
-      attr_reader :name, :callable, :arity
-      def initialize(name, callable, arity = callable.arity)
-        @name = name
-        @callable = callable
-        @arity = arity
-      end
-
-      def call(*args)
-        raise ArgumentError.new <<~MSG.strip unless args.count == arity
-          Invalid number of arguments, expected #{arity}, got #{args.count}
-        MSG
-        callable.call(*args)
-      end
-      alias :[] :call
     end
   end
 end

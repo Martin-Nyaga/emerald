@@ -1,11 +1,10 @@
-require "emerald/runtime"
 require "pp"
 
 module Emerald
   class Interpreter
-    attr_reader :env, :had_error
+    attr_reader :global_env, :had_error
     def initialize
-      @env = {}
+      @global_env = Environment.new
       @had_error = false
 
       define_builtins
@@ -19,7 +18,7 @@ module Emerald
       clear_error
       tokens = Emerald::Scanner.new(program).tokens
       ast = Emerald::Parser.new(tokens).parse
-      interprete_ast(ast).last
+      interprete_ast(ast, global_env).last
     rescue => e
       log_error e
     end
@@ -27,50 +26,49 @@ module Emerald
     private
 
     def define_builtins
-      Emerald::Runtime.new.define_builtins(env)
+      Emerald::Runtime.new.define_builtins(global_env)
     end
 
-    def interprete_ast(ast)
+    def interprete_ast(ast, env)
       ast.map do |node|
-        interprete_node(node)
+        interprete_node(node, env)
       rescue => e
         log_error e
       end
     end
 
-    def interprete_node(node)
+    def interprete_node(node, env)
       case node[0]
       when :integer
         node[1].to_i
       when :define
         (_, (_, ident), value_node) = node
-        value = interprete_node(value_node)
-        env[ident] = value
+        value = interprete_node(value_node, env)
+        env.set(ident, value)
       when :identifier
-        (_, name) = node
-        result = env[name]
-        raise NameError.new("No identifier with name #{name} found") if result.nil?
-        result
+        env.get(node[1])
       when :call
-        fn = interprete_node(node[1])
+        fn = interprete_node(node[1], env)
         if node.length > 2
-          args = interprete_ast(node[2..-1])
+          args = interprete_ast(node[2..-1], env)
           fn[*args]
         else
           fn[]
         end
       when :array
         (_, *elements) = node
-        Emerald::Types::Array.new(interprete_ast(elements))
+        Emerald::Types::Array.new(interprete_ast(elements, env))
       when :fn
         (_, params, body) = node
         arity = params.count
-        Emerald::Runtime::Callable.new("anonymous", proc { |*args|
-          params.zip(args).each { |((_, arg_name), arg_value)| env[arg_name] = arg_value }
-          result = interprete_ast(body)
-          args.each { |(_, arg_name)| env.delete(arg_name) }
+        Emerald::Types::Function.from_block("anonymous", arity) do |*args|
+          block_env = Environment.new(
+            params.zip(args).map { |((_, arg_name), arg_value)| [arg_name, arg_value] }.to_h,
+            env
+          )
+          result = interprete_ast(body, block_env)
           result.last
-        }, arity)
+        end
       end
     end
 
@@ -81,6 +79,7 @@ module Emerald
     def log_error(e)
       @had_error = true
       STDERR.puts "#{e.class}: #{e.message}"
+      # STDERR.puts e.backtrace
     end
   end
 end
