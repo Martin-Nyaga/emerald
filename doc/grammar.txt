@@ -1,6 +1,7 @@
 prog          -> expr (end expr)* end*
-expr          -> (definition | fn | call | terminal) end
-definition    -> :define identifier terminal
+expr          -> (def | defn | fn | call | terminal) end
+def           -> :def identifier terminal
+def           -> :defn identifier parameters fn_body
 fn            -> :fn parameters fn_body
 parameters    -> identifier+
 fn_body       -> :fat_arrow expr

@@ -16,12 +16,12 @@ module Emerald
       def initialize(name, arity, callable)
         @name = name
         @callable = callable
-        @arity = arity
+        @arity = Arity.new(arity)
       end
 
       def call(*args)
-        raise ArgumentError, <<~MSG.strip unless args.count == arity
-          Invalid number of arguments, expected #{arity}, got #{args.count}
+        raise ArgumentError, <<~MSG.strip unless arity.valid?(args.count)
+          Invalid number of arguments, expected #{arity.inspect}, got #{args.count}
         MSG
 
         callable.call(*args)
@@ -30,6 +30,27 @@ module Emerald
 
       def inspect
         "<fn: #{name}>"
+      end
+
+      class Arity
+        def initialize(arity)
+          @arity = arity.is_a?(Range) ? arity : arity..arity
+        end
+
+        def valid?(args_count)
+          arity.cover?(args_count)
+        end
+
+        def inspect
+          one? ? arity.first.inspect : arity.inspect
+        end
+
+        private
+          attr_reader :arity
+
+          def one?
+            arity.first == arity.last
+          end
       end
     end
   end

@@ -5,7 +5,7 @@ module Emerald
     class << self
       def run
         options = parse_options
-        if options.count == 0
+        if options.count == 0 && ARGV.count == 0
           Emerald::Repl.run
         elsif options[:execute]
           Emerald::Interpreter.new.interprete(options[:execute])

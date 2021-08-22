@@ -27,6 +27,7 @@ module Emerald
 
     def define_builtins
       Emerald::Runtime.new.define_builtins(global_env)
+      global_env.set "env", Emerald::Types::Function.from_lambda("env", -> () { pp global_env })
     end
 
     def interprete_ast(ast, env)
@@ -41,7 +42,7 @@ module Emerald
       case node[0]
       when :integer
         node[1].to_i
-      when :define
+      when :def
         (_, (_, ident), value_node) = node
         value = interprete_node(value_node, env)
         env.set(ident, value)
@@ -61,15 +62,23 @@ module Emerald
         Emerald::Types::Array.new(interprete_ast(elements, env))
       when :fn
         (_, params, body) = node
-        arity = params.count
-        Emerald::Types::Function.from_block("anonymous", arity) do |*args|
-          block_env = Environment.new(
-            params.zip(args).map { |((_, arg_name), arg_value)| [arg_name, arg_value] }.to_h,
-            env
-          )
-          result = interprete_ast(body, block_env)
-          result.last
-        end
+        define_function(env, "anonymous", params, body)
+      when :defn
+        (_, (_, name), params, body) = node
+        fn = define_function(env, name, params, body)
+        env.set name, fn
+      end
+    end
+
+    def define_function(env, name, params, body)
+      arity = params.count
+      Emerald::Types::Function.from_block(name, arity) do |*args|
+        block_env = Environment.new(
+          params.zip(args).map { |((_, arg_name), arg_value)| [arg_name, arg_value] }.to_h,
+          env
+        )
+        result = interprete_ast(body, block_env)
+        result.last
       end
     end
 
@@ -80,7 +89,7 @@ module Emerald
     def log_error(e)
       @had_error = true
       STDERR.puts "#{e.class}: #{e.message}"
-      # STDERR.puts e.backtrace
+      STDERR.puts e.backtrace
     end
   end
 end

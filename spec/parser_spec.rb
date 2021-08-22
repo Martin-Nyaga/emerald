@@ -51,11 +51,11 @@ describe Emerald::Parser do
     end
   end
 
-  context "define" do
+  context "def" do
     it "can parse a definition call" do
       src = "def foo 12"
       ast = Emerald::Parser.new(Emerald::Scanner.new(src).tokens).parse
-      result = [[:define, [:identifier, "foo"], [:integer, "12"]]]
+      result = [[:def, [:identifier, "foo"], [:integer, "12"]]]
       expect(ast).to eq(result)
     end
   end
@@ -74,6 +74,14 @@ describe Emerald::Parser do
       src = "fn a => print a"
       ast = Emerald::Parser.new(Emerald::Scanner.new(src).tokens).parse
       result = [[:fn, [[:identifier, "a"]], [[:call, [:identifier, "print"], [:identifier, "a"]]]]]
+      expect(ast).to eq(result)
+    end
+
+    it "can parse a single line named function definition" do
+      src = "defn say a => print a"
+      ast = Emerald::Parser.new(Emerald::Scanner.new(src).tokens).parse
+      result = [[:defn, [:identifier, "say"], [[:identifier, "a"]], [[:call,
+        [:identifier, "print"], [:identifier, "a"]]]]]
       expect(ast).to eq(result)
     end
   end

@@ -27,14 +27,20 @@ module Emerald
     end
 
     def expr
-      definition_expr || fn_expr || call_expr || terminal_expr
+      def_expr || defn_expr || fn_expr || call_expr || terminal_expr
     end
 
-    def definition_expr
-      if match?(:define)
+    def def_expr
+      if match?(:def)
         ident = consume!(:identifier, "Expected identifier, got #{current_text}")
         value = terminal_expr
-        [:define, ident, value]
+        [:def, ident, value]
+      end
+    end
+
+    def defn_expr
+      if match?(:defn)
+        [:defn, identifier_expr, parameters_expr, fn_body_expr]
       end
     end
 

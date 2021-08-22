@@ -39,8 +39,9 @@ module Emerald
 
   TOKEN_TYPES = [
     # Keywords
-    Token.new(:define, /\Adef/, true),
+    Token.new(:def, /\Adef/, true),
     Token.new(:fn, /\Afn/, true),
+    Token.new(:defn, /\Adefn/, true),
 
     Token.new(:identifier, /\A[\+\-\/\*]|\A[a-z]+[a-zA-Z_0-9]*/),
     Token.new(:integer, /\A[0-9]+/),

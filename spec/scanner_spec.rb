@@ -54,7 +54,7 @@ describe Emerald::Scanner do
 
   it "can tokenise a definition" do
     tokens = Emerald::Scanner.new("def foo 12").tokens
-    result = [[:define, "def"], [:identifier, "foo"], [:integer, "12"]]
+    result = [[:def, "def"], [:identifier, "foo"], [:integer, "12"]]
     expect(tokens).to eq(result)
   end
 
@@ -67,9 +67,20 @@ describe Emerald::Scanner do
     expect(tokens).to eq(result)
   end
 
-  it "can tokenise single line function syntax" do
-    tokens = Emerald::Scanner.new("fn a => print a").tokens
-    result = [[:fn, "fn"], [:identifier, "a"], [:fat_arrow, "=>"], [:identifier, "print"], [:identifier, "a"]]
-    expect(tokens).to eq(result)
+  context "functions" do
+    it "can tokenise single line anonymous function syntax" do
+      tokens = Emerald::Scanner.new("fn a => print a").tokens
+      result = [[:fn, "fn"], [:identifier, "a"], [:fat_arrow, "=>"], [:identifier, "print"], [:identifier, "a"]]
+      expect(tokens).to eq(result)
+    end
+
+    it "can tokenise single line named function syntax" do
+      tokens = Emerald::Scanner.new("defn say a => print a").tokens
+      result = [
+        [:defn, "defn"], [:identifier, "say"], [:identifier, "a"],
+        [:fat_arrow, "=>"], [:identifier, "print"], [:identifier, "a"]
+      ]
+      expect(tokens).to eq(result)
+    end
   end
 end
