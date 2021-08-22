@@ -51,6 +51,7 @@ module Emerald
         env.get(node[1])
       when :call
         fn = interprete_node(node[1], env)
+        # TODO: Handle non-function calls
         if node.length > 2
           args = interprete_ast(node[2..-1], env)
           fn[*args]

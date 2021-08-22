@@ -8,7 +8,7 @@ fn_body          -> single_line_body || multiline_body
 single_line_body -> :fat_arrow expr
 multiline_body   -> :do prog :end
 call             -> ident args
-args             -> terminal (space terminal)*
+args             -> terminal (terminal)*
 terminal         -> identifier | integer | parenthesized | array
 identifier       -> :identifier
 end              -> :newline
