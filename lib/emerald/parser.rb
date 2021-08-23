@@ -27,7 +27,7 @@ module Emerald
     end
 
     def expr
-      def_expr || defn_expr || fn_expr || if_expr || call_expr || terminal_expr
+      def_expr || defn_expr || fn_expr || if_expr || unless_expr || call_expr || terminal_expr
     end
 
     def def_expr
@@ -63,7 +63,7 @@ module Emerald
     end
 
     def single_line_body_expr
-      if match?(:fat_arrow)
+      if match?(:arrow)
         [expr]
       end
     end
@@ -106,10 +106,23 @@ module Emerald
     end
 
     def if_expr
-      if match?(:if)
+      condition_expr(:if)
+    end
+
+    def unless_expr
+      condition_expr(:unless)
+    end
+
+    def condition_expr(matcher)
+      if match?(matcher)
         condition = terminal_expr || call_expr
-        (true_branch, false_branch) = return_value = multiline_body_with_possible_else_expr
-        [:if, condition, true_branch, false_branch]
+        if result = single_line_body_expr
+          true_branch = result
+          false_branch = []
+        else
+          (true_branch, false_branch) = multiline_body_with_possible_else_expr
+        end
+        [matcher, condition, true_branch, false_branch]
       end
     end
 

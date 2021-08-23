@@ -69,16 +69,16 @@ describe Emerald::Scanner do
 
   context "functions" do
     it "can tokenise single line anonymous function syntax" do
-      tokens = Emerald::Scanner.new("fn a => print a").tokens
-      result = [[:fn, "fn"], [:identifier, "a"], [:fat_arrow, "=>"], [:identifier, "print"], [:identifier, "a"]]
+      tokens = Emerald::Scanner.new("fn a -> print a").tokens
+      result = [[:fn, "fn"], [:identifier, "a"], [:arrow, "->"], [:identifier, "print"], [:identifier, "a"]]
       expect(tokens).to eq(result)
     end
 
     it "can tokenise single line named function syntax" do
-      tokens = Emerald::Scanner.new("defn say a => print a").tokens
+      tokens = Emerald::Scanner.new("defn say a -> print a").tokens
       result = [
         [:defn, "defn"], [:identifier, "say"], [:identifier, "a"],
-        [:fat_arrow, "=>"], [:identifier, "print"], [:identifier, "a"]
+        [:arrow, "->"], [:identifier, "print"], [:identifier, "a"]
       ]
       expect(tokens).to eq(result)
     end
@@ -122,7 +122,7 @@ describe Emerald::Scanner do
     end
   end
 
-  context "if statements" do
+  context "if/unless statements" do
     it "can tokenise an multiline if statement" do
       tokens = Emerald::Scanner.new("if true do \nprint a \n end").tokens
       result = [[:if, "if"], [:true, "true"], [:do, "do"], [:newline, "\n"],
@@ -139,6 +139,39 @@ describe Emerald::Scanner do
         [:else, "else"], [:newline, "\n"],
         [:identifier, "print"], [:identifier, "b"], [:newline, "\n"],
         [:end, "end"]]
+      expect(tokens).to eq(result)
+    end
+
+    it "can tokenise a single line if statement" do
+      tokens = Emerald::Scanner.new("if true -> print a\n").tokens
+      result = [[:if, "if"], [:true, "true"], [:arrow, "->"],
+        [:identifier, "print"], [:identifier, "a"], [:newline, "\n"]]
+      expect(tokens).to eq(result)
+    end
+
+    it "can tokenise an multiline unless statement" do
+      tokens = Emerald::Scanner.new("unless true do \nprint a \n end").tokens
+      result = [[:unless, "unless"], [:true, "true"], [:do, "do"], [:newline, "\n"],
+        [:identifier, "print"], [:identifier, "a"], [:newline, "\n"],
+        [:end, "end"]]
+      expect(tokens).to eq(result)
+    end
+
+    it "can tokenise else" do
+      tokens = Emerald::Scanner.new("unless true do \nprint a \n else\n print b\n end").tokens
+      result = [
+        [:unless, "unless"], [:true, "true"], [:do, "do"], [:newline, "\n"],
+        [:identifier, "print"], [:identifier, "a"], [:newline, "\n"],
+        [:else, "else"], [:newline, "\n"],
+        [:identifier, "print"], [:identifier, "b"], [:newline, "\n"],
+        [:end, "end"]]
+      expect(tokens).to eq(result)
+    end
+
+    it "can tokenise a single line unless statement" do
+      tokens = Emerald::Scanner.new("unless true -> print a\n").tokens
+      result = [[:unless, "unless"], [:true, "true"], [:arrow, "->"],
+        [:identifier, "print"], [:identifier, "a"], [:newline, "\n"]]
       expect(tokens).to eq(result)
     end
   end

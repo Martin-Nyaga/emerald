@@ -71,14 +71,14 @@ describe Emerald::Parser do
 
   context "functions" do
     it "can parse a single line anonymous function definition" do
-      src = "fn a => print a"
+      src = "fn a -> print a"
       ast = Emerald::Parser.new(Emerald::Scanner.new(src).tokens).parse
       result = [[:fn, [[:identifier, "a"]], [[:call, [:identifier, "print"], [:identifier, "a"]]]]]
       expect(ast).to eq(result)
     end
 
     it "can parse a single line named function definition" do
-      src = "defn say a => print a"
+      src = "defn say a -> print a"
       ast = Emerald::Parser.new(Emerald::Scanner.new(src).tokens).parse
       result = [[:defn, [:identifier, "say"], [[:identifier, "a"]], [[:call,
         [:identifier, "print"], [:identifier, "a"]]]]]
@@ -134,7 +134,7 @@ describe Emerald::Parser do
     end
   end
 
-  context "if statement" do
+  context "if/unless statement" do
     it "can parse a multiline if statement" do
       src = "if true do\n print a \nend"
       ast = Emerald::Parser.new(Emerald::Scanner.new(src).tokens).parse
@@ -152,6 +152,46 @@ describe Emerald::Parser do
         [:if, [:true],
           [[:call, [:identifier, "print"], [:identifier, "a"]]],
           [[:call, [:identifier, "print"], [:identifier, "b"]]]]]
+      expect(ast).to eq(result)
+    end
+
+    it "can parse a single line if statement" do
+      src = "if true -> print a"
+      ast = Emerald::Parser.new(Emerald::Scanner.new(src).tokens).parse
+      result = [
+        [:if, [:true],
+          [[:call, [:identifier, "print"], [:identifier, "a"]]],
+          []]]
+      expect(ast).to eq(result)
+    end
+
+    it "can parse a multiline unless statement" do
+      src = "unless true do\n print a \nend"
+      ast = Emerald::Parser.new(Emerald::Scanner.new(src).tokens).parse
+      result = [
+        [:unless, [:true],
+          [[:call, [:identifier, "print"], [:identifier, "a"]]],
+          []]]
+      expect(ast).to eq(result)
+    end
+
+    it "can parse a multiline unless else" do
+      src = "unless true do\n print a \nelse \nprint b \n end"
+      ast = Emerald::Parser.new(Emerald::Scanner.new(src).tokens).parse
+      result = [
+        [:unless, [:true],
+          [[:call, [:identifier, "print"], [:identifier, "a"]]],
+          [[:call, [:identifier, "print"], [:identifier, "b"]]]]]
+      expect(ast).to eq(result)
+    end
+
+    it "can parse a single line unless statement" do
+      src = "unless true -> print a"
+      ast = Emerald::Parser.new(Emerald::Scanner.new(src).tokens).parse
+      result = [
+        [:unless, [:true],
+          [[:call, [:identifier, "print"], [:identifier, "a"]]],
+          []]]
       expect(ast).to eq(result)
     end
   end

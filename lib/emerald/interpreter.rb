@@ -76,6 +76,13 @@ module Emerald
         else
           else_body.any? ? interprete_ast(else_body, env).last : nil
         end
+      when :unless
+        (_, condition, body, else_body) = node
+        unless interprete_node(condition, env)
+          interprete_ast(body, env).last
+        else
+          else_body.any? ? interprete_ast(else_body, env).last : nil
+        end
       end
     end
 

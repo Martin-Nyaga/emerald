@@ -33,7 +33,7 @@ module Emerald
     end
 
     def match_length_and_keyword_priority
-      [length, keyword ? 1 : 0 ]
+      [length, keyword ? 1 : 0]
     end
   end
 
@@ -48,6 +48,7 @@ module Emerald
     Token.new(:false, /\Afalse/, true),
     Token.new(:nil, /\Anil/, true),
     Token.new(:if, /\Aif/, true),
+    Token.new(:unless, /\Aunless/, true),
     Token.new(:else, /\Aelse/, true),
 
     Token.new(:identifier, /\A[\+\-\/\*]|\A[><]=?|\A==|\A[a-z]+[a-zA-Z_0-9]*/),
@@ -57,32 +58,35 @@ module Emerald
     Token.new(:right_round_bracket, /\A\)/),
     Token.new(:left_square_bracket, /\A\[/),
     Token.new(:right_square_bracket, /\A\]/),
-    Token.new(:fat_arrow, /\A=>/),
-    Token.new(:space, /\A[ \t]/),
+    Token.new(:arrow, /\A->/),
+    Token.new(:space, /\A[ \t]/)
   ]
 
-class Scanner
-  attr_accessor :src
+  class Scanner
+    attr_accessor :src
 
-  def initialize(src)
-    @src = src
-  end
+    def initialize(src)
+      @src = src
+    end
 
     def tokens
       result = []
+
       while src.length > 0
-        match =
-          TOKEN_TYPES.filter_map { |type| type.match(src) }
-            .sort_by(&:match_length_and_keyword_priority)
-            .last
-
+        match = sorted_matches.last
         raise SyntaxError.new("Unexpected input `#{src[0]}`") unless match
-
         result << match.to_a unless match.type == :space
         self.src = src.delete_prefix(match.text)
       end
+
       result
     end
 
+    private
+    def sorted_matches
+      TOKEN_TYPES.filter_map do |type|
+        type.match(src)
+      end.sort_by(&:match_length_and_keyword_priority)
+    end
   end
 end
