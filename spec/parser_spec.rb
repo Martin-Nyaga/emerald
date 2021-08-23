@@ -8,6 +8,13 @@ describe Emerald::Parser do
       result = [[:integer, "1"]]
       expect(ast).to eq(result)
     end
+
+    it "can parse a string" do
+      src = %( "hello world" )
+      ast = Emerald::Parser.new(Emerald::Scanner.new(src).tokens).parse
+      result = [[:string, "hello world"]]
+      expect(ast).to eq(result)
+    end
   end
 
   context "call" do

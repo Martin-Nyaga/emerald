@@ -1,4 +1,10 @@
-# Comments
+println "foo"
+
+# Strings
+println "hello world"
+
+# Symbols
+println :foo
 
 # Math stdlib
 defn sum_square_and_root (x) do

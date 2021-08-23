@@ -144,7 +144,7 @@ module Emerald
 
     def terminal_expr
       identifier_expr || boolean_expr || nil_expr || integer_expr ||
-      parenthesized_expr || array_expr
+      parenthesized_expr || array_expr || string_expr
     end
 
     def boolean_expr
@@ -180,6 +180,10 @@ module Emerald
         consume!(:right_square_bracket, "expected ], got #{current_text}")
         [:array, *elements]
       end
+    end
+
+    def string_expr
+      return previous_token if match?(:string)
     end
 
   private

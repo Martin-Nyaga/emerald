@@ -1,13 +1,16 @@
 module Emerald
   class Token
-    attr_reader :type, :pattern, :keyword
-    def initialize(type, pattern, keyword = false)
-      @type, @pattern, @keyword = type, pattern, keyword
+    attr_reader :type, :pattern, :keyword, :match_extractor
+    def initialize(type, pattern, keyword = false, &match_extractor)
+      @type            = type
+      @pattern         = pattern
+      @keyword         = keyword
+      @match_extractor = match_extractor || -> (m) { m[0] }
     end
 
     def match(str)
       if match = pattern.match(str)
-        return Match.new(type, match, keyword)
+        return Match.new(type, match, keyword, match_extractor)
       else
         nil
       end
@@ -15,9 +18,12 @@ module Emerald
   end
 
   class Match
-    attr_reader :type, :matchdata, :keyword
-    def initialize(type, matchdata, keyword)
-      @type, @matchdata, @keyword = type, matchdata, keyword
+    attr_reader :type, :matchdata, :keyword, :match_extractor
+    def initialize(type, matchdata, keyword, match_extractor)
+      @type            = type
+      @matchdata       = matchdata
+      @keyword         = keyword
+      @match_extractor = match_extractor
     end
 
     def to_a
@@ -25,11 +31,11 @@ module Emerald
     end
 
     def length
-      text.length
+      matchdata[0].length
     end
 
     def text
-      matchdata[0]
+      match_extractor[matchdata]
     end
 
     def match_length_and_keyword_priority
@@ -53,6 +59,8 @@ module Emerald
 
     Token.new(:identifier, /\A[\+\-\/\*]|\A[><]=?|\A==|\A[a-z]+[a-zA-Z_0-9]*/),
     Token.new(:integer, /\A[0-9]+/),
+    Token.new(:string, /\A"(.*)"/) { |m| m[1] },
+
     Token.new(:newline, /\A[\n]|\A[\r\n]/),
     Token.new(:left_round_bracket, /\A\(/),
     Token.new(:right_round_bracket, /\A\)/),
@@ -76,7 +84,7 @@ module Emerald
         match = sorted_matches.last
         raise SyntaxError.new("Unexpected input `#{src[0]}`") unless match
         result << match.to_a unless match.type == :space
-        self.src = src.delete_prefix(match.text)
+        self.src = src[match.length..]
       end
 
       result

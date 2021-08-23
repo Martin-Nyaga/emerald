@@ -1,4 +1,4 @@
-defn fib n do
+def fib n do
   if (<= n 1) do
     1
   else

@@ -175,4 +175,12 @@ describe Emerald::Scanner do
       expect(tokens).to eq(result)
     end
   end
+
+  context "strings" do
+    it "can tokenise a string" do
+      tokens = Emerald::Scanner.new(%( "hello world" )).tokens
+      result = [[:string, "hello world"]]
+      expect(tokens).to eq(result)
+    end
+  end
 end
