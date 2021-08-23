@@ -42,6 +42,7 @@ module Emerald
       case node[0]
       when :integer then node[1].to_i
       when :string then node[1]
+      when :symbol then node[1].to_sym
       when :identifier then env.get(node[1])
       when :true then true
       when :false then false

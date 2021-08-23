@@ -184,6 +184,14 @@ describe Emerald::Scanner do
     end
   end
 
+  context "symbols" do
+    it "can tokenise a symbol" do
+      tokens = Emerald::Scanner.new(":foo").tokens
+      result = [[:symbol, "foo"]]
+      expect(tokens).to eq(result)
+    end
+  end
+
   context "comments" do
     it "can skip over comments in the scanner" do
       tokens = Emerald::Scanner.new("# this is a comment").tokens

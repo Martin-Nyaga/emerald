@@ -59,9 +59,10 @@ module Emerald
     Token.new(:unless, /\Aunless/, true),
     Token.new(:else, /\Aelse/, true),
 
-    Token.new(:identifier, /\A[\+\-\/\*]|\A[><]=?|\A==|\A[a-z]+[a-zA-Z_0-9]*/),
+    Token.new(:identifier, /\A[\+\-\/\*]|\A[><]=?|\A==|\A[a-z]+[a-zA-Z_0-9]*\??/),
     Token.new(:integer, /\A[0-9]+/),
-    Token.new(:string, /\A"(.*)"/) { |m| m[1] },
+    Token.new(:string, /\A"(.*)"/) { _1[1] },
+    Token.new(:symbol, /\A:([a-z]+[a-zA-Z_0-9]*\??)/) { _1[1] },
 
     Token.new(:comment, /\A#.*/),
     Token.new(:newline, /\A[\n]|\A[\r\n]/),

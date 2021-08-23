@@ -44,6 +44,9 @@ end
 if true -> println 4
 unless false -> println 5
 
+# Strings
 println "Hello World"
 
+# Symbols
+println :foo
 

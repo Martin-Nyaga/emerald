@@ -21,6 +21,13 @@ describe Emerald::Parser do
       result = [[:string, "hello world"]]
       expect(ast).to eq(result)
     end
+
+    it "can parse a string" do
+      src = ":foo"
+      ast = Emerald::Parser.new(Emerald::Scanner.new(src).tokens).parse
+      result = [[:symbol, "foo"]]
+      expect(ast).to eq(result)
+    end
   end
 
   context "call" do

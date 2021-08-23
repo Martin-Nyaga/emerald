@@ -144,7 +144,7 @@ module Emerald
 
     def terminal_expr
       identifier_expr || boolean_expr || nil_expr || integer_expr ||
-      parenthesized_expr || array_expr || string_expr
+      parenthesized_expr || array_expr || string_expr || symbol_expr
     end
 
     def boolean_expr
@@ -184,6 +184,10 @@ module Emerald
 
     def string_expr
       return previous_token if match?(:string)
+    end
+
+    def symbol_expr
+      return previous_token if match?(:symbol)
     end
 
   private
