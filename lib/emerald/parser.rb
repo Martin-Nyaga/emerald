@@ -23,7 +23,7 @@ module Emerald
       if !eof?
         raise SyntaxError.new("Unexpected input #{current_text}")
       end
-      ast
+      ast.compact
     end
 
     def expr

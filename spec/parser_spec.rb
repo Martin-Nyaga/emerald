@@ -1,6 +1,12 @@
 require "spec_helper"
 
 describe Emerald::Parser do
+  context "empty" do
+    it "can parse an empty list of tokens" do
+      expect(Emerald::Parser.new([]).parse).to eq([])
+    end
+  end
+
   context "terminal" do
     it "can parse an integer" do
       src = "1"

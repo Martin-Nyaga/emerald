@@ -183,4 +183,12 @@ describe Emerald::Scanner do
       expect(tokens).to eq(result)
     end
   end
+
+  context "comments" do
+    it "can skip over comments in the scanner" do
+      tokens = Emerald::Scanner.new("# this is a comment").tokens
+      result = []
+      expect(tokens).to eq(result)
+    end
+  end
 end

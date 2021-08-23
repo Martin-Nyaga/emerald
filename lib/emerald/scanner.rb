@@ -1,3 +1,5 @@
+require "set"
+
 module Emerald
   class Token
     attr_reader :type, :pattern, :keyword, :match_extractor
@@ -61,6 +63,7 @@ module Emerald
     Token.new(:integer, /\A[0-9]+/),
     Token.new(:string, /\A"(.*)"/) { |m| m[1] },
 
+    Token.new(:comment, /\A#.*/),
     Token.new(:newline, /\A[\n]|\A[\r\n]/),
     Token.new(:left_round_bracket, /\A\(/),
     Token.new(:right_round_bracket, /\A\)/),
@@ -69,6 +72,8 @@ module Emerald
     Token.new(:arrow, /\A->/),
     Token.new(:space, /\A[ \t]/)
   ]
+
+  SKIP_TOKENS = Set[:space, :comment]
 
   class Scanner
     attr_accessor :src
@@ -83,7 +88,7 @@ module Emerald
       while src.length > 0
         match = sorted_matches.last
         raise SyntaxError.new("Unexpected input `#{src[0]}`") unless match
-        result << match.to_a unless match.type == :space
+        result << match.to_a unless SKIP_TOKENS.include?(match.type)
         self.src = src[match.length..]
       end
 

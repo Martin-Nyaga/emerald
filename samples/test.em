@@ -1,3 +1,4 @@
+# this is a comment
 + 1 1
 println (+ 1 (* 3 4))
 def foo 12
@@ -6,17 +7,21 @@ println (+ foo bar)
 println [1 2 3]
 println [1 foo (+ 1 2)]
 
+# anonymous function
 def hello (fn a -> print 1)
 map hello [1 2 3]
 println
 
+# named function
 defn square a -> * a a
 println (map square [1 2 3 4 5])
 
+# named function
 defn print_three a b c -> print [a b c]
 print_three 1 2 3
 println
 
+# multiline function
 defn print_multiline a b c do 
   println a
   println b
@@ -40,3 +45,5 @@ if true -> println 4
 unless false -> println 5
 
 println "Hello World"
+
+
