@@ -1,52 +1,122 @@
-# this is a comment
-+ 1 1
-println (+ 1 (* 3 4))
-def foo 12
-def bar 13
-println (+ foo bar)
-println [1 2 3]
-println [1 foo (+ 1 2)]
-
-# anonymous function
-def hello (fn a -> print 1)
-map hello [1 2 3]
-println
-
-# named function
-defn square a -> * a a
-println (map square [1 2 3 4 5])
-
-# named function
-defn print_three a b c -> print [a b c]
-print_three 1 2 3
-println
-
-# multiline function
-defn print_multiline a b c do 
-  println a
-  println b
-  println c
-end
-print_multiline 9 10 11
-
-println (map (fn a do (* a a) end) [1 2 3 4])
-println (map (fn a -> * a a) [1 2 3 4])
-println true
-println false
-println nil
-
-if true do
-  println 1 
-else
-  println 2
+defn assert assertion do
+  unless assertion -> raise "Assertion failed"
 end
 
-if true -> println 4
-unless false -> println 5
+defn test str test_fn do
+  test_fn
+  print "."
+end
 
-# Strings
-println "Hello World"
+# Skip a test with xtest
+defn xtest str test_fn -> print "S"
 
-# Symbols
-println :foo
+# define it/xit as an alias to test/xtest
+def it test
+def xit xtest
 
+defn describe str describe_fn do
+  describe_fn
+end
+
+defn suite suite_fn do
+  # TODO: Fix this
+  println "Running tests..."
+  println
+  suite_fn
+  println
+  println
+  println "Finished"
+end
+
+suite (fn do
+  describe "Emerald" (fn do
+    it "can evaluate basic math" (fn do
+      assert (== (+ 1 1) 2)
+      assert (== (+ 1 (* 3 4)) 13)
+    end)
+
+    it "can skip over comments" (fn do
+      # This is a comment that shouldn't break the interpreter
+      assert true
+    end)
+
+    it "can define variables and retrieve them" (fn do
+      def foo 2
+      def bar 3
+      assert (== (+ foo bar) 5)
+    end)
+
+    # TODO: Test these better once there's array indexing
+    it "can evaluate arrays" (fn do
+      [1 2 3]
+      assert true
+    end)
+
+    # TODO: Fix this
+    xit "can evaluate anonymous single and multline functions" (fn do
+      def inc (fn n -> + n 1)
+      def dec (fn n do 
+        (- n 1)
+      end)
+      def arr [1 2 3]
+      assert (== (map inc arr) [2 3 4])
+      assert (== (map dec arr) [0 1 2])
+      assert (== (map (fn a do (* a a) end) arr) [1 4 9])
+      assert (== (map (fn a -> * a a) arr) [1 3 9])
+    end)
+
+    # TODO: Fix this
+    xit "can evaluate named single and multiline functions" (fn do
+      defn inc n -> + n 1
+      defn dec n do 
+        (- n 1)
+      end
+      def arr [1 2 3]
+      assert (== (map inc arr) [2 3 4])
+      assert (== (map dec arr) [0 1 2])
+    end)
+
+    it "it can evaluate true false and nil" (fn do
+      assert true
+      assert (unless false -> true)
+      assert (unless nil -> true)
+    end)
+
+    it "can evaluate single and multiline if/unless statements" (fn do
+      # TODO: Allow parens to spill over to next line
+      assert (if (== 1 1) do
+                true
+              else
+                false
+              end)
+      assert (if (== 1 2) do
+                false
+              else
+                true
+              end)
+      assert (if (== 1 1) -> true)
+      assert (unless (== 1 2) do
+                true
+              else
+                false
+              end)
+      assert (unless (== 1 1) do
+                false
+              else
+                true
+              end)
+      assert (unless (== 1 2) -> true)
+    end)
+
+    it "can parse symbols" (fn do
+      assert (== :foo :foo)
+    end)
+
+    it "can parse strings" (fn do
+      def hi "Hello"
+      assert (== hi "Hello")
+      # TODO: Fix this
+      # assert (== "Hello" "Hello")
+    end)
+  end)
+end)
