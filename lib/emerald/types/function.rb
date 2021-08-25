@@ -29,7 +29,7 @@ module Emerald
       alias [] call
 
       def inspect
-        "<fn: #{name}>"
+        "<fn: #{name} (#{arity.inspect})>"
       end
 
       class Arity
@@ -49,7 +49,7 @@ module Emerald
           attr_reader :arity
 
           def one?
-            arity.first == arity.last
+            arity.begin == arity.end
           end
       end
     end

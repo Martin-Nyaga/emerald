@@ -2,10 +2,11 @@ require "pp"
 
 module Emerald
   class Interpreter
-    attr_reader :global_env, :had_error
-    def initialize
+    attr_reader :global_env, :had_error, :exit_on_error
+    def initialize(exit_on_error = true)
       @global_env = Environment.new
       @had_error = false
+      @exit_on_error = exit_on_error
 
       define_builtins
     end
@@ -14,13 +15,13 @@ module Emerald
       had_error
     end
 
-    def interprete(program)
+    def interprete(program, quit_on_error = true)
       clear_error
       tokens = Emerald::Scanner.new(program).tokens
       ast = Emerald::Parser.new(tokens).parse
       interprete_ast(ast, global_env).last
     rescue => e
-      log_error e
+      handle_error e
     end
 
     private
@@ -34,7 +35,7 @@ module Emerald
       ast.map do |node|
         interprete_node(node, env)
       rescue => e
-        log_error e
+        handle_error e
       end
     end
 
@@ -104,10 +105,11 @@ module Emerald
       @had_error = false
     end
 
-    def log_error(e)
+    def handle_error(e)
       @had_error = true
       STDERR.puts "#{e.class}: #{e.message}"
       STDERR.puts e.backtrace
+      exit 1 if exit_on_error
     end
   end
 end

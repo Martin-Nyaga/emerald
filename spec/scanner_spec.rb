@@ -182,6 +182,12 @@ describe Emerald::Scanner do
       result = [[:string, "hello world"]]
       expect(tokens).to eq(result)
     end
+
+    it "can tokenise a multiple subsequent strings" do
+      tokens = Emerald::Scanner.new(%( "hello" "world" )).tokens
+      result = [[:string, "hello"], [:string, "world"]]
+      expect(tokens).to eq(result)
+    end
   end
 
   context "symbols" do

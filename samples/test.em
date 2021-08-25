@@ -113,7 +113,7 @@ suite (fn do
     it "can parse strings" (fn do
       def hi "Hello"
       assert (== hi "Hello")
-      # assert (== "Hello" "Hello")
+      assert (== "Hello" "Hello")
     end)
   end)
 end)
