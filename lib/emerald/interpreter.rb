@@ -3,7 +3,7 @@ require "pp"
 module Emerald
   class Interpreter
     attr_reader :global_env, :had_error, :exit_on_error
-    def initialize(exit_on_error = true)
+    def initialize(exit_on_error: true)
       @global_env = Environment.new
       @had_error = false
       @exit_on_error = exit_on_error
@@ -15,9 +15,9 @@ module Emerald
       had_error
     end
 
-    def interprete(program, quit_on_error = true)
+    def interprete(file)
       clear_error
-      tokens = Emerald::Scanner.new(program).tokens
+      tokens = Emerald::Scanner.new(file).tokens
       ast = Emerald::Parser.new(tokens).parse
       interprete_ast(ast, global_env).last
     rescue => e
@@ -107,8 +107,7 @@ module Emerald
 
     def handle_error(e)
       @had_error = true
-      STDERR.puts "#{e.class}: #{e.message}"
-      STDERR.puts e.backtrace
+      STDERR.puts e.to_s
       exit 1 if exit_on_error
     end
   end

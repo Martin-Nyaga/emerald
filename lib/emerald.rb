@@ -1,6 +1,4 @@
 module Emerald
-  class SyntaxError < StandardError; end
-
   autoload :Main, "emerald/main"
 
   autoload :Scanner, "emerald/scanner"
@@ -11,4 +9,7 @@ module Emerald
   autoload :Environment, "emerald/environment"
 
   autoload :Types, "emerald/types"
+  autoload :Files, "emerald/files"
+
+  require "emerald/error"
 end

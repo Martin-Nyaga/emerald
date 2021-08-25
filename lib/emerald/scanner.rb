@@ -1,35 +1,51 @@
 require "set"
 
 module Emerald
-  class Token
-    attr_reader :type, :pattern, :keyword, :match_extractor
-    def initialize(type, pattern, keyword = false, &match_extractor)
+  class TokenType
+    attr_reader :type, :pattern, :is_keyword, :match_extractor
+    def initialize(type, pattern, is_keyword = false, &match_extractor)
       @type            = type
       @pattern         = pattern
-      @keyword         = keyword
+      @is_keyword      = is_keyword
       @match_extractor = match_extractor || -> (m) { m[0] }
     end
 
-    def match(str)
+    def match(str, file, offset)
       if match = pattern.match(str)
-        return Match.new(type, match, keyword, match_extractor)
+        Token.new(
+          type,
+          match,
+          is_keyword,
+          file,
+          offset,
+          match_extractor
+        )
       else
         nil
       end
     end
   end
 
-  class Match
-    attr_reader :type, :matchdata, :keyword, :match_extractor
-    def initialize(type, matchdata, keyword, match_extractor)
-      @type            = type
-      @matchdata       = matchdata
-      @keyword         = keyword
+  class Token
+    attr_reader :type, :matchdata, :is_keyword, :file, :offset, :match_extractor
+    def initialize(
+      type,
+      matchdata,
+      is_keyword,
+      file,
+      offset,
+      match_extractor
+    )
+      @type       = type
+      @matchdata  = matchdata
+      @is_keyword = is_keyword
+      @file       = file
+      @offset     = offset
       @match_extractor = match_extractor
     end
 
     def to_a
-      [type, text]
+      [type, text, file, offset]
     end
 
     def length
@@ -41,56 +57,59 @@ module Emerald
     end
 
     def match_length_and_keyword_priority
-      [length, keyword ? 1 : 0]
+      [length, is_keyword ? 1 : 0]
     end
   end
 
   TOKEN_TYPES = [
     # Keywords
-    Token.new(:def, /\Adef/, true),
-    Token.new(:fn, /\Afn/, true),
-    Token.new(:defn, /\Adefn/, true),
-    Token.new(:do, /\Ado/, true),
-    Token.new(:end, /\Aend/, true),
-    Token.new(:true, /\Atrue/, true),
-    Token.new(:false, /\Afalse/, true),
-    Token.new(:nil, /\Anil/, true),
-    Token.new(:if, /\Aif/, true),
-    Token.new(:unless, /\Aunless/, true),
-    Token.new(:else, /\Aelse/, true),
+    TokenType.new(:def, /\Adef/, true),
+    TokenType.new(:fn, /\Afn/, true),
+    TokenType.new(:defn, /\Adefn/, true),
+    TokenType.new(:do, /\Ado/, true),
+    TokenType.new(:end, /\Aend/, true),
+    TokenType.new(:true, /\Atrue/, true),
+    TokenType.new(:false, /\Afalse/, true),
+    TokenType.new(:nil, /\Anil/, true),
+    TokenType.new(:if, /\Aif/, true),
+    TokenType.new(:unless, /\Aunless/, true),
+    TokenType.new(:else, /\Aelse/, true),
 
-    Token.new(:identifier, /\A[\+\-\/\*]|\A[><]=?|\A==|\A[a-z]+[a-zA-Z_0-9]*\??/),
-    Token.new(:integer, /\A[0-9]+/),
-    Token.new(:string, /\A"([^"]*)"/) { _1[1] },
-    Token.new(:symbol, /\A:([a-z]+[a-zA-Z_0-9]*\??)/) { _1[1] },
+    TokenType.new(:identifier, /\A[\+\-\/\*]|\A[><]=?|\A==|\A[a-z]+[a-zA-Z_0-9]*\??/),
+    TokenType.new(:integer, /\A[0-9]+/),
+    TokenType.new(:string, /\A"([^"]*)"/) { _1[1] },
+    TokenType.new(:symbol, /\A:([a-z]+[a-zA-Z_0-9]*\??)/) { _1[1] },
 
-    Token.new(:comment, /\A#.*/),
-    Token.new(:newline, /\A[\n]|\A[\r\n]/),
-    Token.new(:left_round_bracket, /\A\(/),
-    Token.new(:right_round_bracket, /\A\)/),
-    Token.new(:left_square_bracket, /\A\[/),
-    Token.new(:right_square_bracket, /\A\]/),
-    Token.new(:arrow, /\A->/),
-    Token.new(:space, /\A[ \t]/)
+    TokenType.new(:comment, /\A#.*/),
+    TokenType.new(:newline, /\A[\n]|\A[\r\n]/),
+    TokenType.new(:left_round_bracket, /\A\(/),
+    TokenType.new(:right_round_bracket, /\A\)/),
+    TokenType.new(:left_square_bracket, /\A\[/),
+    TokenType.new(:right_square_bracket, /\A\]/),
+    TokenType.new(:arrow, /\A->/),
+    TokenType.new(:space, /\A[ \t]/)
   ]
 
   SKIP_TOKENS = Set[:space, :comment]
-
   class Scanner
-    attr_accessor :src
+    attr_reader :file
+    attr_accessor :src, :offset
 
-    def initialize(src)
-      @src = src
+    def initialize(file)
+      @file = file
+      @src = file.contents
+      @offset = 0
     end
 
     def tokens
       result = []
 
       while src.length > 0
-        match = sorted_matches.last
-        raise SyntaxError.new("Unexpected input `#{src[0]}`") unless match
-        result << match.to_a unless SKIP_TOKENS.include?(match.type)
-        self.src = src[match.length..]
+        token = sorted_matches.last
+        raise_syntax_error unless token
+        result << token.to_a unless SKIP_TOKENS.include?(token.type)
+        self.src = src[token.length..]
+        self.offset += token.length
       end
 
       result
@@ -99,8 +118,16 @@ module Emerald
     private
     def sorted_matches
       TOKEN_TYPES.filter_map do |type|
-        type.match(src)
+        type.match(src, file, offset)
       end.sort_by(&:match_length_and_keyword_priority)
+    end
+
+    def raise_syntax_error
+        raise Emerald::SyntaxError.new(
+          "Unexpected input `#{src[0]}`",
+          file,
+          offset
+        )
     end
   end
 end

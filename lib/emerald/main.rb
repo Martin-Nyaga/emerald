@@ -8,18 +8,19 @@ module Emerald
         if options.count == 0 && ARGV.count == 0
           Emerald::Repl.run
         elsif options[:execute]
-          if options[:ast]
-            pp Emerald::Parser.new(Emerald::Scanner.new(options[:execute]).tokens).parse
-          else
-            Emerald::Interpreter.new.interprete(options[:execute])
-          end
+          file = Emerald::Files::ScriptFile.new(options[:execute])
+          run_file_with_options file, options
         else
-          code = File.read(ARGV[0])
-          if options[:ast]
-            pp Emerald::Parser.new(Emerald::Scanner.new(code).tokens).parse
-          else
-            Emerald::Interpreter.new.interprete(code)
-          end
+          file = Emerald::Files::RealFile.new(ARGV[0])
+          run_file_with_options file, options
+        end
+      end
+
+      def run_file_with_options file, options
+        if options[:ast]
+          pp Emerald::Parser.new(Emerald::Scanner.new(file).tokens).parse
+        else
+          Emerald::Interpreter.new.interprete(file)
         end
       end
 
