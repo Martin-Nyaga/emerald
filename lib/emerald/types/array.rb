@@ -16,9 +16,14 @@ module Emerald
         Emerald::Types::Array.new(array.map { |el| yield el })
       end
 
-      def inspect
-        "[" + array.map(&:inspect).join(" ") +  "]"
+      def ==(other)
+        array == other.array
       end
+
+      def to_s
+        "[" + array.map(&:to_s).join(" ") +  "]"
+      end
+      alias inspect to_s
     end
   end
 end

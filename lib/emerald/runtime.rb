@@ -11,24 +11,29 @@ module Emerald
       def self.define_builtins(env)
         [:+, :-, :*, :/, :>, :>=, :<, :<=, :==].each do |op|
           env.set op.to_s,
-            Emerald::Types::Function.from_lambda(op.to_s, ->(a, b) { a.send(op, b) })
+            Emerald::Types::Function.from_lambda(op.to_s, ->(a, b) {
+              a.send(op, b)
+            })
         end
       end
     end
 
     class IO
       def self.define_builtins(env)
-        env.set 'print', Emerald::Types::Function.from_lambda('print', ->(val) { print val; val })
-        println_fn =
-          Emerald::Types::Function.from_block('println', 0..1) do |*args|
-            if args.length == 1
-              p args[0]
-            else
-              puts
-            end
-            args[0]
+        env.set 'print', (Emerald::Types::Function.from_block('print', 0..) do |*vals|
+           print *vals
+           nil
+        end)
+
+        env.set 'println', (Emerald::Types::Function.from_block('println', 0..) do |*args|
+          if args.length > 0
+            print *args
+            puts
+          else
+            puts
           end
-        env.set 'println', println_fn
+          nil
+        end)
       end
     end
 

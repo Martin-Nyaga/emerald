@@ -19,8 +19,7 @@ defn describe str describe_fn do
 end
 
 defn suite suite_fn do
-  # TODO: Fix this
-  println "Running tests..."
+  println "Running tests:"
   println
   suite_fn
   println
@@ -53,7 +52,7 @@ suite (fn do
     end)
 
     # TODO: Fix this
-    xit "can evaluate anonymous single and multline functions" (fn do
+    it "can evaluate anonymous single and multline functions" (fn do
       def inc (fn n -> + n 1)
       def dec (fn n do 
         (- n 1)
@@ -62,11 +61,10 @@ suite (fn do
       assert (== (map inc arr) [2 3 4])
       assert (== (map dec arr) [0 1 2])
       assert (== (map (fn a do (* a a) end) arr) [1 4 9])
-      assert (== (map (fn a -> * a a) arr) [1 3 9])
+      assert (== (map (fn a -> * a a) arr) [1 4 9])
     end)
 
-    # TODO: Fix this
-    xit "can evaluate named single and multiline functions" (fn do
+    it "can evaluate named single and multiline functions" (fn do
       defn inc n -> + n 1
       defn dec n do 
         (- n 1)
@@ -115,7 +113,6 @@ suite (fn do
     it "can parse strings" (fn do
       def hi "Hello"
       assert (== hi "Hello")
-      # TODO: Fix this
       # assert (== "Hello" "Hello")
     end)
   end)
