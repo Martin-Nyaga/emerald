@@ -11,7 +11,7 @@ module Emerald
       def self.define_builtins(env)
         [:+, :-, :*, :/, :>, :>=, :<, :<=, :==].each do |op|
           env.set op.to_s,
-            Emerald::Types::Function.from_lambda(op.to_s, ->(_, _, a, b) {
+            Emerald::Types::Function.from_lambda(op.to_s, ->(env, a, b) {
               a.send(op, b)
             })
         end
@@ -20,12 +20,12 @@ module Emerald
 
     class IO
       def self.define_builtins(env)
-        env.set 'print', (Emerald::Types::Function.from_block('print', 0..) do |_, _, *vals|
+        env.set 'print', (Emerald::Types::Function.from_block('print', 0..) do |env, *vals|
            print *vals
            nil
         end)
 
-        env.set 'println', (Emerald::Types::Function.from_block('println', 0..) do |_, _, *args|
+        env.set 'println', (Emerald::Types::Function.from_block('println', 0..) do |env, *args|
           if args.length > 0
             print *args
             puts
@@ -34,12 +34,6 @@ module Emerald
           end
           nil
         end)
-      end
-    end
-
-    class Error
-      def self.define_builtins(env)
-        env.set "raise", Emerald::Types::Function.from_lambda('raise', -> (_, _, err) { raise err })
       end
     end
   end

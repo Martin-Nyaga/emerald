@@ -4,7 +4,7 @@ module Emerald
   class Interpreter
     attr_reader :global_env, :file, :had_error, :exit_on_error
     def initialize(exit_on_error: true)
-      @global_env = Environment.new
+      @global_env = Environment.new(file: nil)
       @had_error = false
       @exit_on_error = exit_on_error
 
@@ -17,9 +17,10 @@ module Emerald
 
     def interprete(file)
       clear_error
-      @file = file
       tokens = Emerald::Scanner.new(file).tokens
       ast = Emerald::Parser.new(file, tokens).parse
+
+      global_env.file = file
       interprete_node(ast, global_env)
     rescue Emerald::Error => e
       handle_error e
@@ -29,11 +30,11 @@ module Emerald
 
     def define_builtins
       Emerald::Runtime.new.define_builtins(global_env)
-      global_env.set "env", Emerald::Types::Function.from_lambda("env", -> () { pp global_env })
+      global_env.set "env", Emerald::Types::Function.from_lambda("env", -> (env) { pp env })
     end
 
-
     def interprete_node(node, env)
+      env.current_offset = node.offset
       case node.type
       when :block
         return nil if node.children.size == 0
@@ -43,7 +44,7 @@ module Emerald
       when :integer then node.child.to_i
       when :string then node.child
       when :symbol then node.child.to_sym
-      when :identifier then env.get(node.child, file, node)
+      when :identifier then env.get(node.child)
       when :true then true
       when :false then false
       when :nil then nil
@@ -58,9 +59,9 @@ module Emerald
         # TODO: Handle non-function calls
         if args.length > 0
           args = args.map { |arg| interprete_node(arg, env) }
-          fn.call(file, node, *args)
+          fn.call(env, *args)
         else
-          fn.call(file, node)
+          fn.call(env)
         end
       when :array
         Emerald::Types::Array.new(node.children.map { |e| interprete_node(e, env) })
@@ -88,13 +89,15 @@ module Emerald
       end
     end
 
-    def define_function(env, name, params, body)
+    def define_function(defining_env, name, params, body)
       arity = params.children.size
-      Emerald::Types::Function.from_block(name, arity) do |_file, _node, *args|
+      Emerald::Types::Function.from_block(name, arity) do |_calling_env, *args|
         block_env = Environment.new(
           params.children.zip(args).map { |((_, arg_name), arg_value)| [arg_name, arg_value] }.to_h,
-          env
+          file: defining_env.file,
+          outer: defining_env
         )
+        block_env.current_offset = defining_env.current_offset
         result = interprete_node(body, block_env)
         result
       end

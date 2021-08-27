@@ -4,8 +4,8 @@ module Emerald
       class << self
         def define_builtins(env)
           env.set("map",
-            Emerald::Types::Function.from_block("map", 2) do |file, node, fn, arr|
-              arr.map { |el| fn.call(file, node, el) }
+            Emerald::Types::Function.from_block("map", 2) do |fenv, fn, arr|
+              arr.map { |el| fn.call(env, el) }
             end)
         end
       end

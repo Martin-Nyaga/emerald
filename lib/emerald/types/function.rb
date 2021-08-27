@@ -7,7 +7,7 @@ module Emerald
         end
 
         def from_lambda(name, _lambda)
-          new(name, _lambda.arity - 2, _lambda)
+          new(name, _lambda.arity - 1, _lambda)
         end
       end
 
@@ -19,14 +19,14 @@ module Emerald
         @arity = Arity.new(arity)
       end
 
-      def call(file, node, *args)
+      def call(env, *args)
         raise Emerald::ArgumentError.new(
           "Invalid number of arguments for #{inspect}, expected #{arity.inspect}, got #{args.count}",
-          file,
-          node.offset
+          env.file,
+          env.current_offset
         ) unless arity.valid?(args.count)
 
-        callable.call(file, node, *args)
+        callable.call(env, *args)
       end
       alias [] call
 
