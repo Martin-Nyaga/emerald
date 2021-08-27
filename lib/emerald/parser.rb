@@ -93,9 +93,10 @@ module Emerald
     end
 
     def guarded_body_expr
-      if check?(:when) || look_over(:newline).match?(:when)
+      if check_over?(:newline, for_type: :when)
         ast = s(:guards)
-        while check?(:when) || look_over(:newline).match?(:when)
+        while check_over?(:newline, for_type: :when) ||
+              check_over?(:newline, for_type: :else)
           skip(:newline)
           ast << require_expr!(when_expr, "when expression")
         end
@@ -111,11 +112,17 @@ module Emerald
         ast << require_expr!(when_condition_expr, "when condition")
         ast << require_expr!(when_body_expr, "when body")
         ast
+      elsif match?(:else)
+        # Rewrite `else` branch as `when true`
+        ast = s(:when)
+        ast << s(:true, "true", offset: previous_token.offset)
+        ast << require_expr!(when_body_expr, "when body")
+        ast
       end
     end
 
     def when_condition_expr
-      call_expr
+      call_expr || terminal_expr
     end
 
     def when_body_expr
@@ -298,7 +305,11 @@ module Emerald
       while look_ahead(n).match?(type)
         n += 1
       end
-      return look_ahead(n)
+      look_ahead(n)
+    end
+
+    def check_over?(skipped_type, for_type:)
+      check?(for_type) || look_over(skipped_type).match?(for_type)
     end
 
     def assert_not_eof!
