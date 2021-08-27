@@ -9,24 +9,24 @@ describe Emerald::Scanner do
 
   it "can tokenise integers" do
     file,  tokens = tokenise "1"
-    expect(tokens).to eq([[:integer, "1", 0]])
+    expect(tokens).to eq([ s(:integer, "1", offset: 0) ])
   end
 
   context "identifiers" do
     it "allows alphanumeric identifiers tokenise identifiers" do
       file, tokens = tokenise "foo"
-      result = [[:identifier, "foo", 0]]
+      result = [ s(:identifier, "foo", offset: 0) ]
       expect(tokens).to eq(result)
 
       file, tokens = tokenise "foo123"
-      result = [[:identifier, "foo123", 0]]
+      result = [ s(:identifier, "foo123", offset: 0) ]
       expect(tokens).to eq(result)
     end
 
     it "allows +-/* as independent identifiers" do
       "+-/*".split("").each do |op|
         file, tokens = tokenise op
-        result = [[:identifier, op, 0]]
+        result = [ s(:identifier, op, offset: 0) ]
         expect(tokens).to eq(result)
       end
     end
@@ -35,9 +35,9 @@ describe Emerald::Scanner do
   it "can tokenise a sequence of integers and identifiers" do
     file, tokens = tokenise "foo 1 1"
     result = [
-      [:identifier, "foo", 0],
-      [:integer, "1", 4],
-      [:integer, "1", 6]
+      s(:identifier, "foo", offset: 0),
+      s(:integer, "1", offset: 4),
+      s(:integer, "1", offset: 6)
     ]
     expect(tokens).to eq(result)
   end
@@ -45,13 +45,13 @@ describe Emerald::Scanner do
   it "can tokenise a multiline statement" do
     file, tokens = tokenise "foo 1 1\n+ 3 3"
     result = [
-      [:identifier, "foo", 0],
-      [:integer, "1", 4],
-      [:integer, "1", 6],
-      [:newline, "\n", 7],
-      [:identifier, "+", 8],
-      [:integer, "3", 10],
-      [:integer, "3", 12]
+      s(:identifier, "foo", offset: 0),
+      s(:integer, "1", offset: 4),
+      s(:integer, "1", offset: 6),
+      s(:newline, "\n", offset: 7),
+      s(:identifier, "+", offset: 8),
+      s(:integer, "3", offset: 10),
+      s(:integer, "3", offset: 12)
     ]
     expect(tokens).to eq(result)
   end
@@ -59,13 +59,13 @@ describe Emerald::Scanner do
   it "can tokenise a parenthesized call" do
     file, tokens = tokenise "foo (+ 1 1) 1"
     result = [
-      [:identifier, "foo", 0],
-      [:left_round_bracket, "(", 4],
-      [:identifier, "+", 5],
-      [:integer, "1", 7],
-      [:integer, "1", 9],
-      [:right_round_bracket, ")", 10],
-      [:integer, "1", 12]
+      s(:identifier, "foo", offset: 0),
+      s(:left_round_bracket, "(", offset: 4),
+      s(:identifier, "+", offset: 5),
+      s(:integer, "1", offset: 7),
+      s(:integer, "1", offset: 9),
+      s(:right_round_bracket, ")", offset: 10),
+      s(:integer, "1", offset: 12)
     ]
     expect(tokens).to eq(result)
   end
@@ -73,9 +73,9 @@ describe Emerald::Scanner do
   it "can tokenise a definition" do
     file, tokens = tokenise "def foo 12"
     result = [
-      [:def, "def", 0],
-      [:identifier, "foo", 4],
-      [:integer, "12", 8]
+      s(:def, "def", offset: 0),
+      s(:identifier, "foo", offset: 4),
+      s(:integer, "12", offset: 8)
     ]
     expect(tokens).to eq(result)
   end
@@ -83,11 +83,11 @@ describe Emerald::Scanner do
   it "can tokenise array syntax" do
     file, tokens = tokenise "print [1 2]"
     result = [
-      [:identifier, "print", 0],
-      [:left_square_bracket, "[", 6],
-      [:integer, "1", 7],
-      [:integer, "2", 9],
-      [:right_square_bracket, "]", 10]
+      s(:identifier, "print", offset: 0),
+      s(:left_square_bracket, "[", offset: 6),
+      s(:integer, "1", offset: 7),
+      s(:integer, "2", offset: 9),
+      s(:right_square_bracket, ")", offset: 10)
     ]
     expect(tokens).to eq(result)
   end
@@ -96,11 +96,11 @@ describe Emerald::Scanner do
     it "can tokenise single line anonymous function syntax" do
       file, tokens = tokenise "fn a -> print a"
       result = [
-        [:fn, "fn", 0],
-        [:identifier, "a", 3],
-        [:arrow, "->", 5],
-        [:identifier, "print", 8],
-        [:identifier, "a", 14]
+        s(:fn, "fn", offset: 0),
+        s(:identifier, "a", offset: 3),
+        s(:arrow, "->", offset: 5),
+        s(:identifier, "print", offset: 8),
+        s(:identifier, "a", offset: 14)
       ]
       expect(tokens).to eq(result)
     end
@@ -108,12 +108,12 @@ describe Emerald::Scanner do
     it "can tokenise single line named function syntax" do
       file, tokens = tokenise "defn say a -> print a"
       result = [
-        [:defn, "defn", 0],
-        [:identifier, "say", 5],
-        [:identifier, "a", 9],
-        [:arrow, "->", 11],
-        [:identifier, "print", 14],
-        [:identifier, "a", 20]
+        s(:defn, "defn", offset: 0),
+        s(:identifier, "say", offset: 5),
+        s(:identifier, "a", offset: 9),
+        s(:arrow, "->", offset: 11),
+        s(:identifier, "print", offset: 14),
+        s(:identifier, "a", offset: 20)
       ]
       expect(tokens).to eq(result)
     end
@@ -121,14 +121,14 @@ describe Emerald::Scanner do
     it "can tokenise multi-line anonymous function syntax" do
       file, tokens = tokenise "fn a do\n print a\n end"
       result = [
-        [:fn, "fn", 0],
-        [:identifier, "a", 3],
-        [:do, "do", 5],
-        [:newline, "\n", 7],
-        [:identifier, "print", 9],
-        [:identifier, "a", 15],
-        [:newline, "\n", 16],
-        [:end, "end", 18]
+        s(:fn, "fn", offset: 0),
+        s(:identifier, "a", offset: 3),
+        s(:do, "do", offset: 5),
+        s(:newline, "\n", offset: 7),
+        s(:identifier, "print", offset: 9),
+        s(:identifier, "a", offset: 15),
+        s(:newline, "\n", offset: 16),
+        s(:end, "end", offset: 18)
       ]
       expect(tokens).to eq(result)
     end
@@ -136,15 +136,15 @@ describe Emerald::Scanner do
     it "can tokenise multi-line named function syntax" do
       file, tokens = tokenise "defn say a do \nprint a \n end"
       result = [
-        [:defn, "defn", 0],
-        [:identifier, "say", 5],
-        [:identifier, "a", 9],
-        [:do, "do", 11],
-        [:newline, "\n", 14],
-        [:identifier, "print", 15],
-        [:identifier, "a", 21],
-        [:newline, "\n", 23],
-        [:end, "end", 25]
+        s(:defn, "defn", offset: 0),
+        s(:identifier, "say", offset: 5),
+        s(:identifier, "a", offset: 9),
+        s(:do, "do", offset: 11),
+        s(:newline, "\n", offset: 14),
+        s(:identifier, "print", offset: 15),
+        s(:identifier, "a", offset: 21),
+        s(:newline, "\n", offset: 23),
+        s(:end, "end", offset: 25)
       ]
       expect(tokens).to eq(result)
     end
@@ -153,17 +153,17 @@ describe Emerald::Scanner do
   context "true/false/nil" do
     it "can tokenise true" do
       file, tokens = tokenise "true"
-      result = [[:true, "true", 0]]
+      result = [ s(:true, "true", offset: 0) ]
       expect(tokens).to eq(result)
     end
     it "can tokenise false" do
       file, tokens = tokenise "false"
-      result = [[:false, "false", 0]]
+      result = [ s(:false, "false", offset: 0) ]
       expect(tokens).to eq(result)
     end
     it "can tokenise nil" do
       file, tokens = tokenise "nil"
-      result = [[:nil, "nil", 0]]
+      result = [ s(:nil, "nil", offset: 0) ]
       expect(tokens).to eq(result)
     end
   end
@@ -171,87 +171,95 @@ describe Emerald::Scanner do
   context "if/unless statements" do
     it "can tokenise an multiline if statement" do
       file, tokens = tokenise "if true do \nprint a \n end"
-      result = [[:if, "if", 0],
-        [:true, "true", 3],
-        [:do, "do", 8],
-        [:newline, "\n", 11],
-        [:identifier, "print", 12],
-        [:identifier, "a", 18],
-        [:newline, "\n", 20],
-        [:end, "end", 22]]
+      result = [ s(:if, "if", offset: 0),
+        s(:true, "true", offset: 3),
+        s(:do, "do", offset: 8),
+        s(:newline, "\n", offset: 11),
+        s(:identifier, "print", offset: 12),
+        s(:identifier, "a", offset: 18),
+        s(:newline, "\n", offset: 20),
+        s(:end, "end", offset: 22)
+      ]
       expect(tokens).to eq(result)
     end
 
     it "can tokenise else" do
       file, tokens = tokenise "if true do \nprint a \n else\n print b\n end"
       result = [
-        [:if, "if", 0],
-        [:true, "true", 3],
-        [:do, "do", 8],
-        [:newline, "\n", 11],
-        [:identifier, "print", 12],
-        [:identifier, "a", 18],
-        [:newline, "\n", 20],
-        [:else, "else", 22],
-        [:newline, "\n", 26],
-        [:identifier, "print", 28],
-        [:identifier, "b", 34],
-        [:newline, "\n", 35],
-        [:end, "end", 37]]
+        s(:if, "if", offset: 0),
+        s(:true, "true", offset: 3),
+        s(:do, "do", offset: 8),
+        s(:newline, "\n", offset: 11),
+        s(:identifier, "print", offset: 12),
+        s(:identifier, "a", offset: 18),
+        s(:newline, "\n", offset: 20),
+        s(:else, "else", offset: 22),
+        s(:newline, "\n", offset: 26),
+        s(:identifier, "print", offset: 28),
+        s(:identifier, "b", offset: 34),
+        s(:newline, "\n", offset: 35),
+        s(:end, "end", offset: 37)
+      ]
       expect(tokens).to eq(result)
     end
 
     it "can tokenise a single line if statement" do
       file, tokens = tokenise "if true -> print a\n"
-      result = [[:if, "if", 0],
-        [:true, "true", 3],
-        [:arrow, "->", 8],
-        [:identifier, "print", 11],
-        [:identifier, "a", 17],
-        [:newline, "\n", 18]]
+      result = [
+        s(:if, "if", offset: 0),
+        s(:true, "true", offset: 3),
+        s(:arrow, "->", offset: 8),
+        s(:identifier, "print", offset: 11),
+        s(:identifier, "a", offset: 17),
+        s(:newline, "\n", offset: 18)
+      ]
       expect(tokens).to eq(result)
     end
 
     it "can tokenise an multiline unless statement" do
       file, tokens = tokenise "unless true do \nprint a \n end"
-      result = [[:unless, "unless", 0],
-        [:true, "true", 7],
-        [:do, "do", 12],
-        [:newline, "\n", 15],
-        [:identifier, "print", 16],
-        [:identifier, "a", 22],
-        [:newline, "\n", 24],
-        [:end, "end", 26]]
+      result = [
+        s(:unless, "unless", offset: 0),
+        s(:true, "true", offset: 7),
+        s(:do, "do", offset: 12),
+        s(:newline, "\n", offset: 15),
+        s(:identifier, "print", offset: 16),
+        s(:identifier, "a", offset: 22),
+        s(:newline, "\n", offset: 24),
+        s(:end, "end", offset: 26)
+      ]
       expect(tokens).to eq(result)
     end
 
     it "can tokenise else" do
       file, tokens = tokenise "unless true do \nprint a \n else\n print b\n end"
       result = [
-        [:unless, "unless", 0],
-        [:true, "true", 7],
-        [:do, "do", 12],
-        [:newline, "\n", 15],
-        [:identifier, "print", 16],
-        [:identifier, "a", 22],
-        [:newline, "\n", 24],
-        [:else, "else", 26],
-        [:newline, "\n", 30],
-        [:identifier, "print", 32],
-        [:identifier, "b", 38],
-        [:newline, "\n", 39],
-        [:end, "end", 41]]
+        s(:unless, "unless", offset: 0),
+        s(:true, "true", offset: 7),
+        s(:do, "do", offset: 12),
+        s(:newline, "\n", offset: 15),
+        s(:identifier, "print", offset: 16),
+        s(:identifier, "a", offset: 22),
+        s(:newline, "\n", offset: 24),
+        s(:else, "else", offset: 26),
+        s(:newline, "\n", offset: 30),
+        s(:identifier, "print", offset: 32),
+        s(:identifier, "b", offset: 38),
+        s(:newline, "\n", offset: 39),
+        s(:end, "end", offset: 41)
+      ]
       expect(tokens).to eq(result)
     end
 
     it "can tokenise a single line unless statement" do
       file, tokens = tokenise "unless true -> print a\n"
-      result = [[:unless, "unless", 0],
-        [:true, "true", 7],
-        [:arrow, "->", 12],
-        [:identifier, "print", 15],
-        [:identifier, "a", 21],
-        [:newline, "\n", 22]]
+      result = [ s(:unless, "unless", offset: 0),
+        s(:true, "true", offset: 7),
+        s(:arrow, "->", offset: 12),
+        s(:identifier, "print", offset: 15),
+        s(:identifier, "a", offset: 21),
+        s(:newline, "\n", offset: 22)
+      ]
       expect(tokens).to eq(result)
     end
   end
@@ -259,14 +267,16 @@ describe Emerald::Scanner do
   context "strings" do
     it "can tokenise a string" do
       file, tokens = tokenise %( "hello world" )
-      result = [[:string, "hello world", 1]]
+      result = [ s(:string, "hello world", offset: 1) ]
       expect(tokens).to eq(result)
     end
 
     it "can tokenise a multiple subsequent strings" do
       file, tokens = tokenise %( "hello" "world" )
-      result = [[:string, "hello", 1],
-        [:string, "world", 9]]
+      result = [
+        s(:string, "hello", offset: 1),
+        s(:string, "world", offset: 9)
+      ]
       expect(tokens).to eq(result)
     end
   end
@@ -274,7 +284,7 @@ describe Emerald::Scanner do
   context "symbols" do
     it "can tokenise a symbol" do
       file, tokens = tokenise ":foo"
-      result = [[:symbol, "foo", 0]]
+      result = [ s(:symbol, "foo", offset: 0) ]
       expect(tokens).to eq(result)
     end
   end

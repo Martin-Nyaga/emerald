@@ -44,8 +44,8 @@ module Emerald
       @match_extractor = match_extractor
     end
 
-    def to_a
-      [type, text, offset]
+    def to_sexp
+      s(type, text, offset: offset)
     end
 
     def length
@@ -107,7 +107,7 @@ module Emerald
       while src.length > 0
         token = sorted_matches.last
         raise_syntax_error unless token
-        result << token.to_a unless SKIP_TOKENS.include?(token.type)
+        result << token.to_sexp unless SKIP_TOKENS.include?(token.type)
         self.src = src[token.length..]
         self.offset += token.length
       end

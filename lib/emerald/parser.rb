@@ -248,11 +248,11 @@ module Emerald
     end
 
     def assert_not_eof!
-      raise SyntaxError.new("Unexpected end of input", file, file.length - 1) if eof?
+      raise Emerald::SyntaxError.new("Unexpected end of input", file, file.length - 1) if eof?
     end
 
     def require_expr!(expr, expected_text)
-      raise SyntaxError.new(
+      raise Emerald::SyntaxError.new(
         "Expected #{expected_text}, got #{current_text}",
         file,
         position

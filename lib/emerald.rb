@@ -12,4 +12,5 @@ module Emerald
   autoload :Files, "emerald/files"
 
   require "emerald/error"
+  require "emerald/sexp"
 end
