@@ -2,6 +2,10 @@ module Emerald
   module Files
     class File
       attr_reader :path, :contents
+      def length
+        contents.length
+      end
+
       def inspect
         "<file: #{path}>"
       end

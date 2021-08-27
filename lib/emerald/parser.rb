@@ -1,9 +1,10 @@
 module Emerald
   class Parser
-    attr_reader :tokens
+    attr_reader :file, :tokens
     attr_accessor :position
 
-    def initialize(tokens)
+    def initialize(file, tokens)
+      @file = file
       @tokens = tokens
       @position = 0
     end
@@ -21,7 +22,7 @@ module Emerald
         end
       end
       if !eof?
-        raise SyntaxError.new("Unexpected input #{current_text}")
+        raise Emerald::SyntaxError.new("Unexpected input #{current_text}", file, current_token[2])
       end
       ast.compact
     end
@@ -32,21 +33,26 @@ module Emerald
 
     def def_expr
       if match?(:def)
-        ident = consume!(:identifier, "Expected identifier, got #{current_text}")
-        value = terminal_expr
+        ident = consume!(:identifier, "identifier")
+        value = require_expr!(terminal_expr, "expression")
         [:def, ident, value]
       end
     end
 
     def defn_expr
       if match?(:defn)
-        [:defn, identifier_expr, parameters_expr, fn_body_expr]
+        ident  = require_expr!(identifier_expr, "identifier")
+        params = parameters_expr
+        body   = require_expr!(fn_body_expr, "function body")
+        [:defn, ident, params, body]
       end
     end
 
     def fn_expr
       if match?(:fn)
-        [:fn, parameters_expr, fn_body_expr]
+        params = parameters_expr
+        body   = require_expr!(fn_body_expr, "function body")
+        [:fn, params, body]
       end
     end
 
@@ -64,7 +70,7 @@ module Emerald
 
     def single_line_body_expr
       if match?(:arrow)
-        [expr]
+        [require_expr!(expr, "body")]
       end
     end
 
@@ -77,7 +83,7 @@ module Emerald
           ast << result
         end
         skip(:newline)
-        consume!(:end, "Expected end, got #{current_text}")
+        consume!(:end, "end")
         ast
       end
     end
@@ -100,7 +106,7 @@ module Emerald
           end
         end
         skip(:newline)
-        consume!(:end, "Expected end, got #{current_text}")
+        consume!(:end, "end")
         [default_branch, else_branch]
       end
     end
@@ -166,7 +172,7 @@ module Emerald
     def parenthesized_expr
       if match?(:left_round_bracket)
         ast = expr
-        consume!(:right_round_bracket, "expected ), got #{current_text}")
+        consume!(:right_round_bracket, ")")
         ast
       end
     end
@@ -177,7 +183,7 @@ module Emerald
         while result = terminal_expr
           elements << result
         end
-        consume!(:right_square_bracket, "expected ], got #{current_text}")
+        consume!(:right_square_bracket, "]")
         [:array, *elements]
       end
     end
@@ -196,6 +202,7 @@ module Emerald
     end
 
     def current_token
+      return [:eof, "EOF", file.length - 1] if eof?
       tokens[position]
     end
 
@@ -222,9 +229,13 @@ module Emerald
       @position += 1
     end
 
-    def consume!(type, message)
+    def consume!(type, expected_text)
       assert_not_eof!
-      raise SyntaxError.new(message) unless match?(type)
+      raise SyntaxError.new(
+        "Expected #{expected_text}, got #{current_text}",
+        file,
+        position
+      ) unless match?(type)
       previous_token
     end
 
@@ -237,7 +248,16 @@ module Emerald
     end
 
     def assert_not_eof!
-      raise SyntaxError.new("Unexpected end of input") if eof?
+      raise SyntaxError.new("Unexpected end of input", file, file.length - 1) if eof?
+    end
+
+    def require_expr!(expr, expected_text)
+      raise SyntaxError.new(
+        "Expected #{expected_text}, got #{current_text}",
+        file,
+        position
+      ) if expr.nil?
+      expr
     end
   end
 end

@@ -18,7 +18,7 @@ module Emerald
     def interprete(file)
       clear_error
       tokens = Emerald::Scanner.new(file).tokens
-      ast = Emerald::Parser.new(tokens).parse
+      ast = Emerald::Parser.new(file, tokens).parse
       interprete_ast(ast, global_env).last
     rescue => e
       handle_error e

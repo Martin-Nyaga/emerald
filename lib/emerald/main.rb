@@ -18,10 +18,17 @@ module Emerald
 
       def run_file_with_options file, options
         if options[:ast]
-          pp Emerald::Parser.new(Emerald::Scanner.new(file).tokens).parse
+          print_ast(file)
         else
           Emerald::Interpreter.new.interprete(file)
         end
+      end
+
+      def print_ast(file)
+        tokens = Emerald::Scanner.new(file).tokens
+        pp Emerald::Parser.new(file, tokens).parse
+      rescue Emerald::Error => e
+        puts e.to_s
       end
 
       def parse_options

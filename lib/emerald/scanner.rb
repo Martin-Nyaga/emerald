@@ -45,7 +45,7 @@ module Emerald
     end
 
     def to_a
-      [type, text, file, offset]
+      [type, text, offset]
     end
 
     def length
