@@ -20,11 +20,10 @@ end
 
 defn suite suite_fn do
   println "Running tests:"
-  println
   suite_fn
   println
   println
-  println "Finished"
+  println "Finished!"
 end
 
 suite (fn do

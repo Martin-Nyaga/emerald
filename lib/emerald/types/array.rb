@@ -3,7 +3,10 @@ module Emerald
     class Array
       class << self
         def define_builtins(env)
-          env.set "map", Emerald::Types::Function.from_lambda("map", -> (fn, arr) { arr.map { |el| fn[el] } })
+          env.set("map",
+            Emerald::Types::Function.from_block("map", 2) do |file, node, fn, arr|
+              arr.map { |el| fn.call(file, node, el) }
+            end)
         end
       end
 

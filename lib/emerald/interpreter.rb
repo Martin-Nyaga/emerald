@@ -2,7 +2,7 @@ require "pp"
 
 module Emerald
   class Interpreter
-    attr_reader :global_env, :had_error, :exit_on_error
+    attr_reader :global_env, :file, :had_error, :exit_on_error
     def initialize(exit_on_error: true)
       @global_env = Environment.new
       @had_error = false
@@ -17,10 +17,11 @@ module Emerald
 
     def interprete(file)
       clear_error
+      @file = file
       tokens = Emerald::Scanner.new(file).tokens
       ast = Emerald::Parser.new(file, tokens).parse
-      interprete_ast(ast, global_env).last
-    rescue => e
+      interprete_node(ast, global_env)
+    rescue Emerald::Error => e
       handle_error e
     end
 
@@ -31,20 +32,18 @@ module Emerald
       global_env.set "env", Emerald::Types::Function.from_lambda("env", -> () { pp global_env })
     end
 
-    def interprete_ast(ast, env)
-      ast.map do |node|
-        interprete_node(node, env)
-      rescue => e
-        handle_error e
-      end
-    end
 
     def interprete_node(node, env)
-      case node[0]
-      when :integer then node[1].to_i
-      when :string then node[1]
-      when :symbol then node[1].to_sym
-      when :identifier then env.get(node[1])
+      case node.type
+      when :block
+        return nil if node.children.size == 0
+        node.children.map do |node|
+          interprete_node(node, env)
+        end.last
+      when :integer then node.child.to_i
+      when :string then node.child
+      when :symbol then node.child.to_sym
+      when :identifier then env.get(node.child, file, node)
       when :true then true
       when :false then false
       when :nil then nil
@@ -54,17 +53,17 @@ module Emerald
         env.set(ident, value)
         ident
       when :call
-        fn = interprete_node(node[1], env)
+        (_, fn, *args) = node
+        fn = interprete_node(fn, env)
         # TODO: Handle non-function calls
-        if node.length > 2
-          args = interprete_ast(node[2..-1], env)
-          fn[*args]
+        if args.length > 0
+          args = args.map { |arg| interprete_node(arg, env) }
+          fn.call(file, node, *args)
         else
-          fn[]
+          fn.call(file, node)
         end
       when :array
-        (_, *elements) = node
-        Emerald::Types::Array.new(interprete_ast(elements, env))
+        Emerald::Types::Array.new(node.children.map { |e| interprete_node(e, env) })
       when :fn
         (_, params, body) = node
         define_function(env, "anonymous", params, body)
@@ -75,29 +74,29 @@ module Emerald
       when :if
         (_, condition, body, else_body) = node
         if interprete_node(condition, env)
-          interprete_ast(body, env).last
+          interprete_node(body, env)
         else
-          else_body.any? ? interprete_ast(else_body, env).last : nil
+          else_body.any? ? interprete_node(else_body, env) : nil
         end
       when :unless
         (_, condition, body, else_body) = node
         unless interprete_node(condition, env)
-          interprete_ast(body, env).last
+          interprete_node(body, env)
         else
-          else_body.any? ? interprete_ast(else_body, env).last : nil
+          else_body.any? ? interprete_node(else_body, env) : nil
         end
       end
     end
 
     def define_function(env, name, params, body)
-      arity = params.count
-      Emerald::Types::Function.from_block(name, arity) do |*args|
+      arity = params.children.size
+      Emerald::Types::Function.from_block(name, arity) do |_file, _node, *args|
         block_env = Environment.new(
-          params.zip(args).map { |((_, arg_name), arg_value)| [arg_name, arg_value] }.to_h,
+          params.children.zip(args).map { |((_, arg_name), arg_value)| [arg_name, arg_value] }.to_h,
           env
         )
-        result = interprete_ast(body, block_env)
-        result.last
+        result = interprete_node(body, block_env)
+        result
       end
     end
 

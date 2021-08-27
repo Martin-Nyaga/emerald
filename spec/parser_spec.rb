@@ -9,26 +9,26 @@ describe Emerald::Parser do
 
   context "empty" do
     it "can parse an empty list of tokens" do
-      expect(parse "").to eq([])
+      expect(parse "").to eq(s(:block))
     end
   end
 
   context "terminal" do
     it "can parse an integer" do
       src = "1"
-      result = [[:integer, "1", 0]]
+      result = s(:block, s(:integer, "1", offset: 0))
       expect(parse src).to eq(result)
     end
 
     it "can parse a string" do
       src = %( "hello world" )
-      result = [[:string, "hello world", 1]]
+      result = s(:block, s(:string, "hello world", offset: 1))
       expect(parse src).to eq(result)
     end
 
     it "can parse a symbol" do
       src = ":foo"
-      result = [[:symbol, "foo", 0]]
+      result = s(:block, s(:symbol, "foo", offset: 0))
       expect(parse src).to eq(result)
     end
   end
@@ -36,13 +36,19 @@ describe Emerald::Parser do
   context "call" do
     it "can parse a call" do
       src = "foo 1 1"
-      result = [[:call, [:identifier, "foo", 0], [:integer, "1", 4], [:integer, "1", 6]]]
+      result =
+        s(:block,
+          s(:call,
+            s(:identifier, "foo", offset: 0), s(:integer, "1", offset: 4), s(:integer, "1", offset: 6)))
       expect(parse src).to eq(result)
     end
 
     it "can parse a call with identifiers" do
       src = "foo bar baz"
-      result = [[:call, [:identifier, "foo", 0], [:identifier, "bar", 4], [:identifier, "baz", 8]]]
+      result =
+        s(:block,
+          s(:call,
+            s(:identifier, "foo", offset: 0), s(:identifier, "bar", offset: 4), s(:identifier, "baz", offset: 8)))
       expect(parse src).to eq(result)
     end
   end
@@ -50,10 +56,10 @@ describe Emerald::Parser do
   context "multiline" do
     it "can parse a multiline program" do
       src = "foo 1 1\nbar 1 1"
-      result = [
-        [:call, [:identifier, "foo", 0], [:integer, "1", 4], [:integer, "1", 6]],
-        [:call, [:identifier, "bar", 8], [:integer, "1", 12], [:integer, "1", 14]]
-      ]
+      result =
+        s(:block,
+          s(:call, s(:identifier, "foo", offset: 0), s(:integer, "1", offset: 4), s(:integer, "1", offset: 6)),
+          s(:call, s(:identifier, "bar", offset: 8), s(:integer, "1", offset: 12), s(:integer, "1", offset: 14)))
       expect(parse src).to eq(result)
     end
   end
@@ -61,11 +67,11 @@ describe Emerald::Parser do
   context "parenthesized" do
     it "can parse a parenthesized call" do
       src = "foo (+ 1 1) 1"
-      result = [
-        [:call, [:identifier, "foo", 0],
-          [:call, [:identifier, "+", 5], [:integer, "1", 7], [:integer, "1", 9]],
-          [:integer, "1", 12]]
-      ]
+      result =
+        s(:block,
+          s(:call, s(:identifier, "foo", offset: 0),
+            s(:call, s(:identifier, "+", offset: 5), s(:integer, "1", offset: 7), s(:integer, "1", offset: 9)),
+            s(:integer, "1", offset: 12)))
       expect(parse src).to eq(result)
     end
 
@@ -78,7 +84,7 @@ describe Emerald::Parser do
   context "def" do
     it "can parse a definition call" do
       src = "def foo 12"
-      result = [[:def, [:identifier, "foo", 4], [:integer, "12", 8]]]
+      result = s(:block, s(:def, s(:identifier, "foo", offset: 4), s(:integer, "12", offset: 8)))
       expect(parse src).to eq(result)
     end
   end
@@ -86,7 +92,7 @@ describe Emerald::Parser do
   context "array" do
     it "can parse array syntax" do
       src = "print [1 2]"
-      result = [[:call, [:identifier, "print", 0], [:array, [:integer, "1", 7], [:integer, "2", 9]]]]
+      result = s(:block, s(:call, s(:identifier, "print", offset: 0), s(:array, s(:integer, "1", offset: 7), s(:integer, "2", offset: 9))))
       expect(parse src).to eq(result)
     end
 
@@ -99,37 +105,43 @@ describe Emerald::Parser do
   context "functions" do
     it "can parse a single line anonymous function definition" do
       src = "fn a -> print a"
-      result = [[:fn, [[:identifier, "a", 3]], [[:call, [:identifier, "print", 8], [:identifier, "a", 14]]]]]
+      result = s(:block,
+        s(:fn,
+          s(:params, s(:identifier, "a", offset: 3)),
+          s(:block, s(:call, s(:identifier, "print", offset: 8), s(:identifier, "a", offset: 14)))))
       expect(parse src).to eq(result)
     end
 
     it "can parse a single line named function definition" do
       src = "defn say a -> print a"
-      result = [[:defn, [:identifier, "say", 5], [[:identifier, "a", 9]], [[:call,
-        [:identifier, "print", 14], [:identifier, "a", 20]]]]]
+      result = s(:block,
+        s(:defn,
+          s(:identifier, "say", offset: 5),
+          s(:params, s(:identifier, "a", offset: 9)),
+          s(:block, s(:call, s(:identifier, "print", offset: 14), s(:identifier, "a", offset: 20)))))
       expect(parse src).to eq(result)
     end
 
     it "can parse a multi-line anonymous function definition" do
       src = "fn a b do\n print a\nprint b\n end"
-      result = [
-        [:fn,
-          [[:identifier, "a", 3], [:identifier, "b", 5]],
-          [
-            [:call, [:identifier, "print", 11], [:identifier, "a", 17]],
-            [:call, [:identifier, "print", 19], [:identifier, "b", 25]]]]]
+      result = s(:block,
+        s(:fn,
+          s(:params, s(:identifier, "a", offset: 3), s(:identifier, "b", offset: 5)),
+          s(:block,
+            s(:call, s(:identifier, "print", offset: 11), s(:identifier, "a", offset: 17)),
+            s(:call, s(:identifier, "print", offset: 19), s(:identifier, "b", offset: 25)))))
       expect(parse src).to eq(result)
     end
 
     it "can parse a multi-line named function definition" do
       src = "defn say a b do\n print a \n print b\n end"
-      result = [
-        [:defn,
-          [:identifier, "say", 5],
-          [[:identifier, "a", 9], [:identifier, "b",  11]],
-          [
-            [:call, [:identifier, "print", 17], [:identifier, "a", 23]],
-            [:call, [:identifier, "print", 27], [:identifier, "b", 33]]]]]
+      result = s(:block,
+        s(:defn,
+          s(:identifier, "say", offset: 5),
+          s(:params, s(:identifier, "a", offset: 9), s(:identifier, "b",  offset: 11)),
+          s(:block,
+            s(:call, s(:identifier, "print", offset: 17), s(:identifier, "a", offset: 23)),
+            s(:call, s(:identifier, "print", offset: 27), s(:identifier, "b", offset: 33)))))
       expect(parse src).to eq(result)
     end
 
@@ -150,19 +162,19 @@ describe Emerald::Parser do
   context "true/false/nil" do
     it "can parse true" do
       src = "true"
-      result = [[:true]]
+      result = s(:block, s(:true, "true", offset: 0))
       expect(parse src).to eq(result)
     end
 
     it "can parse false" do
       src = "false"
-      result = [[:false]]
+      result = s(:block, s(:false, "false", offset: 0))
       expect(parse src).to eq(result)
     end
 
     it "can parse nil" do
       src = "nil"
-      result = [[:nil]]
+      result = s(:block, s(:nil, "nil", offset: 0))
       expect(parse src).to eq(result)
     end
   end
@@ -170,55 +182,56 @@ describe Emerald::Parser do
   context "if/unless statement" do
     it "can parse a multiline if statement" do
       src = "if true do\n print a \nend"
-      result = [
-        [:if, [:true],
-          [[:call, [:identifier, "print", 12], [:identifier, "a", 18]]],
-          []]]
+      result = s(:block,
+        s(:if, s(:true, "true", offset: 3),
+          s(:block, s(:call, s(:identifier, "print", offset: 12), s(:identifier, "a", offset: 18))),
+          s(:block)))
       expect(parse src).to eq(result)
     end
 
     it "can parse a multiline if else" do
       src = "if true do\n print a \nelse \nprint b \n end"
-      result = [
-        [:if, [:true],
-          [[:call, [:identifier, "print", 12], [:identifier, "a", 18]]],
-          [[:call, [:identifier, "print", 27], [:identifier, "b", 33]]]]]
+      result = s(:block,
+        s(:if, s(:true, "true", offset: 3),
+          s(:block, s(:call, s(:identifier, "print", offset: 12), s(:identifier, "a", offset: 18))),
+          s(:block, s(:call, s(:identifier, "print", offset: 27), s(:identifier, "b", offset: 33)))))
       expect(parse src).to eq(result)
     end
 
     it "can parse a single line if statement" do
       src = "if true -> print a"
-      result = [
-        [:if, [:true],
-          [[:call, [:identifier, "print", 11], [:identifier, "a", 17]]],
-          []]]
+      result = s(:block,
+        s(:if, s(:true, "true", offset: 3),
+          s(:block, s(:call, s(:identifier, "print", offset: 11), s(:identifier, "a", offset: 17))),
+          s(:block)))
       expect(parse src).to eq(result)
     end
 
     it "can parse a multiline unless statement" do
       src = "unless true do\n print a \nend"
-      result = [
-        [:unless, [:true],
-          [[:call, [:identifier, "print", 16], [:identifier, "a", 22]]],
-          []]]
+      result = s(:block,
+        s(:unless, s(:true, "true", offset: 7),
+          s(:block, s(:call, s(:identifier, "print", offset: 16), s(:identifier, "a", offset: 22))),
+          s(:block)))
       expect(parse src).to eq(result)
     end
 
     it "can parse a multiline unless else" do
       src = "unless true do\n print a \nelse \nprint b \n end"
-      result = [
-        [:unless, [:true],
-          [[:call, [:identifier, "print", 16], [:identifier, "a", 22]]],
-          [[:call, [:identifier, "print", 31], [:identifier, "b", 37]]]]]
+      result = s(:block,
+        s(:unless, s(:true, "true", offset: 7),
+          s(:block, s(:call, s(:identifier, "print", offset: 16), s(:identifier, "a", offset: 22))),
+          s(:block, s(:call, s(:identifier, "print", offset: 31), s(:identifier, "b", offset: 37)))))
       expect(parse src).to eq(result)
     end
 
     it "can parse a single line unless statement" do
       src = "unless true -> print a"
-      result = [
-        [:unless, [:true],
-          [[:call, [:identifier, "print", 15], [:identifier, "a", 21]]],
-          []]]
+      result =
+        s(:block,
+          s(:unless, s(:true, "true", offset: 7),
+            s(:block, s(:call, s(:identifier, "print", offset: 15), s(:identifier, "a", offset: 21))),
+            s(:block)))
       expect(parse src).to eq(result)
     end
 

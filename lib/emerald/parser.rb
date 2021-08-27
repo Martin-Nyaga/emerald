@@ -14,7 +14,7 @@ module Emerald
     end
 
     def prog
-      ast = []
+      ast = s(:block)
       ast << expr
       while !eof? && match?(:newline)
         if result = expr
@@ -22,9 +22,13 @@ module Emerald
         end
       end
       if !eof?
-        raise Emerald::SyntaxError.new("Unexpected input #{current_text}", file, current_token[2])
+        raise Emerald::SyntaxError.new(
+          "Unexpected input #{current_text}",
+          file,
+          current_token.offset
+        )
       end
-      ast.compact
+      ast.compact!
     end
 
     def expr
@@ -35,7 +39,7 @@ module Emerald
       if match?(:def)
         ident = consume!(:identifier, "identifier")
         value = require_expr!(terminal_expr, "expression")
-        [:def, ident, value]
+        s(:def, ident, value)
       end
     end
 
@@ -44,7 +48,7 @@ module Emerald
         ident  = require_expr!(identifier_expr, "identifier")
         params = parameters_expr
         body   = require_expr!(fn_body_expr, "function body")
-        [:defn, ident, params, body]
+        s(:defn, ident, params, body)
       end
     end
 
@@ -52,12 +56,12 @@ module Emerald
       if match?(:fn)
         params = parameters_expr
         body   = require_expr!(fn_body_expr, "function body")
-        [:fn, params, body]
+        s(:fn, params, body)
       end
     end
 
     def parameters_expr
-      ast = []
+      ast = s(:params)
       while result = identifier_expr
         ast << result
       end
@@ -70,13 +74,13 @@ module Emerald
 
     def single_line_body_expr
       if match?(:arrow)
-        [require_expr!(expr, "body")]
+        s(:block, require_expr!(expr, "body"))
       end
     end
 
     def multiline_body_expr
       if match?(:do)
-        ast = []
+        ast = s(:block)
         skip(:newline)
         while result = expr
           skip(:newline)
@@ -90,14 +94,14 @@ module Emerald
 
     def multiline_body_with_possible_else_expr
       if match?(:do)
-        default_branch = []
+        default_branch = s(:block)
         skip(:newline)
         while result = expr
           skip(:newline)
           default_branch << result
         end
         skip(:newline)
-        else_branch = []
+        else_branch = s(:block)
         if match?(:else)
           skip(:newline)
           while result = expr
@@ -124,11 +128,11 @@ module Emerald
         condition = terminal_expr || call_expr
         if result = single_line_body_expr
           true_branch = result
-          false_branch = []
+          false_branch = s(:block)
         else
           (true_branch, false_branch) = multiline_body_with_possible_else_expr
         end
-        [matcher, condition, true_branch, false_branch]
+        s(matcher, condition, true_branch, false_branch)
       end
     end
 
@@ -136,7 +140,7 @@ module Emerald
       if match?(:identifier)
         ident = previous_token
         args = args_expr
-        [:call, ident, *args]
+        s(:call, ident, *args)
       end
     end
 
@@ -154,11 +158,11 @@ module Emerald
     end
 
     def boolean_expr
-      return [previous_token.first] if match?(:true) || match?(:false)
+      return previous_token if match?(:true) || match?(:false)
     end
 
     def nil_expr
-      return [previous_token.first] if match?(:nil)
+      return previous_token if match?(:nil)
     end
 
     def integer_expr
@@ -184,7 +188,7 @@ module Emerald
           elements << result
         end
         consume!(:right_square_bracket, "]")
-        [:array, *elements]
+        s(:array, *elements)
       end
     end
 
@@ -202,12 +206,12 @@ module Emerald
     end
 
     def current_token
-      return [:eof, "EOF", file.length - 1] if eof?
+      return s(:eof, "EOF", offset: file.length - 1) if eof?
       tokens[position]
     end
 
     def current_text
-      '"' + current_token[1] + '"'
+      '"' + current_token.children[0] + '"'
     end
 
     def match?(type)
@@ -221,7 +225,7 @@ module Emerald
 
     def check?(type)
       return false if eof?
-      current_token[0] == type
+      current_token.match?(type)
     end
 
     def advance

@@ -9,6 +9,7 @@ describe Emerald::Error do
     rescue Emerald::Error => e
       message =
       error_message = <<MSG
+
 Error: test error
     in #{file.path} on line 1
 
@@ -27,6 +28,7 @@ MSG
     rescue Emerald::Error => e
       message =
       error_message = <<MSG
+
 Error: test error
     in #{file.path} on line 2
 

@@ -87,7 +87,7 @@ describe Emerald::Scanner do
       s(:left_square_bracket, "[", offset: 6),
       s(:integer, "1", offset: 7),
       s(:integer, "2", offset: 9),
-      s(:right_square_bracket, ")", offset: 10)
+      s(:right_square_bracket, "]", offset: 10)
     ]
     expect(tokens).to eq(result)
   end

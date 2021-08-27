@@ -9,7 +9,8 @@ module Emerald
     end
 
     def to_s
-      error_string =  name_and_message + "\n"
+      error_string = "\n"
+      error_string << name_and_message + "\n"
       error_string << location + "\n\n"
       error_string << context + "\n"
       error_string << formatted_backtrace
@@ -57,4 +58,6 @@ module Emerald
   end
 
   class SyntaxError < Error; end
+  class ArgumentError < Error; end
+  class NameError < Error; end
 end
