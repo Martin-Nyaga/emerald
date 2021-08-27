@@ -157,6 +157,22 @@ describe Emerald::Parser do
       src = "fn a ->"
       expect { parse src }.to raise_error(Emerald::SyntaxError)
     end
+
+    it "can parse a function guard" do
+      src = "fn a when > 0 a -> print a\nwhen < 0 a -> raise \"foo\""
+      result =
+        s(:block,
+          s(:fn,
+            s(:params, s(:identifier, "a", offset: 3)),
+            s(:guards,
+              s(:when,
+                s(:call, s(:identifier, ">", offset: 10), s(:integer, "0", offset: 12), s(:identifier, "a", offset: 14)),
+                s(:block, s(:call, s(:identifier, "print", offset: 19), s(:identifier, "a", offset: 25)))),
+              s(:when,
+                s(:call, s(:identifier, "<", offset: 32), s(:integer, "0", offset: 34), s(:identifier, "a", offset: 36)),
+                s(:block, s(:call, s(:identifier, "raise", offset: 41), s(:string, "foo", offset: 47)))))))
+      expect(parse src).to eq(result)
+    end
   end
 
   context "true/false/nil" do

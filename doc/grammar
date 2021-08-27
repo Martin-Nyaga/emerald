@@ -1,10 +1,14 @@
-prog             -> expr (end expr)* end*
-expr             -> (def | defn | fn | if | unless | call | terminal)
+prog             -> expr (newline expr)* newline*
+expr             -> def | defn | fn | if | unless | call | terminal
 def              -> :def identifier terminal
 defn             -> :defn identifier parameters fn_body
 fn               -> :fn parameters fn_body
 parameters       -> identifier+
-fn_body          -> single_line_body || multiline_body
+fn_body          -> guarded_body | single_line_body | multiline_body
+guarded_body     -> (newline* when_expr newline)+
+when             -> :when when_condition when_body
+when_condition   -> call
+when_body        -> single_line_body | multiline_body
 single_line_body -> :fat_arrow expr
 multiline_body   -> :do prog :end
 multiline_body_with_possible_else
@@ -20,6 +24,6 @@ boolean          -> :true | :false
 string           -> :string
 string           -> :symbol
 nil              -> :nil
-end              -> :newline
+newline          -> :newline
 parenthesized    -> :left_round_bracket call :right_round_bracket
 array            -> :left_square_bracket terminal* right_square_bracket

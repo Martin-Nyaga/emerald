@@ -148,6 +148,30 @@ describe Emerald::Scanner do
       ]
       expect(tokens).to eq(result)
     end
+
+    it "can tokenise function guards" do
+      file, tokens = tokenise "fn a when > 0 a -> print a\nwhen < 0 a -> raise \"foo\""
+      result = [
+        s(:fn, "fn", offset: 0),
+        s(:identifier, "a", offset: 3),
+        s(:when, "when", offset: 5),
+        s(:identifier, ">", offset: 10),
+        s(:integer, "0", offset: 12),
+        s(:identifier, "a", offset: 14),
+        s(:arrow, "->", offset: 16),
+        s(:identifier, "print", offset: 19),
+        s(:identifier, "a", offset: 25),
+        s(:newline, "\n", offset: 26),
+        s(:when, "when", offset: 27),
+        s(:identifier, "<", offset: 32),
+        s(:integer, "0", offset: 34),
+        s(:identifier, "a", offset: 36),
+        s(:arrow, "->", offset: 38),
+        s(:identifier, "raise", offset: 41),
+        s(:string, "foo", offset: 47),
+      ]
+      expect(tokens).to eq(result)
+    end
   end
 
   context "true/false/nil" do

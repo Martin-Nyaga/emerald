@@ -69,7 +69,7 @@ module Emerald
     end
 
     def fn_body_expr
-      single_line_body_expr || multiline_body_expr
+      guarded_body_expr || single_line_body_expr || multiline_body_expr
     end
 
     def single_line_body_expr
@@ -90,6 +90,34 @@ module Emerald
         consume!(:end, "end")
         ast
       end
+    end
+
+    def guarded_body_expr
+      if check?(:when) || look_over(:newline).match?(:when)
+        ast = s(:guards)
+        while check?(:when) || look_over(:newline).match?(:when)
+          skip(:newline)
+          ast << require_expr!(when_expr, "when expression")
+        end
+        ast
+      end
+    end
+
+    def when_expr
+      if match?(:when)
+        ast = s(:when)
+        ast << require_expr!(when_condition_expr, "when condition")
+        ast << require_expr!(when_body_expr, "when body")
+        ast
+      end
+    end
+
+    def when_condition_expr
+      call_expr
+    end
+
+    def when_body_expr
+      single_line_body_expr || multiline_body_expr
     end
 
     def multiline_body_with_possible_else_expr
@@ -206,8 +234,12 @@ module Emerald
     end
 
     def current_token
-      return s(:eof, "EOF", offset: file.length - 1) if eof?
+      return eof_token if eof?
       tokens[position]
+    end
+
+    def eof_token
+      s(:eof, "EOF", offset: file.length - 1)
     end
 
     def current_text
@@ -249,6 +281,22 @@ module Emerald
 
     def eof?
       position == tokens.length
+    end
+
+    def look_ahead(n = 1)
+      if position + 1 < tokens.length
+        tokens[position + n]
+      else
+        eof_token
+      end
+    end
+
+    def look_over(type)
+      n = 1
+      while look_ahead(n).match?(type)
+        n += 1
+      end
+      return look_ahead(n)
     end
 
     def assert_not_eof!
