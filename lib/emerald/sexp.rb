@@ -34,10 +34,15 @@ module Emerald
       array[0]
     end
 
-    def inspect
-      elements = array.map(&:inspect).join(", ")
-      elements += ", " if elements.length > 0
-      "s(#{elements}offset: #{offset})"
+    def inspect(indent = "  ")
+      if children.length > 0 && child.is_a?(Sexp)
+        elements = children.map { |child| indent + child.inspect(indent + "  ") }.join(",\n")
+        "s(:#{type}, offset: #{offset}\n#{elements})"
+      else
+        elements = children.map(&:inspect).join(", ")
+        elements = ", #{elements}" if elements.length > 0
+        "s(:#{type}, offset: #{offset}#{elements})"
+      end
     end
 
     def children

@@ -114,5 +114,15 @@ suite (fn do
       assert (== hi "Hello")
       assert (== "Hello" "Hello")
     end)
+
+    it "can evaluate guarded functions" (fn do
+      defn even? x
+        when == 0 (% x 2) -> true
+        when == 1 (% x 2) -> false
+      end
+
+      assert (even? 8)
+      assert (== false (even? 3))
+    end)
   end)
 end)

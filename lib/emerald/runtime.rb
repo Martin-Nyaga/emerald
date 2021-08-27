@@ -9,7 +9,7 @@ module Emerald
 
     class Math
       def self.define_builtins(env)
-        [:+, :-, :*, :/, :>, :>=, :<, :<=, :==].each do |op|
+        [:+, :-, :*, :/, :>, :>=, :<, :<=, :==, :%].each do |op|
           env.set op.to_s,
             Emerald::Types::Function.from_lambda(op.to_s, ->(env, a, b) {
               a.send(op, b)

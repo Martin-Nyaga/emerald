@@ -99,6 +99,8 @@ module Emerald
           skip(:newline)
           ast << require_expr!(when_expr, "when expression")
         end
+        skip(:newline)
+        consume!(:end, "end")
         ast
       end
     end

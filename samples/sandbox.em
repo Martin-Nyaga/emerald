@@ -1,10 +1,4 @@
-# Function guards
-defn fib x 
-  when == 0 x -> 0
-  when == 1 x -> 1
-  else        -> + (fib (- x 1)) (fib (- x 2))
-end
-
+# Try/rescue
 defn test str test_fn do
   try do
     test_fn

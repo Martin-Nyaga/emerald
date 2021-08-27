@@ -10,10 +10,10 @@ module Emerald
         "<file: #{path}>"
       end
 
-      def context_around(offset:, line_number:)
+      def context_around(offset)
         LineContext.new(
           file: self,
-          line_number: line_number,
+          line_number: line_number(offset),
           offset: offset,
         ).to_s
       end
@@ -28,6 +28,7 @@ module Emerald
       end
 
       def start_of_line(offset)
+        offset -= 1 if contents[offset] == "\n"
         while offset > 0 && contents[offset] != "\n"
           offset -= 1
         end
@@ -36,6 +37,7 @@ module Emerald
       end
 
       def end_of_line(offset)
+        return offset if contents[offset] == "\n"
         while offset < contents.length && contents[offset] != "\n"
           offset += 1
         end
@@ -85,7 +87,7 @@ module Emerald
         end
 
         def current_line_context
-          file.contents[current_line_context_bounds]
+          file.contents[current_line_context_bounds].chomp
         end
 
         def current_line_context_bounds
@@ -93,7 +95,7 @@ module Emerald
         end
 
         def previous_line_context
-          file.contents[previous_line_context_bounds]
+          file.contents[previous_line_context_bounds].chomp
         end
 
         def previous_line_context_bounds

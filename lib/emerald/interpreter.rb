@@ -56,12 +56,15 @@ module Emerald
       when :call
         (_, fn, *args) = node
         fn = interprete_node(fn, env)
-        # TODO: Handle non-function calls
-        if args.length > 0
-          args = args.map { |arg| interprete_node(arg, env) }
-          fn.call(env, *args)
+        if fn.is_a?(Emerald::Types::Function)
+          if args.length > 0
+            args = args.map { |arg| interprete_node(arg, env) }
+            fn.call(env, *args)
+          else
+            fn.call(env)
+          end
         else
-          fn.call(env)
+          fn
         end
       when :array
         Emerald::Types::Array.new(node.children.map { |e| interprete_node(e, env) })
@@ -72,6 +75,20 @@ module Emerald
         (_, (_, name), params, body) = node
         fn = define_function(env, name, params, body)
         env.set name, fn
+      when :guards
+        (_, *guards) = node
+        matching_guard = guards.detect do |(_, condition, _body)|
+          interprete_node(condition, env)
+        end
+        unless matching_guard
+          raise Emerald::NoMatchingGuardError.new(
+            "No guard matched",
+            env.file,
+            env.current_offset
+          )
+        end
+        (_, _, body) = matching_guard
+        interprete_node(body, env)
       when :if
         (_, condition, body, else_body) = node
         if interprete_node(condition, env)
@@ -86,6 +103,12 @@ module Emerald
         else
           else_body.any? ? interprete_node(else_body, env) : nil
         end
+      else
+        raise Emerald::NotImplementedError.new(
+          "evaluation of :#{node.type} is not implemented",
+          env.file,
+          env.current_offset
+        )
       end
     end
 

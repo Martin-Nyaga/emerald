@@ -36,7 +36,7 @@ module Emerald
     end
 
     def context
-      text = file.context_around(offset: offset, line_number: line_number)
+      text = file.context_around(offset)
       indent(text, amount: indentation)
     end
 
@@ -68,4 +68,6 @@ module Emerald
   class ArgumentError < Error; end
   class NameError < Error; end
   class RuntimeError < Error; end
+  class NotImplementedError < Error; end
+  class NoMatchingGuardError < Error; end
 end
