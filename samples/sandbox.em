@@ -1,10 +1,17 @@
-println "foo"
+# Function guards
+defn fib (x) 
+  when == 0 x => 0
+  when == 1 x => 1
+  else        => + (fib (- x 1)) (fib (- x 2))
+end
 
-# Strings
-println "hello world"
-
-# Symbols
-println :foo
+defn test str test_fn do
+  try do
+    test_fn
+    print "."
+  rescue Error (fn e when AssertionFailedError -> print "F"
+                     else -> print "E")
+end
 
 # Math stdlib
 defn sum_square_and_root (x) do
@@ -14,26 +21,9 @@ defn sum_square_and_root (x) do
 end
 map sum_square_and_root [1 2 3] 
 
-
-# Function guards
-defn fib (x) 
-  when == 0 x => 0
-  when == 1 x => 1
-  else        => + (fib (- x 1)) (fib (- x 2))
-end
-
-# Blocks
-describe "MyModule" do
-  context "MyThing" do
-    it "Can do the thing I want" do
-      Assert.assert (foo bar baz)
-    end
-  end 
-end
-
 # Modules & symbols
-it "can tokenise a parenthesized call" do
+it "can tokenise a parenthesized call" (fn do
   def tokens Emerald::Scanner.tokenise "foo"
   def result [:identifier "foo"]
   Assert.equal tokens result
-end
+end)

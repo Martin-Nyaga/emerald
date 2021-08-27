@@ -105,7 +105,6 @@ suite (fn do
       assert (unless (== 1 2) -> true)
     end)
 
-
     it "can parse symbols" (fn do
       assert (== :foo :foo)
     end)
