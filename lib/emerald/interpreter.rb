@@ -33,7 +33,6 @@ module Emerald
 
     def define_builtins
       Emerald::Runtime.new.define_builtins(global_env)
-      global_env.set "env", Emerald::Types::Function.from_lambda("env", -> (env) { pp env })
     end
 
     def interprete_node(node, env)

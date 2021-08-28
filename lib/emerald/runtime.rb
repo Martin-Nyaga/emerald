@@ -1,6 +1,8 @@
 module Emerald
   class Runtime
     def define_builtins(env)
+      global_env.set "env", Emerald::Types::Function.from_lambda("env", -> (env) { pp env })
+
       Math.define_builtins(env)
       IO.define_builtins(env)
       Emerald::Types::Array.define_builtins(env)
