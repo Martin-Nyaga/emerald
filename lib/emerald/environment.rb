@@ -24,4 +24,17 @@ class Emerald::Environment
     ) if result.nil?
     result
   end
+
+  def get_at_distance(distance, name)
+    parent_at_distance(distance).get(name)
+  end
+
+  private
+    def parent_at_distance(distance)
+      target_env = self
+      distance.times do |i|
+        target_env = target_env.outer
+      end
+      target_env
+    end
 end

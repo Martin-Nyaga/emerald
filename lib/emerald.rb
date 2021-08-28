@@ -4,6 +4,7 @@ module Emerald
   autoload :Scanner, "emerald/scanner"
   autoload :Parser, "emerald/parser"
   autoload :Interpreter, "emerald/interpreter"
+  autoload :Resolver, "emerald/resolver"
   autoload :Repl, "emerald/repl"
   autoload :Runtime, "emerald/runtime"
   autoload :Environment, "emerald/environment"

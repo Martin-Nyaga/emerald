@@ -5,6 +5,7 @@ module Emerald
     attr_reader :global_env, :file, :had_error, :exit_on_error
     def initialize(exit_on_error: true)
       @global_env = Environment.new(file: nil)
+      @scoped_locals = {}
       @had_error = false
       @exit_on_error = exit_on_error
 
@@ -19,7 +20,8 @@ module Emerald
       clear_error
       tokens = Emerald::Scanner.new(file).tokens
       ast = Emerald::Parser.new(file, tokens).parse
-
+      ast, locals = Emerald::Resolver.new(file, ast).resolve_locals
+      @scoped_locals = locals
       global_env.file = file
       interprete_node(ast, global_env)
     rescue Emerald::Error => e
@@ -27,6 +29,7 @@ module Emerald
     end
 
     private
+    attr_reader :scoped_locals
 
     def define_builtins
       Emerald::Runtime.new.define_builtins(global_env)
@@ -44,7 +47,12 @@ module Emerald
       when :integer then node.child.to_i
       when :string then node.child
       when :symbol then node.child.to_sym
-      when :identifier then env.get(node.child)
+      when :identifier then
+        if scope_distance = scoped_locals[node]
+          env.get_at_distance(scope_distance, node.child)
+        else
+          global_env.get(node.child)
+        end
       when :true then true
       when :false then false
       when :nil then nil

@@ -17,7 +17,9 @@ module Emerald
 
     def offset
       return @offset unless @offset.nil?
-      return array[1].offset if array.length >= 2
+      if child = children.detect { |child| child.offset != nil }
+        return child.offset
+      end
       nil
     end
 
@@ -37,11 +39,11 @@ module Emerald
     def inspect(indent = "  ")
       if children.length > 0 && child.is_a?(Sexp)
         elements = children.map { |child| indent + child.inspect(indent + "  ") }.join(",\n")
-        "s(:#{type}, offset: #{offset}\n#{elements})"
+        "s(:#{type} <#{offset || "nil"}>\n#{elements})"
       else
         elements = children.map(&:inspect).join(", ")
         elements = ", #{elements}" if elements.length > 0
-        "s(:#{type}, offset: #{offset}#{elements})"
+        "s(:#{type} <#{offset || "nil"}>#{elements})"
       end
     end
 
