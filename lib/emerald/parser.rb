@@ -162,7 +162,7 @@ module Emerald
 
     def condition_expr(matcher)
       if match?(matcher)
-        condition = terminal_expr || call_expr
+        condition = call_expr || terminal_expr
         if result = single_line_body_expr
           true_branch = result
           false_branch = s(:block)
@@ -267,6 +267,16 @@ module Emerald
     def check?(type)
       return false if eof?
       current_token.match?(type)
+    end
+
+    def terminal?(token)
+      case token.type
+      when :identifier, :true, :false, :nil, :integer, :left_round_bracket,
+            :left_square_bracket, :string, :symbol
+        true
+      else
+        false
+      end
     end
 
     def advance
