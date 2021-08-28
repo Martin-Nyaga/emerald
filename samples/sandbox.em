@@ -3,8 +3,11 @@ defn test str test_fn do
   try do
     test_fn
     print "."
-  rescue Error (fn e when AssertionFailedError -> print "F"
-                     else -> print "E")
+  rescue Error (fn e 
+    when AssertionFailedError -> print "F"
+    else -> print "E"
+    end)
+  end
 end
 
 # Math stdlib
