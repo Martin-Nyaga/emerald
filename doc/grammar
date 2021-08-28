@@ -6,11 +6,11 @@ fn               -> :fn parameters fn_body
 parameters       -> identifier+
 fn_body          -> guarded_body | single_line_body | multiline_body
 guarded_body     -> newline* when_expr (newline* when_expr | guard_else_expr newline)*
-when_expr        -> :when when_condition when_body
-guard_else_expr  -> :else when_body
+when             -> :when when_condition when_body
+guard_else       -> :else when_body
 when_condition   -> call | terminal
 when_body        -> single_line_body | multiline_body
-single_line_body -> :fat_arrow expr
+single_line_body -> :arrow expr
 multiline_body   -> :do prog :end
 multiline_body_with_possible_else
                  -> :do prog (:else prog)? :end

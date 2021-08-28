@@ -115,7 +115,7 @@ module Emerald
       elsif match?(:else)
         # Rewrite `else` branch as `when true`
         ast = s(:when)
-        ast << s(:true, "true", offset: previous_token.offset)
+        ast << s(:true, "else", offset: previous_token.offset)
         ast << require_expr!(when_body_expr, "when body")
         ast
       end
