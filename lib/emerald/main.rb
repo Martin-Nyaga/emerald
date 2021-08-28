@@ -17,7 +17,9 @@ module Emerald
       end
 
       def run_file_with_options file, options
-        if options[:ast]
+        if options[:tokens]
+          print_tokens(file)
+        elsif options[:ast]
           print_ast(file)
         else
           Emerald::Interpreter.new.interprete(file)
@@ -27,6 +29,12 @@ module Emerald
       def print_ast(file)
         tokens = Emerald::Scanner.new(file).tokens
         pp Emerald::Parser.new(file, tokens).parse
+      rescue Emerald::Error => e
+        puts e.to_s
+      end
+
+      def print_tokens(file)
+        pp Emerald::Scanner.new(file).tokens
       rescue Emerald::Error => e
         puts e.to_s
       end
@@ -42,6 +50,10 @@ module Emerald
 
           opts.on("--ast", "Print ast") do |ast|
             options[:ast] = ast
+          end
+
+          opts.on("--tokens", "Print tokens") do |tokens|
+            options[:tokens] = tokens
           end
 
           opts.on("-h", "--help", "Show usage") do |code|

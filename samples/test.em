@@ -81,28 +81,28 @@ suite (fn do
 
     it "can evaluate single and multiline if/unless statements" (fn do
       # TODO: Allow parens to spill over to next line
-      assert (if (== 1 1) do
+      assert (if == 1 1 do
                 true
               else
                 false
               end)
-      assert (if (== 1 2) do
+      assert (if == 1 2 do
                 false
               else
                 true
               end)
-      assert (if (== 1 1) -> true)
-      assert (unless (== 1 2) do
+      assert (if == 1 1 -> true)
+      assert (unless == 1 2 do
                 true
               else
                 false
               end)
-      assert (unless (== 1 1) do
+      assert (unless == 1 1 do
                 false
               else
                 true
               end)
-      assert (unless (== 1 2) -> true)
+      assert (unless == 1 2 -> true)
     end)
 
     it "can parse symbols" (fn do
