@@ -124,5 +124,20 @@ suite (fn do
       assert (even? 8)
       assert (== false (even? 3))
     end)
+
+    it "correctly scopes variables in closures" (fn do
+      def a "outer a"
+      defn func do
+        def b "inner b"
+        def func2 (fn do
+          assert (== a "outer a")
+          assert (== b "inner b")
+        end)
+        func2
+        def a "inner a"
+        func2
+      end
+      func
+    end)
   end)
 end)
