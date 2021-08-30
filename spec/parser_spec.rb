@@ -287,4 +287,12 @@ describe Emerald::Parser do
       expect { parse src }.to raise_error(Emerald::SyntaxError)
     end
   end
+
+  context "constants" do
+    it "can parse constants" do
+      src = "String"
+      result = s(:block, s(:constant, "String", offset: 0))
+      expect(parse src).to eq(result)
+    end
+  end
 end

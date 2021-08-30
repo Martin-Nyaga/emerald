@@ -2,7 +2,7 @@ module Emerald
   class Error < StandardError
     attr_reader :message, :file, :offset
 
-    def initialize(message, file, offset)
+    def initialize(message, file = nil, offset = nil)
       @message = message
       @file = file
       @offset = offset
@@ -59,7 +59,7 @@ module Emerald
     def self.define_builtins(env)
         env.set "raise",
           Emerald::Types::Function.from_lambda('raise', -> (env, message) {
-            raise Emerald::RuntimeError.new(message, env.file, env.current_offset)
+            raise Emerald::RuntimeError.new(message.str, env.file, env.current_offset)
           })
     end
   end
@@ -68,6 +68,7 @@ module Emerald
   class ArgumentError < Error; end
   class NameError < Error; end
   class RuntimeError < Error; end
+  class TypeError < Error; end
   class NotImplementedError < Error; end
   class NoMatchingGuardError < Error; end
 end

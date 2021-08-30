@@ -191,11 +191,15 @@ module Emerald
 
     def terminal_expr
       identifier_expr || boolean_expr || nil_expr || integer_expr ||
-      parenthesized_expr || array_expr || string_expr || symbol_expr
+      parenthesized_expr || array_expr || string_expr || symbol_expr || constant_expr
     end
 
     def boolean_expr
       return previous_token if match?(:true) || match?(:false)
+    end
+
+    def constant_expr
+      return previous_token if match?(:constant)
     end
 
     def nil_expr

@@ -1,7 +1,17 @@
 module Emerald
   class Runtime
     def define_builtins(env)
-      env.set "env", Emerald::Types::Function.from_lambda("env", -> (env) { pp env })
+      env.set_constant "String", Emerald::Types::String
+      env.set_constant "Array", Emerald::Types::Array
+      env.set_constant "Integer", Emerald::Types::Integer
+      env.set_constant "Symbol", Emerald::Types::Symbol
+      env.set_constant "Boolean", Emerald::Types::Boolean
+      env.set_constant "Nil", Emerald::Types::Nil
+      env.set_constant "Function", Emerald::Types::Function
+
+      env.set "type", (Emerald::Types::Function.from_block('type', 1) do |env, value|
+        Emerald::Types::Type.new(value.class)
+      end)
 
       Math.define_builtins(env)
       IO.define_builtins(env)
@@ -24,7 +34,7 @@ module Emerald
       def self.define_builtins(env)
         env.set 'print', (Emerald::Types::Function.from_block('print', 0..) do |env, *vals|
            print *vals
-           nil
+           Emerald::Types::NIL
         end)
 
         env.set 'println', (Emerald::Types::Function.from_block('println', 0..) do |env, *args|
@@ -34,7 +44,7 @@ module Emerald
           else
             puts
           end
-          nil
+           Emerald::Types::NIL
         end)
       end
     end

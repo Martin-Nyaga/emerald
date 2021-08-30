@@ -1,3 +1,10 @@
+deftype MyString
+deftype MyError Error
+deftype Person () [:name :age]
+deftype Some () [:value]
+deftype None
+deftype Option [:inner]
+
 # Try/rescue
 defn test str test_fn do
   try do

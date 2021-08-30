@@ -11,6 +11,7 @@ module Emerald
       end
 
       attr_reader :array
+
       def initialize(array)
         @array = array
       end
@@ -20,7 +21,9 @@ module Emerald
       end
 
       def ==(other)
-        array == other.array
+        Emerald::Types::Boolean.from(
+          other.is_a?(self.class) && array == other.array
+        )
       end
 
       def to_s

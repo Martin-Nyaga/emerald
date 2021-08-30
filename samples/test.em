@@ -139,5 +139,15 @@ suite (fn do
       end
       func
     end)
+
+    it "understands basic types" (fn do
+      assert (== String (type "hello"))
+      assert (== Integer (type 1))
+      assert (== Array (type [1 2 3]))
+      assert (== Function (type (fn do end)))
+      assert (== Boolean (type true))
+      assert (== Boolean (type false))
+      assert (== Nil (type nil))
+    end)
   end)
 end)

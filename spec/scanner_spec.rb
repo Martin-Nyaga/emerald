@@ -326,4 +326,12 @@ describe Emerald::Scanner do
       expect { tokenise "def @ foo" }.to raise_error(Emerald::SyntaxError)
     end
   end
+
+  context "constants" do
+    it "can tokenise constants" do
+      file, tokens = tokenise "String"
+      result = [s(:constant, "String", offset: 0)]
+      expect(tokens).to eq(result)
+    end
+  end
 end

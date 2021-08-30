@@ -35,6 +35,9 @@ module Emerald
       Emerald::Runtime.new.define_builtins(global_env)
     end
 
+    TRUE = Emerald::Types::TRUE
+    FALSE = Emerald::Types::FALSE
+    NIL = Emerald::Types::NIL
     def interprete_node(node, env)
       env.current_offset = node.offset
       case node.type
@@ -43,18 +46,18 @@ module Emerald
         node.children.map do |node|
           interprete_node(node, env)
         end.last
-      when :integer then node.child.to_i
-      when :string then node.child
-      when :symbol then node.child.to_sym
+      when :integer then Emerald::Types::Integer.new(node.child.to_i)
+      when :string then Emerald::Types::String.new(node.child)
+      when :symbol then Emerald::Types::Symbol.new(node.child.to_sym)
       when :identifier then
         if scope_distance = scoped_locals[node]
           env.get_at_distance(scope_distance, node.child)
         else
           global_env.get(node.child)
         end
-      when :true then true
-      when :false then false
-      when :nil then nil
+      when :true then TRUE
+      when :false then FALSE
+      when :nil then NIL
       when :def
         (_, (_, ident), value_node) = node
         value = interprete_node(value_node, env)
@@ -98,24 +101,33 @@ module Emerald
         interprete_node(body, env)
       when :if
         (_, condition, body, else_body) = node
-        if interprete_node(condition, env)
+        if truthy?(interprete_node(condition, env))
           interprete_node(body, env)
         else
-          else_body.any? ? interprete_node(else_body, env) : nil
+          else_body.any? ? interprete_node(else_body, env) : NIL
         end
       when :unless
         (_, condition, body, else_body) = node
-        unless interprete_node(condition, env)
-          interprete_node(body, env)
+        unless truthy?(interprete_node(condition, env))
+          result = interprete_node(body, env)
+          result
         else
-          else_body.any? ? interprete_node(else_body, env) : nil
+          else_body.any? ? interprete_node(else_body, env) : NIL
         end
+      when :constant
+        env.get_constant(node.child)
       else
         raise Emerald::NotImplementedError.new(
           "evaluation of :#{node.type} is not implemented",
           env.file,
           env.current_offset
         )
+      end
+    rescue Emerald::Error => e
+      if (e.file.nil? || e.offset.nil?)
+        raise e.class.new(e.message, env.file, env.current_offset)
+      else
+        raise
       end
     end
 
@@ -131,6 +143,10 @@ module Emerald
         result = interprete_node(body, block_env)
         result
       end
+    end
+
+    def truthy?(value)
+      !([NIL, FALSE].include?(value))
     end
 
     def clear_error
