@@ -152,7 +152,7 @@ suite (fn do
 
     it "can parse hashmaps" (fn do
       def a { :foo "bar" :baz "buz" }
-      assert (== (get a :foo) "bar")
+      assert (== (:foo a) "bar")
     end)
     
     it "skips over commas as whitespace" (fn do

@@ -8,6 +8,10 @@ module Emerald
       def assert_type(arg, type, message)
         raise Emerald::TypeError.new(message) unless arg.is_a?(type)
       end
+
+      def to_key
+        inspect
+      end
     end
 
     class Type < Base

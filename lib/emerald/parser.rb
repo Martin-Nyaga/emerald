@@ -174,11 +174,32 @@ module Emerald
     end
 
     def call_expr
+      identifier_call_expr || symbol_call_expr
+    end
+
+    def identifier_call_expr
       if match?(:identifier)
         ident = previous_token
         args = args_expr
         s(:call, ident, *args)
       end
+    end
+
+    def symbol_call_expr
+      if match?(:symbol)
+        symbol = previous_token
+        callee = symbol_callable_expr
+        if callee
+          s(:call, symbol, callee)
+        else
+          backtrack(1)
+          nil
+        end
+      end
+    end
+
+    def symbol_callable_expr
+      identifier_expr || hashmap_expr || parenthesized_expr
     end
 
     def args_expr
@@ -315,6 +336,10 @@ module Emerald
 
     def eof?
       position == tokens.length
+    end
+
+    def backtrack(n)
+      @position -= n
     end
 
     def look_ahead(n = 1)

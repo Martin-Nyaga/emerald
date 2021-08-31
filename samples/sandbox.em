@@ -1,9 +1,9 @@
-deftype MyString
-deftype MyError Error
-deftype Person () [:name :age]
-deftype Some () [:value]
-deftype None
-deftype Option [:inner]
+it "can define basic record types" (fn do
+  deftype User () [:email, :first_name, :last_name]
+  def john (User { :email "test@example.com", :first_name "John", :last_name "Doe"})
+  assert (== (:first_name john) "John")
+  assert (== (:last_name john) "Doe")
+end)
 
 # Try/rescue
 defn test str test_fn do

@@ -10,6 +10,10 @@ module Emerald
         other.is_a?(self.class) && self.sym == other.sym
       end
 
+      def to_key
+        sym
+      end
+
       def_delegators :sym, :to_s, :inspect
     end
   end

@@ -66,13 +66,17 @@ module Emerald
       when :call
         (_, fn, *args) = node
         fn = interprete_node(fn, env)
-        if fn.is_a?(Emerald::Types::Function)
+        case fn
+        when Emerald::Types::Function
           if args.length > 0
             args = args.map { |arg| interprete_node(arg, env) }
             fn.call(env, *args)
           else
             fn.call(env)
           end
+        when Emerald::Types::Symbol
+          callee = interprete_node(args[0], env)
+          callee[fn]
         else
           fn
         end

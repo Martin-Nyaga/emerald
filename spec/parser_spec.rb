@@ -51,6 +51,16 @@ describe Emerald::Parser do
             s(:identifier, "foo", offset: 0), s(:identifier, "bar", offset: 4), s(:identifier, "baz", offset: 8)))
       expect(parse src).to eq(result)
     end
+
+    it "can parse a call with a symbol" do
+      src = ":a {:a 1}"
+      result =
+        s(:block,
+          s(:call,
+            s(:symbol, "a", offset: 0),
+            s(:hashmap,  s(:symbol, "a", offset: 4), s(:integer, "1", offset: 7), offset: 4)))
+      expect(parse src).to eq(result)
+    end
   end
 
   context "multiline" do

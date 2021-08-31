@@ -5,7 +5,7 @@ module Emerald
         def define_builtins(env)
           env.set "get",
             (Emerald::Types::Function.from_block("get", 2) do |env, hashmap, key|
-              hashmap.get(key)
+              hashmap[key]
             end)
         end
       end
@@ -13,7 +13,9 @@ module Emerald
       attr_reader :hashmap
 
       def initialize(pairs)
-        @hashmap = pairs.each_cons(2).to_a.to_h
+        @hashmap = pairs.each_cons(2).to_a.map do |key, value|
+          [key.to_key, value]
+        end.to_h
       end
 
       def ==(other)
@@ -22,8 +24,8 @@ module Emerald
         )
       end
 
-      def get(key)
-        hashmap[key]
+      def [](key)
+        hashmap[key.to_key]
       end
 
       def to_s
