@@ -60,11 +60,11 @@ describe Emerald::Scanner do
     file, tokens = tokenise "foo (+ 1 1) 1"
     result = [
       s(:identifier, "foo", offset: 0),
-      s(:left_round_bracket, "(", offset: 4),
+      s(:left_paren, "(", offset: 4),
       s(:identifier, "+", offset: 5),
       s(:integer, "1", offset: 7),
       s(:integer, "1", offset: 9),
-      s(:right_round_bracket, ")", offset: 10),
+      s(:right_paren, ")", offset: 10),
       s(:integer, "1", offset: 12)
     ]
     expect(tokens).to eq(result)
@@ -80,16 +80,52 @@ describe Emerald::Scanner do
     expect(tokens).to eq(result)
   end
 
-  it "can tokenise array syntax" do
-    file, tokens = tokenise "print [1 2]"
-    result = [
-      s(:identifier, "print", offset: 0),
-      s(:left_square_bracket, "[", offset: 6),
-      s(:integer, "1", offset: 7),
-      s(:integer, "2", offset: 9),
-      s(:right_square_bracket, "]", offset: 10)
-    ]
-    expect(tokens).to eq(result)
+  context "arrays/hashmaps" do
+    it "can tokenise array syntax" do
+      file, tokens = tokenise "[1 2]"
+      result = [
+        s(:left_bracket, "[", offset: 0),
+        s(:integer, "1", offset: 1),
+        s(:integer, "2", offset: 3),
+        s(:right_bracket, "]", offset: 4)
+      ]
+      expect(tokens).to eq(result)
+    end
+
+    it "can tokenise hashmap syntax" do
+      file, tokens = tokenise "{:foo 1}"
+      result = [
+        s(:left_brace, "{", offset: 0),
+        s(:symbol, "foo", offset: 1),
+        s(:integer, "1", offset: 6),
+        s(:right_brace, "}", offset: 7)
+      ]
+      expect(tokens).to eq(result)
+    end
+
+    it "allows commas betwen array elements and discards them" do
+      file, tokens = tokenise "[1, 2]"
+      result = [
+        s(:left_bracket, "[", offset: 0),
+        s(:integer, "1", offset: 1),
+        s(:integer, "2", offset: 4),
+        s(:right_bracket, "]", offset: 5)
+      ]
+      expect(tokens).to eq(result)
+    end
+
+    it "allows commas betwen hashmap key value pairs and discards them" do
+      file, tokens = tokenise "{:foo 1, :bar 2}"
+      result = [
+        s(:left_brace, "{", offset: 0),
+        s(:symbol, "foo", offset: 1),
+        s(:integer, "1", offset: 6),
+        s(:symbol, "bar", offset: 9),
+        s(:integer, "2", offset: 14),
+        s(:right_brace, "}", offset: 15)
+      ]
+      expect(tokens).to eq(result)
+    end
   end
 
   context "functions" do

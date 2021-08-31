@@ -3,6 +3,7 @@ module Emerald
     def define_builtins(env)
       env.set_constant "String", Emerald::Types::String
       env.set_constant "Array", Emerald::Types::Array
+      env.set_constant "Hashmap", Emerald::Types::Hashmap
       env.set_constant "Integer", Emerald::Types::Integer
       env.set_constant "Symbol", Emerald::Types::Symbol
       env.set_constant "Boolean", Emerald::Types::Boolean
@@ -16,6 +17,7 @@ module Emerald
       Math.define_builtins(env)
       IO.define_builtins(env)
       Emerald::Types::Array.define_builtins(env)
+      Emerald::Types::Hashmap.define_builtins(env)
       Error.define_builtins(env)
     end
 

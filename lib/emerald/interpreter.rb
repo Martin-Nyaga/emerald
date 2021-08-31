@@ -78,6 +78,8 @@ module Emerald
         end
       when :array
         Emerald::Types::Array.new(node.children.map { |e| interprete_node(e, env) })
+      when :hashmap
+        Emerald::Types::Hashmap.new(node.children.map { |e| interprete_node(e, env) })
       when :fn
         (_, params, body) = node
         define_function(env, "anonymous", params, body)

@@ -18,7 +18,7 @@ module Emerald
 
     def resolve_node(node)
       case node.type
-      when :array
+      when :array, :hashmap
         (_, *elements) = node
         elements.map do |node|
           resolve_node(node)

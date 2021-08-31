@@ -102,6 +102,28 @@ describe Emerald::Parser do
     end
   end
 
+  context "hashmap" do
+    it "can parse hashmap syntax" do
+      src = "print { :foo 1 }"
+      result =
+        s(:block,
+          s(:call,
+            s(:identifier, "print", offset: 0),
+            s(:hashmap, s(:symbol, "foo", offset: 8), s(:integer, "1", offset: 13))))
+      expect(parse src).to eq(result)
+    end
+
+    it "raises a syntax error for unclosed brace" do
+      src = "foo {"
+      expect { parse src }.to raise_error(Emerald::SyntaxError)
+    end
+
+    it "raises a syntax error for incomplete key-value pair" do
+      src = "{ :foo }"
+      expect { parse src }.to raise_error(Emerald::SyntaxError)
+    end
+  end
+
   context "functions" do
     it "can parse a single line anonymous function definition" do
       src = "fn a -> print a"

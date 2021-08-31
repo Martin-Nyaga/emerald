@@ -4,7 +4,7 @@ module Emerald
       class << self
         def define_builtins(env)
           env.set("map",
-            Emerald::Types::Function.from_block("map", 2) do |fenv, fn, arr|
+            Emerald::Types::Function.from_block("map", 2) do |env, fn, arr|
               arr.map { |el| fn.call(env, el) }
             end)
         end
@@ -27,7 +27,7 @@ module Emerald
       end
 
       def to_s
-        "[" + array.map(&:to_s).join(" ") +  "]"
+        "[" + array.map(&:inspect).join(" ") +  "]"
       end
       alias inspect to_s
     end

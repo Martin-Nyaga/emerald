@@ -149,5 +149,15 @@ suite (fn do
       assert (== Boolean (type false))
       assert (== Nil (type nil))
     end)
+
+    it "can parse hashmaps" (fn do
+      def a { :foo "bar" :baz "buz" }
+      assert (== (get a :foo) "bar")
+    end)
+    
+    it "skips over commas as whitespace" (fn do
+      def a { :foo "bar", :baz "buz" }
+      def b [1, 2, 3, 4]
+    end)
   end)
 end)

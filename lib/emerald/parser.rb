@@ -191,7 +191,8 @@ module Emerald
 
     def terminal_expr
       identifier_expr || boolean_expr || nil_expr || integer_expr ||
-      parenthesized_expr || array_expr || string_expr || symbol_expr || constant_expr
+      parenthesized_expr || array_expr || hashmap_expr || string_expr ||
+      symbol_expr || constant_expr
     end
 
     def boolean_expr
@@ -215,21 +216,41 @@ module Emerald
     end
 
     def parenthesized_expr
-      if match?(:left_round_bracket)
+      if match?(:left_paren)
         ast = expr
-        consume!(:right_round_bracket, ")")
+        consume!(:right_paren, ")")
         ast
       end
     end
 
     def array_expr
-      if match?(:left_square_bracket)
+      if match?(:left_bracket)
         elements = []
         while result = terminal_expr
           elements << result
         end
-        consume!(:right_square_bracket, "]")
+        consume!(:right_bracket, "]")
         s(:array, *elements)
+      end
+    end
+
+    def hashmap_expr
+      if match?(:left_brace)
+        pairs = []
+        while pair = key_value_pair_expr
+          key, value = pair
+          pairs << key
+          pairs << value
+        end
+        consume!(:right_brace, "}")
+        s(:hashmap, *pairs)
+      end
+    end
+
+    def key_value_pair_expr
+      if key = terminal_expr
+        value = require_expr!(terminal_expr, "value")
+        [key, value]
       end
     end
 
@@ -271,16 +292,6 @@ module Emerald
     def check?(type)
       return false if eof?
       current_token.match?(type)
-    end
-
-    def terminal?(token)
-      case token.type
-      when :identifier, :true, :false, :nil, :integer, :left_round_bracket,
-            :left_square_bracket, :string, :symbol
-        true
-      else
-        false
-      end
     end
 
     def advance

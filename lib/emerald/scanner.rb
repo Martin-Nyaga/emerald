@@ -84,15 +84,18 @@ module Emerald
 
     TokenType.new(:comment, /\A#.*/),
     TokenType.new(:newline, /\A[\n]|\A[\r\n]/),
-    TokenType.new(:left_round_bracket, /\A\(/),
-    TokenType.new(:right_round_bracket, /\A\)/),
-    TokenType.new(:left_square_bracket, /\A\[/),
-    TokenType.new(:right_square_bracket, /\A\]/),
+    TokenType.new(:left_paren, /\A\(/),
+    TokenType.new(:right_paren, /\A\)/),
+    TokenType.new(:left_bracket, /\A\[/),
+    TokenType.new(:right_bracket, /\A\]/),
+    TokenType.new(:left_brace, /\A\{/),
+    TokenType.new(:right_brace, /\A\}/),
     TokenType.new(:arrow, /\A->/),
+    TokenType.new(:comma, /\A,/),
     TokenType.new(:space, /\A[ \t]/)
   ]
 
-  SKIP_TOKENS = Set[:space, :comment]
+  SKIP_TOKENS = Set[:space, :comment, :comma]
   class Scanner
     attr_reader :file
     attr_accessor :src, :offset

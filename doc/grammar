@@ -18,7 +18,7 @@ call             -> identifier args
 args             -> terminal (terminal)*
 if               -> :if (terminal | call) (single_line_body | multiline_body_with_possible_else)
 unless           -> :unless (terminal | call) (single_line_body | multiline_body_with_possible_else)
-terminal         -> identifier | integer | boolean | nil | parenthesized | array | string | symbol | constant
+terminal         -> identifier | integer | boolean | nil | parenthesized | array | hashmap | string | symbol | constant
 identifier       -> :identifier
 boolean          -> :true | :false
 string           -> :string
@@ -26,5 +26,6 @@ symbol           -> :symbol
 constant         -> :constant
 nil              -> :nil
 newline          -> :newline
-parenthesized    -> :left_round_bracket call :right_round_bracket
-array            -> :left_square_bracket terminal* right_square_bracket
+parenthesized    -> :left_paren call :right_paren
+array            -> :left_bracket terminal* right_bracket
+hashmap          -> :left_brace (terminal terminal)* right_brace

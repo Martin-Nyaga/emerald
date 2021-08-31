@@ -26,6 +26,7 @@ module Emerald
 
     autoload :Array, "emerald/types/array"
     autoload :Function, "emerald/types/function"
+    autoload :Hashmap, "emerald/types/hashmap"
     autoload :Integer, "emerald/types/integer"
     autoload :String, "emerald/types/string"
     autoload :Symbol, "emerald/types/symbol"
