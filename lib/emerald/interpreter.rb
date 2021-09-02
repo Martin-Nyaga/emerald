@@ -35,9 +35,9 @@ module Emerald
       Emerald::Runtime.new.define_builtins(global_env)
     end
 
-    TRUE = Emerald::Types::TRUE
-    FALSE = Emerald::Types::FALSE
-    NIL = Emerald::Types::NIL
+    EM_TRUE = Emerald::Types::TRUE
+    EM_FALSE = Emerald::Types::FALSE
+    EM_NIL = Emerald::Types::NIL
     def interprete_node(node, env)
       env.current_offset = node.offset
       case node.type
@@ -55,9 +55,9 @@ module Emerald
         else
           global_env.get(node.child)
         end
-      when :true then TRUE
-      when :false then FALSE
-      when :nil then NIL
+      when :true then EM_TRUE
+      when :false then EM_FALSE
+      when :nil then EM_NIL
       when :def
         (_, (_, ident), value_node) = node
         value = interprete_node(value_node, env)
@@ -110,7 +110,7 @@ module Emerald
         if truthy?(interprete_node(condition, env))
           interprete_node(body, env)
         else
-          else_body.any? ? interprete_node(else_body, env) : NIL
+          else_body.any? ? interprete_node(else_body, env) : EM_NIL
         end
       when :unless
         (_, condition, body, else_body) = node
@@ -118,7 +118,7 @@ module Emerald
           result = interprete_node(body, env)
           result
         else
-          else_body.any? ? interprete_node(else_body, env) : NIL
+          else_body.any? ? interprete_node(else_body, env) : EM_NIL
         end
       when :constant
         env.get_constant(node.child)
@@ -164,7 +164,7 @@ module Emerald
     end
 
     def truthy?(value)
-      !([NIL, FALSE].include?(value))
+      !([EM_NIL, EM_FALSE].include?(value))
     end
 
     def clear_error
