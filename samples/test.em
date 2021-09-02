@@ -151,12 +151,12 @@ suite (fn do
     end)
 
     it "can parse hashmaps" (fn do
-      def a { :foo "bar" :baz "buz" }
+      def a {:foo "bar" :baz "buz"}
       assert (== (:foo a) "bar")
     end)
     
     it "skips over commas as whitespace" (fn do
-      def a { :foo "bar", :baz "buz" }
+      def a {:foo "bar", :baz "buz"}
       def b [1, 2, 3, 4]
     end)
   end)

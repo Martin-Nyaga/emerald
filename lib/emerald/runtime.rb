@@ -9,6 +9,7 @@ module Emerald
       env.set_constant "Boolean", Emerald::Types::Boolean
       env.set_constant "Nil", Emerald::Types::Nil
       env.set_constant "Function", Emerald::Types::Function
+      env.set_constant "Error", Emerald::Types::Error
 
       env.set "type", (Emerald::Types::Function.from_block('type', 1) do |env, value|
         Emerald::Types::Type.new(value.class)
@@ -18,7 +19,7 @@ module Emerald
       IO.define_builtins(env)
       Emerald::Types::Array.define_builtins(env)
       Emerald::Types::Hashmap.define_builtins(env)
-      Error.define_builtins(env)
+      Emerald::Types::Error.define_builtins(env)
     end
 
     class Math

@@ -55,13 +55,6 @@ module Emerald
         padding + line
       end.join("\n")
     end
-
-    def self.define_builtins(env)
-        env.set "raise",
-          Emerald::Types::Function.from_lambda('raise', -> (env, message) {
-            raise Emerald::RuntimeError.new(message.str, env.file, env.current_offset)
-          })
-    end
   end
 
   class SyntaxError < Error; end

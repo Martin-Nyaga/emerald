@@ -1,6 +1,11 @@
+it "can define a subtype of another type" (fn do
+  deftype MyError Error
+  assert (== (type Error)
+end)
+
 it "can define basic record types" (fn do
-  deftype User () [:email, :first_name, :last_name]
-  def john (User { :email "test@example.com", :first_name "John", :last_name "Doe"})
+  deftype User [:email, :first_name, :last_name]
+  def john (User {:email "test@example.com", :first_name "John", :last_name "Doe"})
   assert (== (:first_name john) "John")
   assert (== (:last_name john) "Doe")
 end)
