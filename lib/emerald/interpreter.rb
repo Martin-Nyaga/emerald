@@ -49,7 +49,7 @@ module Emerald
       when :integer then Emerald::Types::Integer.new(node.child.to_i)
       when :string then Emerald::Types::String.new(node.child)
       when :symbol then Emerald::Types::Symbol.new(node.child.to_sym)
-      when :identifier then
+      when :identifier
         if scope_distance = scoped_locals[node]
           env.get_at_distance(scope_distance, node.child)
         else
@@ -114,12 +114,14 @@ module Emerald
         end
       when :unless
         (_, condition, body, else_body) = node
+        # standard:disable Style/UnlessElse
         unless truthy?(interprete_node(condition, env))
           result = interprete_node(body, env)
           result
         else
           else_body.any? ? interprete_node(else_body, env) : EM_NIL
         end
+        # standard:enable Style/UnlessElse
       when :constant
         env.get_constant(node.child)
       when :deftype
@@ -173,7 +175,7 @@ module Emerald
 
     def handle_error(e)
       @had_error = true
-      STDERR.puts e.to_s
+      $stderr.puts e.to_s # standard:disable Style/StderrPuts
       exit 1 if exit_on_error
     end
   end
