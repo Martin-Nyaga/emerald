@@ -9,7 +9,7 @@ describe Emerald::Parser do
 
   context "empty" do
     it "can parse an empty list of tokens" do
-      expect(parse "").to eq(s(:block))
+      expect(parse("")).to eq(s(:block))
     end
   end
 
@@ -17,19 +17,19 @@ describe Emerald::Parser do
     it "can parse an integer" do
       src = "1"
       result = s(:block, s(:integer, "1", offset: 0))
-      expect(parse src).to eq(result)
+      expect(parse(src)).to eq(result)
     end
 
     it "can parse a string" do
       src = %( "hello world" )
       result = s(:block, s(:string, "hello world", offset: 1))
-      expect(parse src).to eq(result)
+      expect(parse(src)).to eq(result)
     end
 
     it "can parse a symbol" do
       src = ":foo"
       result = s(:block, s(:symbol, "foo", offset: 0))
-      expect(parse src).to eq(result)
+      expect(parse(src)).to eq(result)
     end
   end
 
@@ -40,7 +40,7 @@ describe Emerald::Parser do
         s(:block,
           s(:call,
             s(:identifier, "foo", offset: 0), s(:integer, "1", offset: 4), s(:integer, "1", offset: 6)))
-      expect(parse src).to eq(result)
+      expect(parse(src)).to eq(result)
     end
 
     it "can parse a call with identifiers" do
@@ -49,7 +49,7 @@ describe Emerald::Parser do
         s(:block,
           s(:call,
             s(:identifier, "foo", offset: 0), s(:identifier, "bar", offset: 4), s(:identifier, "baz", offset: 8)))
-      expect(parse src).to eq(result)
+      expect(parse(src)).to eq(result)
     end
 
     it "can parse a call with a symbol" do
@@ -58,8 +58,8 @@ describe Emerald::Parser do
         s(:block,
           s(:call,
             s(:symbol, "a", offset: 0),
-            s(:hashmap,  s(:symbol, "a", offset: 4), s(:integer, "1", offset: 7), offset: 4)))
-      expect(parse src).to eq(result)
+            s(:hashmap, s(:symbol, "a", offset: 4), s(:integer, "1", offset: 7), offset: 4)))
+      expect(parse(src)).to eq(result)
     end
   end
 
@@ -70,7 +70,7 @@ describe Emerald::Parser do
         s(:block,
           s(:call, s(:identifier, "foo", offset: 0), s(:integer, "1", offset: 4), s(:integer, "1", offset: 6)),
           s(:call, s(:identifier, "bar", offset: 8), s(:integer, "1", offset: 12), s(:integer, "1", offset: 14)))
-      expect(parse src).to eq(result)
+      expect(parse(src)).to eq(result)
     end
   end
 
@@ -82,7 +82,7 @@ describe Emerald::Parser do
           s(:call, s(:identifier, "foo", offset: 0),
             s(:call, s(:identifier, "+", offset: 5), s(:integer, "1", offset: 7), s(:integer, "1", offset: 9)),
             s(:integer, "1", offset: 12)))
-      expect(parse src).to eq(result)
+      expect(parse(src)).to eq(result)
     end
 
     it "raises a syntax error for unclosed parens" do
@@ -95,7 +95,7 @@ describe Emerald::Parser do
     it "can parse a definition call" do
       src = "def foo 12"
       result = s(:block, s(:def, s(:identifier, "foo", offset: 4), s(:integer, "12", offset: 8)))
-      expect(parse src).to eq(result)
+      expect(parse(src)).to eq(result)
     end
   end
 
@@ -103,7 +103,7 @@ describe Emerald::Parser do
     it "can parse array syntax" do
       src = "print [1 2]"
       result = s(:block, s(:call, s(:identifier, "print", offset: 0), s(:array, s(:integer, "1", offset: 7), s(:integer, "2", offset: 9))))
-      expect(parse src).to eq(result)
+      expect(parse(src)).to eq(result)
     end
 
     it "raises a syntax error for unclosed square brackets" do
@@ -120,7 +120,7 @@ describe Emerald::Parser do
           s(:call,
             s(:identifier, "print", offset: 0),
             s(:hashmap, s(:symbol, "foo", offset: 8), s(:integer, "1", offset: 13))))
-      expect(parse src).to eq(result)
+      expect(parse(src)).to eq(result)
     end
 
     it "raises a syntax error for unclosed brace" do
@@ -141,7 +141,7 @@ describe Emerald::Parser do
         s(:fn,
           s(:params, s(:identifier, "a", offset: 3)),
           s(:block, s(:call, s(:identifier, "print", offset: 8), s(:identifier, "a", offset: 14)))))
-      expect(parse src).to eq(result)
+      expect(parse(src)).to eq(result)
     end
 
     it "can parse a single line named function definition" do
@@ -151,7 +151,7 @@ describe Emerald::Parser do
           s(:identifier, "say", offset: 5),
           s(:params, s(:identifier, "a", offset: 9)),
           s(:block, s(:call, s(:identifier, "print", offset: 14), s(:identifier, "a", offset: 20)))))
-      expect(parse src).to eq(result)
+      expect(parse(src)).to eq(result)
     end
 
     it "can parse a multi-line anonymous function definition" do
@@ -162,7 +162,7 @@ describe Emerald::Parser do
           s(:block,
             s(:call, s(:identifier, "print", offset: 11), s(:identifier, "a", offset: 17)),
             s(:call, s(:identifier, "print", offset: 19), s(:identifier, "b", offset: 25)))))
-      expect(parse src).to eq(result)
+      expect(parse(src)).to eq(result)
     end
 
     it "can parse a multi-line named function definition" do
@@ -170,11 +170,11 @@ describe Emerald::Parser do
       result = s(:block,
         s(:defn,
           s(:identifier, "say", offset: 5),
-          s(:params, s(:identifier, "a", offset: 9), s(:identifier, "b",  offset: 11)),
+          s(:params, s(:identifier, "a", offset: 9), s(:identifier, "b", offset: 11)),
           s(:block,
             s(:call, s(:identifier, "print", offset: 17), s(:identifier, "a", offset: 23)),
             s(:call, s(:identifier, "print", offset: 27), s(:identifier, "b", offset: 33)))))
-      expect(parse src).to eq(result)
+      expect(parse(src)).to eq(result)
     end
 
     it "raises a syntax error for do without end" do
@@ -203,7 +203,7 @@ describe Emerald::Parser do
               s(:when,
                 s(:call, s(:identifier, "<", offset: 32), s(:integer, "0", offset: 34), s(:identifier, "a", offset: 36)),
                 s(:block, s(:call, s(:identifier, "raise", offset: 41), s(:string, "foo", offset: 47)))))))
-      expect(parse src).to eq(result)
+      expect(parse(src)).to eq(result)
     end
 
     it "can parse a function guard with an else clause" do
@@ -217,9 +217,9 @@ describe Emerald::Parser do
                 s(:call, s(:identifier, ">", offset: 10), s(:integer, "0", offset: 12), s(:identifier, "a", offset: 14)),
                 s(:block, s(:call, s(:identifier, "print", offset: 19), s(:identifier, "a", offset: 25)))),
               s(:when,
-                s(:true, "else", offset:27),
+                s(:true, "else", offset: 27),
                 s(:block, s(:call, s(:identifier, "raise", offset: 35), s(:string, "foo", offset: 41)))))))
-      expect(parse src).to eq(result)
+      expect(parse(src)).to eq(result)
     end
   end
 
@@ -227,19 +227,19 @@ describe Emerald::Parser do
     it "can parse true" do
       src = "true"
       result = s(:block, s(:true, "true", offset: 0))
-      expect(parse src).to eq(result)
+      expect(parse(src)).to eq(result)
     end
 
     it "can parse false" do
       src = "false"
       result = s(:block, s(:false, "false", offset: 0))
-      expect(parse src).to eq(result)
+      expect(parse(src)).to eq(result)
     end
 
     it "can parse nil" do
       src = "nil"
       result = s(:block, s(:nil, "nil", offset: 0))
-      expect(parse src).to eq(result)
+      expect(parse(src)).to eq(result)
     end
   end
 
@@ -250,7 +250,7 @@ describe Emerald::Parser do
         s(:if, s(:true, "true", offset: 3),
           s(:block, s(:call, s(:identifier, "print", offset: 12), s(:identifier, "a", offset: 18))),
           s(:block)))
-      expect(parse src).to eq(result)
+      expect(parse(src)).to eq(result)
     end
 
     it "can parse a multiline if else" do
@@ -259,7 +259,7 @@ describe Emerald::Parser do
         s(:if, s(:true, "true", offset: 3),
           s(:block, s(:call, s(:identifier, "print", offset: 12), s(:identifier, "a", offset: 18))),
           s(:block, s(:call, s(:identifier, "print", offset: 27), s(:identifier, "b", offset: 33)))))
-      expect(parse src).to eq(result)
+      expect(parse(src)).to eq(result)
     end
 
     it "can parse a single line if statement" do
@@ -268,7 +268,7 @@ describe Emerald::Parser do
         s(:if, s(:true, "true", offset: 3),
           s(:block, s(:call, s(:identifier, "print", offset: 11), s(:identifier, "a", offset: 17))),
           s(:block)))
-      expect(parse src).to eq(result)
+      expect(parse(src)).to eq(result)
     end
 
     it "can parse a multiline unless statement" do
@@ -277,7 +277,7 @@ describe Emerald::Parser do
         s(:unless, s(:true, "true", offset: 7),
           s(:block, s(:call, s(:identifier, "print", offset: 16), s(:identifier, "a", offset: 22))),
           s(:block)))
-      expect(parse src).to eq(result)
+      expect(parse(src)).to eq(result)
     end
 
     it "can parse a multiline unless else" do
@@ -286,7 +286,7 @@ describe Emerald::Parser do
         s(:unless, s(:true, "true", offset: 7),
           s(:block, s(:call, s(:identifier, "print", offset: 16), s(:identifier, "a", offset: 22))),
           s(:block, s(:call, s(:identifier, "print", offset: 31), s(:identifier, "b", offset: 37)))))
-      expect(parse src).to eq(result)
+      expect(parse(src)).to eq(result)
     end
 
     it "can parse a single line unless statement" do
@@ -296,7 +296,7 @@ describe Emerald::Parser do
           s(:unless, s(:true, "true", offset: 7),
             s(:block, s(:call, s(:identifier, "print", offset: 15), s(:identifier, "a", offset: 21))),
             s(:block)))
-      expect(parse src).to eq(result)
+      expect(parse(src)).to eq(result)
     end
 
     it "raises a syntax error for do without end" do
@@ -308,7 +308,6 @@ describe Emerald::Parser do
 
       src = "unless bar do baz else"
       expect { parse src }.to raise_error(Emerald::SyntaxError)
-
     end
 
     it "raises a syntax error for single line function if/unless a body" do
@@ -324,7 +323,7 @@ describe Emerald::Parser do
     it "can parse constants" do
       src = "String"
       result = s(:block, s(:constant, "String", offset: 0))
-      expect(parse src).to eq(result)
+      expect(parse(src)).to eq(result)
     end
   end
 
@@ -332,7 +331,7 @@ describe Emerald::Parser do
     it "can parse an empty type definition" do
       src = "deftype MyError"
       result = s(:block, s(:deftype, s(:constant, "MyError", offset: 8), offset: 0))
-      expect(parse src).to eq(result)
+      expect(parse(src)).to eq(result)
     end
   end
 end

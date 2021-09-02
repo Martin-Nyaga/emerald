@@ -38,7 +38,7 @@ module Emerald
       end
 
       def ==(other)
-        other.is_a?(self.class) && self.type == other.type
+        other.is_a?(self.class) && type == other.type
       end
 
       def_delegators :type, :to_s, :inspect

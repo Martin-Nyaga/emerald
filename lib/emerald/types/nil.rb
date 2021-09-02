@@ -7,7 +7,7 @@ module Emerald
         "nil"
       end
 
-      alias inspect to_s
+      alias_method :inspect, :to_s
     end
   end
 end

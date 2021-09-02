@@ -4,10 +4,10 @@ module Emerald
   class TokenType
     attr_reader :type, :pattern, :is_keyword, :match_extractor
     def initialize(type, pattern, is_keyword = false, &match_extractor)
-      @type            = type
-      @pattern         = pattern
-      @is_keyword      = is_keyword
-      @match_extractor = match_extractor || -> (m) { m[0] }
+      @type = type
+      @pattern = pattern
+      @is_keyword = is_keyword
+      @match_extractor = match_extractor || ->(m) { m[0] }
     end
 
     def match(str, file, offset)
@@ -20,8 +20,6 @@ module Emerald
           offset,
           match_extractor
         )
-      else
-        nil
       end
     end
   end
@@ -36,11 +34,11 @@ module Emerald
       offset,
       match_extractor
     )
-      @type       = type
-      @matchdata  = matchdata
+      @type = type
+      @matchdata = matchdata
       @is_keyword = is_keyword
-      @file       = file
-      @offset     = offset
+      @file = file
+      @offset = offset
       @match_extractor = match_extractor
     end
 
@@ -78,7 +76,7 @@ module Emerald
     TokenType.new(:when, /\Awhen/, true),
 
     # Other words
-    TokenType.new(:identifier, /\A[\+\-\/\*%]|\A[><]=?|\A==|\A[a-z]+[a-zA-Z_0-9]*\??/),
+    TokenType.new(:identifier, /\A[+\-\/*%]|\A[><]=?|\A==|\A[a-z]+[a-zA-Z_0-9]*\??/),
     TokenType.new(:constant, /\A[A-Z]+[a-zA-Z_0-9]*/),
     TokenType.new(:integer, /\A[0-9]+/),
     TokenType.new(:string, /\A"([^"]*)"/) { _1[1] },
@@ -86,7 +84,7 @@ module Emerald
 
     # Punctuation
     TokenType.new(:comment, /\A#.*/),
-    TokenType.new(:newline, /\A[\n]|\A[\r\n]/),
+    TokenType.new(:newline, /\A\n|\A[\r\n]/),
     TokenType.new(:left_paren, /\A\(/),
     TokenType.new(:right_paren, /\A\)/),
     TokenType.new(:left_bracket, /\A\[/),
@@ -124,6 +122,7 @@ module Emerald
     end
 
     private
+
     def sorted_matches
       TOKEN_TYPES.filter_map do |type|
         type.match(src, file, offset)
@@ -131,11 +130,11 @@ module Emerald
     end
 
     def raise_syntax_error
-        raise Emerald::SyntaxError.new(
-          "Unexpected input `#{src[0]}`",
-          file,
-          offset
-        )
+      raise Emerald::SyntaxError.new(
+        "Unexpected input `#{src[0]}`",
+        file,
+        offset
+      )
     end
   end
 end

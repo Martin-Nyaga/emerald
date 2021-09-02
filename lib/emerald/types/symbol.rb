@@ -7,7 +7,7 @@ module Emerald
       end
 
       def ==(other)
-        other.is_a?(self.class) && self.sym == other.sym
+        other.is_a?(self.class) && sym == other.sym
       end
 
       def to_key

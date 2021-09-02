@@ -12,7 +12,7 @@ module Emerald
       env.set_constant "Function", Emerald::Types::Function
       env.set_constant "Error", Emerald::Types::Error
 
-      env.set "type", (Emerald::Types::Function.from_block('type', 1) do |env, value|
+      env.set "type", (Emerald::Types::Function.from_block("type", 1) do |env, value|
         if value.is_a?(Class)
           Emerald::Types::Type.new(Emerald::Types::Type)
         else
@@ -40,19 +40,19 @@ module Emerald
 
     class IO
       def self.define_builtins(env)
-        env.set 'print', (Emerald::Types::Function.from_block('print', 0..) do |env, *vals|
-           print *vals
-           Emerald::Types::NIL
+        env.set "print", (Emerald::Types::Function.from_block("print", 0..) do |env, *vals|
+          print(*vals)
+          Emerald::Types::NIL
         end)
 
-        env.set 'println', (Emerald::Types::Function.from_block('println', 0..) do |env, *args|
+        env.set "println", (Emerald::Types::Function.from_block("println", 0..) do |env, *args|
           if args.length > 0
-            print *args
+            print(*args)
             puts
           else
             puts
           end
-           Emerald::Types::NIL
+          Emerald::Types::NIL
         end)
       end
     end

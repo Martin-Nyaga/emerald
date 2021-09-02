@@ -20,15 +20,17 @@ module Emerald
       end
 
       def call(env, *args)
-        raise Emerald::ArgumentError.new(
-          "Invalid number of arguments for #{inspect}, expected #{arity.inspect}, got #{args.count}",
-          env.file,
-          env.current_offset
-        ) unless arity.valid?(args.count)
+        unless arity.valid?(args.count)
+          raise Emerald::ArgumentError.new(
+            "Invalid number of arguments for #{inspect}, expected #{arity.inspect}, got #{args.count}",
+            env.file,
+            env.current_offset
+          )
+        end
 
         callable.call(env, *args)
       end
-      alias [] call
+      alias_method :[], :call
 
       def inspect
         "<fn: #{name} (#{arity.inspect})>"
@@ -48,11 +50,12 @@ module Emerald
         end
 
         private
-          attr_reader :arity
 
-          def one?
-            arity.begin == arity.end
-          end
+        attr_reader :arity
+
+        def one?
+          arity.begin == arity.end
+        end
       end
     end
   end

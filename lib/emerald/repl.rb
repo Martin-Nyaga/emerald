@@ -7,7 +7,7 @@ module Emerald
       while program = Readline.readline("iem> ", true)
         file = Emerald::Files::ScriptFile.new(program)
         result = interpreter.interprete(file)
-        puts "=> #{result.to_s}" unless interpreter.had_error?
+        puts "=> #{result}" unless interpreter.had_error?
       end
     end
   end

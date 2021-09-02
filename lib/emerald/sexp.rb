@@ -17,7 +17,7 @@ module Emerald
 
     def offset
       return @offset unless @offset.nil?
-      if child = children.detect { |child| child.offset != nil }
+      if child = children.detect { |child| !child.offset.nil? }
         return child.offset
       end
       nil

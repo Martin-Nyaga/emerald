@@ -7,7 +7,7 @@ module Emerald
       end
 
       def ==(other)
-        other.is_a?(self.class) && self.str == other.str
+        other.is_a?(self.class) && str == other.str
       end
 
       def_delegators :str, :to_s, :inspect

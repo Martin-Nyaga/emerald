@@ -53,9 +53,9 @@ module Emerald
 
     def defn_expr
       if match?(:defn)
-        ident  = require_expr!(identifier_expr, "identifier")
+        ident = require_expr!(identifier_expr, "identifier")
         params = parameters_expr
-        body   = require_expr!(fn_body_expr, "function body")
+        body = require_expr!(fn_body_expr, "function body")
         s(:defn, ident, params, body)
       end
     end
@@ -63,7 +63,7 @@ module Emerald
     def fn_expr
       if match?(:fn)
         params = parameters_expr
-        body   = require_expr!(fn_body_expr, "function body")
+        body = require_expr!(fn_body_expr, "function body")
         s(:fn, params, body)
       end
     end
@@ -104,7 +104,7 @@ module Emerald
       if check_over?(:newline, for_type: :when)
         ast = s(:guards)
         while check_over?(:newline, for_type: :when) ||
-              check_over?(:newline, for_type: :else)
+            check_over?(:newline, for_type: :else)
           skip(:newline)
           ast << require_expr!(when_expr, "when expression")
         end
@@ -220,8 +220,8 @@ module Emerald
 
     def terminal_expr
       identifier_expr || boolean_expr || nil_expr || integer_expr ||
-      parenthesized_expr || array_expr || hashmap_expr || string_expr ||
-      symbol_expr || constant_expr
+        parenthesized_expr || array_expr || hashmap_expr || string_expr ||
+        symbol_expr || constant_expr
     end
 
     def boolean_expr
@@ -291,7 +291,8 @@ module Emerald
       return previous_token if match?(:symbol)
     end
 
-  private
+    private
+
     def previous_token
       tokens[position - 1]
     end
@@ -330,11 +331,13 @@ module Emerald
 
     def consume!(type, expected_text)
       assert_not_eof!
-      raise SyntaxError.new(
-        "Expected #{expected_text}, got #{current_text}",
-        file,
-        position
-      ) unless match?(type)
+      unless match?(type)
+        raise SyntaxError.new(
+          "Expected #{expected_text}, got #{current_text}",
+          file,
+          position
+        )
+      end
       previous_token
     end
 
@@ -375,11 +378,13 @@ module Emerald
     end
 
     def require_expr!(expr, expected_text)
-      raise Emerald::SyntaxError.new(
-        "Expected #{expected_text}, got #{current_text}",
-        file,
-        position
-      ) if expr.nil?
+      if expr.nil?
+        raise Emerald::SyntaxError.new(
+          "Expected #{expected_text}, got #{current_text}",
+          file,
+          position
+        )
+      end
       expr
     end
   end

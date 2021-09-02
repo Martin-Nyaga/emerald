@@ -29,6 +29,7 @@ module Emerald
     end
 
     private
+
     attr_reader :scoped_locals
 
     def define_builtins
@@ -116,8 +117,8 @@ module Emerald
         (_, condition, body, else_body) = node
         # standard:disable Style/UnlessElse
         unless truthy?(interprete_node(condition, env))
-          result = interprete_node(body, env)
-          result
+          interprete_node(body, env)
+
         else
           else_body.any? ? interprete_node(else_body, env) : EM_NIL
         end
@@ -144,7 +145,7 @@ module Emerald
         )
       end
     rescue Emerald::Error => e
-      if (e.file.nil? || e.offset.nil?)
+      if e.file.nil? || e.offset.nil?
         raise e.class.new(e.message, env.file, env.current_offset)
       else
         raise
@@ -166,7 +167,7 @@ module Emerald
     end
 
     def truthy?(value)
-      !([EM_NIL, EM_FALSE].include?(value))
+      ![EM_NIL, EM_FALSE].include?(value)
     end
 
     def clear_error

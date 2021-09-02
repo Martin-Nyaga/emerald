@@ -14,6 +14,7 @@ module Emerald
     end
 
     private
+
     attr_reader :scopes
 
     def resolve_node(node)
@@ -109,7 +110,7 @@ module Emerald
     end
 
     def resolve_local(node, name)
-      scopes.each_with_index.to_a.reverse.each do |scope, index|
+      scopes.each_with_index.to_a.reverse_each do |scope, index|
         if scope.key?(name)
           locals[node] = scopes.size - index - 1
         end
@@ -117,4 +118,3 @@ module Emerald
     end
   end
 end
-

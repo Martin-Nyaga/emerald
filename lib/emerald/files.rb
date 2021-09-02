@@ -14,7 +14,7 @@ module Emerald
         LineContext.new(
           file: self,
           line_number: line_number(offset),
-          offset: offset,
+          offset: offset
         ).to_s
       end
 
@@ -65,6 +65,7 @@ module Emerald
         end
 
         private
+
         attr_reader :file, :line, :offset, :previous_line, :line_number, :padding
 
         def previous_line_text
@@ -73,7 +74,7 @@ module Emerald
         end
 
         def current_line_text
-          padded_line_number(line_number) + "| " + current_line_context  + "\n"
+          padded_line_number(line_number) + "| " + current_line_context + "\n"
         end
 
         def context_pointer_text
@@ -82,8 +83,8 @@ module Emerald
           arrow_up = empty_prefix_space + "^"
           here_text = empty_prefix_space + "here"
 
-          padded_line_number("") + "| " + arrow_up  + "\n" +
-          padded_line_number("") + "  " + here_text + "\n"
+          padded_line_number("") + "| " + arrow_up + "\n" +
+            padded_line_number("") + "  " + here_text + "\n"
         end
 
         def current_line_context

@@ -58,10 +58,16 @@ module Emerald
   end
 
   class SyntaxError < Error; end
+
   class ArgumentError < Error; end
+
   class NameError < Error; end
+
   class RuntimeError < Error; end
+
   class TypeError < Error; end
+
   class NotImplementedError < Error; end
+
   class NoMatchingGuardError < Error; end
 end

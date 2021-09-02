@@ -18,7 +18,7 @@ module Emerald
           "true"
         end
 
-        alias inspect to_s
+        alias_method :inspect, :to_s
       end
 
       class False < Base
@@ -28,7 +28,7 @@ module Emerald
           "false"
         end
 
-        alias inspect to_s
+        alias_method :inspect, :to_s
       end
     end
   end
