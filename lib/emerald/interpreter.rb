@@ -122,6 +122,18 @@ module Emerald
         end
       when :constant
         env.get_constant(node.child)
+      when :deftype
+        (_, (_, type_name)) = node
+        if env.get_constant(type_name, raise_if_not_exists: false)
+          raise Emerald::NameError.new(
+            "type #{type_name} is already defined",
+            env.file,
+            env.current_offset
+          )
+        end
+        new_type = Class.new(Emerald::Types::Base)
+        Emerald::Types.const_set(type_name, new_type)
+        env.set_constant type_name, new_type
       else
         raise Emerald::NotImplementedError.new(
           "evaluation of :#{node.type} is not implemented",

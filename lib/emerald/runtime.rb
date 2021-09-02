@@ -1,6 +1,7 @@
 module Emerald
   class Runtime
     def define_builtins(env)
+      env.set_constant "Type", Emerald::Types::Type
       env.set_constant "String", Emerald::Types::String
       env.set_constant "Array", Emerald::Types::Array
       env.set_constant "Hashmap", Emerald::Types::Hashmap
@@ -12,7 +13,11 @@ module Emerald
       env.set_constant "Error", Emerald::Types::Error
 
       env.set "type", (Emerald::Types::Function.from_block('type', 1) do |env, value|
-        Emerald::Types::Type.new(value.class)
+        if value.is_a?(Class)
+          Emerald::Types::Type.new(Emerald::Types::Type)
+        else
+          Emerald::Types::Type.new(value.class)
+        end
       end)
 
       Math.define_builtins(env)

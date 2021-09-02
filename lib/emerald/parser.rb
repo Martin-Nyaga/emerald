@@ -32,7 +32,15 @@ module Emerald
     end
 
     def expr
-      def_expr || defn_expr || fn_expr || if_expr || unless_expr || call_expr || terminal_expr
+      deftype_expr || def_expr || defn_expr || fn_expr || if_expr || unless_expr || call_expr || terminal_expr
+    end
+
+    def deftype_expr
+      if match?(:deftype)
+        offset = previous_token.offset
+        type_name = consume!(:constant, "type name")
+        s(:deftype, type_name, offset: offset)
+      end
     end
 
     def def_expr

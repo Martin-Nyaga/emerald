@@ -64,24 +64,27 @@ module Emerald
   TOKEN_TYPES = [
     # Keywords
     TokenType.new(:def, /\Adef/, true),
-    TokenType.new(:fn, /\Afn/, true),
     TokenType.new(:defn, /\Adefn/, true),
+    TokenType.new(:deftype, /\Adeftype/, true),
     TokenType.new(:do, /\Ado/, true),
-    TokenType.new(:end, /\Aend/, true),
-    TokenType.new(:true, /\Atrue/, true),
-    TokenType.new(:false, /\Afalse/, true),
-    TokenType.new(:nil, /\Anil/, true),
-    TokenType.new(:if, /\Aif/, true),
-    TokenType.new(:unless, /\Aunless/, true),
     TokenType.new(:else, /\Aelse/, true),
+    TokenType.new(:end, /\Aend/, true),
+    TokenType.new(:false, /\Afalse/, true),
+    TokenType.new(:fn, /\Afn/, true),
+    TokenType.new(:if, /\Aif/, true),
+    TokenType.new(:nil, /\Anil/, true),
+    TokenType.new(:true, /\Atrue/, true),
+    TokenType.new(:unless, /\Aunless/, true),
     TokenType.new(:when, /\Awhen/, true),
 
+    # Other words
     TokenType.new(:identifier, /\A[\+\-\/\*%]|\A[><]=?|\A==|\A[a-z]+[a-zA-Z_0-9]*\??/),
     TokenType.new(:constant, /\A[A-Z]+[a-zA-Z_0-9]*/),
     TokenType.new(:integer, /\A[0-9]+/),
     TokenType.new(:string, /\A"([^"]*)"/) { _1[1] },
     TokenType.new(:symbol, /\A:([a-z]+[a-zA-Z_0-9]*\??)/) { _1[1] },
 
+    # Punctuation
     TokenType.new(:comment, /\A#.*/),
     TokenType.new(:newline, /\A[\n]|\A[\r\n]/),
     TokenType.new(:left_paren, /\A\(/),

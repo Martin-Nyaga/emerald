@@ -159,5 +159,10 @@ suite (fn do
       def a {:foo "bar", :baz "buz"}
       def b [1, 2, 3, 4]
     end)
+
+    it "can define a type" (fn do
+      deftype MyError
+      assert (== Type (type MyError))
+    end)
   end)
 end)

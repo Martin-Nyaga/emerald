@@ -15,6 +15,12 @@ module Emerald
     class Base
       extend Forwardable
 
+      class << self
+        def to_s
+          name.delete_prefix("Emerald::Types::")
+        end
+      end
+
       def assert_type(arg, type, message)
         raise Emerald::TypeError.new(message) unless arg.is_a?(type)
       end

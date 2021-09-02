@@ -1,5 +1,6 @@
 prog             -> expr (newline expr)* newline*
-expr             -> def | defn | fn | if | unless | call | terminal
+expr             -> deftype | def | defn | fn | if | unless | call | terminal
+deftype          -> :deftype constant
 def              -> :def identifier terminal
 defn             -> :defn identifier parameters fn_body
 fn               -> :fn parameters fn_body

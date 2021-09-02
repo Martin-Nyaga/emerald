@@ -370,4 +370,12 @@ describe Emerald::Scanner do
       expect(tokens).to eq(result)
     end
   end
+
+  context "Types" do
+    it "can tokenise deftype as a keyword" do
+      file, tokens = tokenise "deftype MyError"
+      result = [s(:deftype, "deftype", offset: 0), s(:constant, "MyError", offset: 8)]
+      expect(tokens).to eq(result)
+    end
+  end
 end

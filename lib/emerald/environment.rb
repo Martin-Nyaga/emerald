@@ -19,30 +19,39 @@ class Emerald::Environment
     constants[name] = value
   end
 
-  def get(name)
+  def get(name, raise_if_not_exists: true)
     result = env[name]
-    result = outer.get(name) if outer && result.nil?
+    result = outer.get(
+      name,
+      raise_if_not_exists: raise_if_not_exists
+    ) if outer && result.nil?
     raise Emerald::NameError.new(
       "No identifier with name #{name} found",
       file,
       current_offset
-    ) if result.nil?
+    ) if result.nil? && raise_if_not_exists
     result
   end
 
-  def get_constant(name)
+  def get_constant(name, raise_if_not_exists: true)
     result = constants[name]
-    result = outer.get_constant(name) if outer && result.nil?
+    result = outer.get_constant(
+      name, raise_if_not_exists:
+      raise_if_not_exists
+    ) if outer && result.nil?
     raise Emerald::NameError.new(
       "No constant with name #{name} found",
       file,
       current_offset
-    ) if result.nil?
+    ) if result.nil? && raise_if_not_exists
     result
   end
 
-  def get_at_distance(distance, name)
-    parent_at_distance(distance).get(name)
+  def get_at_distance(distance, name, raise_if_not_exists: true)
+    parent_at_distance(distance).get(
+      name,
+      raise_if_not_exists: raise_if_not_exists
+    )
   end
 
   private
