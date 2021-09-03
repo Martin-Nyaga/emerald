@@ -23,6 +23,10 @@ module Emerald
       nil
     end
 
+    def offset=(new_offset)
+      @offset = offset
+    end
+
     def ==(other)
       return false unless other.is_a?(Sexp)
       array == other.array && offset == other.offset

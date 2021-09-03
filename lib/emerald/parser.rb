@@ -14,7 +14,7 @@ module Emerald
     end
 
     def prog
-      ast = s(:block)
+      ast = s(:block, offset: position)
       ast << expr
       while !eof? && match?(:newline)
         if (result = expr)
@@ -45,26 +45,29 @@ module Emerald
 
     def def_expr
       if match?(:def)
+        offset = previous_token.offset
         ident = consume!(:identifier, "identifier")
         value = require_expr!(terminal_expr, "expression")
-        s(:def, ident, value)
+        s(:def, ident, value, offset: offset)
       end
     end
 
     def defn_expr
       if match?(:defn)
+        offset = previous_token.offset
         ident = require_expr!(identifier_expr, "identifier")
         params = parameters_expr
         body = require_expr!(fn_body_expr, "function body")
-        s(:defn, ident, params, body)
+        s(:defn, ident, params, body, offset: offset)
       end
     end
 
     def fn_expr
       if match?(:fn)
+        offset = previous_token.offset
         params = parameters_expr
         body = require_expr!(fn_body_expr, "function body")
-        s(:fn, params, body)
+        s(:fn, params, body, offset: offset)
       end
     end
 
@@ -82,7 +85,8 @@ module Emerald
 
     def single_line_body_expr
       if match?(:arrow)
-        s(:block, require_expr!(expr, "body"))
+        offset = previous_token.offset
+        s(:block, require_expr!(expr, "body"), offset: offset)
       end
     end
 
@@ -119,7 +123,7 @@ module Emerald
 
     def when_expr
       if match?(:when)
-        ast = s(:when)
+        ast = s(:when, offset: previous_token.offset)
         ast << require_expr!(when_condition_expr, "when condition")
         ast << require_expr!(when_body_expr, "when body")
         ast
@@ -179,6 +183,7 @@ module Emerald
 
     def condition_expr(matcher)
       if match?(matcher)
+        offset = previous_token.offset
         condition = call_expr || terminal_expr
         if (result = single_line_body_expr)
           true_branch = result
@@ -186,7 +191,7 @@ module Emerald
         else
           (true_branch, false_branch) = multiline_body_with_possible_else_expr
         end
-        s(matcher, condition, true_branch, false_branch)
+        s(matcher, condition, true_branch, false_branch, offset: offset)
       end
     end
 
@@ -198,7 +203,7 @@ module Emerald
       if match?(:identifier)
         ident = previous_token
         args = args_expr
-        s(:call, ident, *args)
+        s(:call, ident, *args, offset: ident.offset)
       end
     end
 
@@ -207,7 +212,7 @@ module Emerald
         symbol = previous_token
         callee = symbol_callable_expr
         if callee
-          s(:call, symbol, callee)
+          s(:call, symbol, callee, offset: symbol.offset)
         else
           backtrack(1)
           nil
@@ -263,17 +268,19 @@ module Emerald
 
     def array_expr
       if match?(:left_bracket)
+        offset = previous_token.offset
         elements = []
         while (result = terminal_expr)
           elements << result
         end
         consume!(:right_bracket, "]")
-        s(:array, *elements)
+        s(:array, *elements, offset: offset)
       end
     end
 
     def hashmap_expr
       if match?(:left_brace)
+        offset = previous_token.offset
         pairs = []
         while (pair = key_value_pair_expr)
           key, value = pair
@@ -281,7 +288,7 @@ module Emerald
           pairs << value
         end
         consume!(:right_brace, "}")
-        s(:hashmap, *pairs)
+        s(:hashmap, *pairs, offset: offset)
       end
     end
 

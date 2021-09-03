@@ -9,7 +9,7 @@ describe Emerald::Parser do
 
   context "empty" do
     it "can parse an empty list of tokens" do
-      expect(parse("")).to eq(s(:block))
+      expect(parse("")).to eq(s(:block, offset: 0))
     end
   end
 
@@ -22,7 +22,7 @@ describe Emerald::Parser do
 
     it "can parse a string" do
       src = %( "hello world" )
-      result = s(:block, s(:string, "hello world", offset: 1))
+      result = s(:block, s(:string, "hello world", offset: 1), offset: 0)
       expect(parse(src)).to eq(result)
     end
 
@@ -58,7 +58,7 @@ describe Emerald::Parser do
         s(:block,
           s(:call,
             s(:symbol, "a", offset: 0),
-            s(:hashmap, s(:symbol, "a", offset: 4), s(:integer, "1", offset: 7), offset: 4)))
+            s(:hashmap, s(:symbol, "a", offset: 4), s(:integer, "1", offset: 7), offset: 3)))
       expect(parse(src)).to eq(result)
     end
   end
@@ -94,7 +94,7 @@ describe Emerald::Parser do
   context "def" do
     it "can parse a definition call" do
       src = "def foo 12"
-      result = s(:block, s(:def, s(:identifier, "foo", offset: 4), s(:integer, "12", offset: 8)))
+      result = s(:block, s(:def, s(:identifier, "foo", offset: 4), s(:integer, "12", offset: 8), offset: 0), offset: 0)
       expect(parse(src)).to eq(result)
     end
   end
@@ -102,7 +102,7 @@ describe Emerald::Parser do
   context "array" do
     it "can parse array syntax" do
       src = "print [1 2]"
-      result = s(:block, s(:call, s(:identifier, "print", offset: 0), s(:array, s(:integer, "1", offset: 7), s(:integer, "2", offset: 9))))
+      result = s(:block, s(:call, s(:identifier, "print", offset: 0), s(:array, s(:integer, "1", offset: 7), s(:integer, "2", offset: 9), offset: 6)))
       expect(parse(src)).to eq(result)
     end
 
@@ -119,7 +119,7 @@ describe Emerald::Parser do
         s(:block,
           s(:call,
             s(:identifier, "print", offset: 0),
-            s(:hashmap, s(:symbol, "foo", offset: 8), s(:integer, "1", offset: 13))))
+            s(:hashmap, s(:symbol, "foo", offset: 8), s(:integer, "1", offset: 13), offset: 6)))
       expect(parse(src)).to eq(result)
     end
 
@@ -140,7 +140,7 @@ describe Emerald::Parser do
       result = s(:block,
         s(:fn,
           s(:params, s(:identifier, "a", offset: 3)),
-          s(:block, s(:call, s(:identifier, "print", offset: 8), s(:identifier, "a", offset: 14)))))
+          s(:block, s(:call, s(:identifier, "print", offset: 8), s(:identifier, "a", offset: 14)), offset: 5), offset: 0), offset: 0)
       expect(parse(src)).to eq(result)
     end
 
@@ -150,7 +150,7 @@ describe Emerald::Parser do
         s(:defn,
           s(:identifier, "say", offset: 5),
           s(:params, s(:identifier, "a", offset: 9)),
-          s(:block, s(:call, s(:identifier, "print", offset: 14), s(:identifier, "a", offset: 20)))))
+          s(:block, s(:call, s(:identifier, "print", offset: 14), s(:identifier, "a", offset: 20)), offset: 11), offset: 0), offset: 0)
       expect(parse(src)).to eq(result)
     end
 
@@ -161,7 +161,7 @@ describe Emerald::Parser do
           s(:params, s(:identifier, "a", offset: 3), s(:identifier, "b", offset: 5)),
           s(:block,
             s(:call, s(:identifier, "print", offset: 11), s(:identifier, "a", offset: 17)),
-            s(:call, s(:identifier, "print", offset: 19), s(:identifier, "b", offset: 25)))))
+            s(:call, s(:identifier, "print", offset: 19), s(:identifier, "b", offset: 25))), offset: 0), offset: 0)
       expect(parse(src)).to eq(result)
     end
 
@@ -173,7 +173,7 @@ describe Emerald::Parser do
           s(:params, s(:identifier, "a", offset: 9), s(:identifier, "b", offset: 11)),
           s(:block,
             s(:call, s(:identifier, "print", offset: 17), s(:identifier, "a", offset: 23)),
-            s(:call, s(:identifier, "print", offset: 27), s(:identifier, "b", offset: 33)))))
+            s(:call, s(:identifier, "print", offset: 27), s(:identifier, "b", offset: 33))), offset: 0), offset: 0)
       expect(parse(src)).to eq(result)
     end
 
@@ -204,10 +204,15 @@ describe Emerald::Parser do
             s(:guards,
               s(:when,
                 s(:call, s(:identifier, ">", offset: 10), s(:integer, "0", offset: 12), s(:identifier, "a", offset: 14)),
-                s(:block, s(:call, s(:identifier, "print", offset: 19), s(:identifier, "a", offset: 25)))),
+                s(:block, s(:call, s(:identifier, "print", offset: 19), s(:identifier, "a", offset: 25)), offset: 16),
+                offset: 5),
               s(:when,
                 s(:call, s(:identifier, "<", offset: 32), s(:integer, "0", offset: 34), s(:identifier, "a", offset: 36)),
-                s(:block, s(:call, s(:identifier, "raise", offset: 41), s(:string, "foo", offset: 47)))))))
+                s(:block, s(:call, s(:identifier, "raise", offset: 41), s(:string, "foo", offset: 47)), offset: 38),
+                offset: 27),
+              offset: 5),
+            offset: 0),
+          offset: 0)
       expect(parse(src)).to eq(result)
     end
 
@@ -220,10 +225,14 @@ describe Emerald::Parser do
             s(:guards,
               s(:when,
                 s(:call, s(:identifier, ">", offset: 10), s(:integer, "0", offset: 12), s(:identifier, "a", offset: 14)),
-                s(:block, s(:call, s(:identifier, "print", offset: 19), s(:identifier, "a", offset: 25)))),
+                s(:block, s(:call, s(:identifier, "print", offset: 19), s(:identifier, "a", offset: 25)), offset: 16),
+                offset: 5),
               s(:when,
                 s(:true, "else", offset: 27),
-                s(:block, s(:call, s(:identifier, "raise", offset: 35), s(:string, "foo", offset: 41)))))))
+                s(:block, s(:call, s(:identifier, "raise", offset: 35), s(:string, "foo", offset: 41)), offset: 32)),
+              offset: 5),
+            offset: 0),
+          offset: 0)
       expect(parse(src)).to eq(result)
     end
   end
@@ -254,7 +263,7 @@ describe Emerald::Parser do
       result = s(:block,
         s(:if, s(:true, "true", offset: 3),
           s(:block, s(:call, s(:identifier, "print", offset: 12), s(:identifier, "a", offset: 18))),
-          s(:block)))
+          s(:block), offset: 0), offset: 0)
       expect(parse(src)).to eq(result)
     end
 
@@ -263,7 +272,7 @@ describe Emerald::Parser do
       result = s(:block,
         s(:if, s(:true, "true", offset: 3),
           s(:block, s(:call, s(:identifier, "print", offset: 12), s(:identifier, "a", offset: 18))),
-          s(:block, s(:call, s(:identifier, "print", offset: 27), s(:identifier, "b", offset: 33)))))
+          s(:block, s(:call, s(:identifier, "print", offset: 27), s(:identifier, "b", offset: 33))), offset: 0), offset: 0)
       expect(parse(src)).to eq(result)
     end
 
@@ -271,8 +280,8 @@ describe Emerald::Parser do
       src = "if true -> print a"
       result = s(:block,
         s(:if, s(:true, "true", offset: 3),
-          s(:block, s(:call, s(:identifier, "print", offset: 11), s(:identifier, "a", offset: 17))),
-          s(:block)))
+          s(:block, s(:call, s(:identifier, "print", offset: 11), s(:identifier, "a", offset: 17)), offset: 8),
+          s(:block), offset: 0), offset: 0)
       expect(parse(src)).to eq(result)
     end
 
@@ -281,7 +290,7 @@ describe Emerald::Parser do
       result = s(:block,
         s(:unless, s(:true, "true", offset: 7),
           s(:block, s(:call, s(:identifier, "print", offset: 16), s(:identifier, "a", offset: 22))),
-          s(:block)))
+          s(:block), offset: 0), offset: 0)
       expect(parse(src)).to eq(result)
     end
 
@@ -290,7 +299,7 @@ describe Emerald::Parser do
       result = s(:block,
         s(:unless, s(:true, "true", offset: 7),
           s(:block, s(:call, s(:identifier, "print", offset: 16), s(:identifier, "a", offset: 22))),
-          s(:block, s(:call, s(:identifier, "print", offset: 31), s(:identifier, "b", offset: 37)))))
+          s(:block, s(:call, s(:identifier, "print", offset: 31), s(:identifier, "b", offset: 37))), offset: 0), offset: 0)
       expect(parse(src)).to eq(result)
     end
 
@@ -299,8 +308,8 @@ describe Emerald::Parser do
       result =
         s(:block,
           s(:unless, s(:true, "true", offset: 7),
-            s(:block, s(:call, s(:identifier, "print", offset: 15), s(:identifier, "a", offset: 21))),
-            s(:block)))
+            s(:block, s(:call, s(:identifier, "print", offset: 15), s(:identifier, "a", offset: 21)), offset: 12),
+            s(:block), offset: 0), offset: 0)
       expect(parse(src)).to eq(result)
     end
 
