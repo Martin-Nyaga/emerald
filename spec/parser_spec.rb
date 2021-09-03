@@ -190,6 +190,11 @@ describe Emerald::Parser do
       expect { parse src }.to raise_error(Emerald::SyntaxError)
     end
 
+    it "raises a syntax error for improperly delimited expressions in a function body" do
+      src = "defn bar do Bar Baz end"
+      expect { parse src }.to raise_error(Emerald::SyntaxError)
+    end
+
     it "can parse a function guard" do
       src = "fn a when > 0 a -> print a\nwhen < 0 a -> raise \"foo\" end"
       result =

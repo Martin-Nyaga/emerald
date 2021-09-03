@@ -91,8 +91,11 @@ module Emerald
         ast = s(:block)
         skip(:newline)
         while (result = expr)
-          skip(:newline)
           ast << result
+          unless check?(:newline) || check?(:end)
+            raise_expected!("end of expression")
+          end
+          skip(:newline)
         end
         skip(:newline)
         consume!(:end, "end")
@@ -142,16 +145,22 @@ module Emerald
         default_branch = s(:block)
         skip(:newline)
         while (result = expr)
-          skip(:newline)
           default_branch << result
+          unless check?(:newline) || check?(:else) || check?(:end)
+            raise_expected!("end of expression")
+          end
+          skip(:newline)
         end
         skip(:newline)
         else_branch = s(:block)
         if match?(:else)
           skip(:newline)
           while (result = expr)
-            skip(:newline)
             else_branch << result
+            unless check?(:newline) || check?(:end)
+              raise_expected!("end of expression")
+            end
+            skip(:newline)
           end
         end
         skip(:newline)
@@ -332,11 +341,7 @@ module Emerald
     def consume!(type, expected_text)
       assert_not_eof!
       unless match?(type)
-        raise SyntaxError.new(
-          "Expected #{expected_text}, got #{current_text}",
-          file,
-          position
-        )
+        raise_expected!(expected_text)
       end
       previous_token
     end
@@ -379,13 +384,17 @@ module Emerald
 
     def require_expr!(expr, expected_text)
       if expr.nil?
-        raise Emerald::SyntaxError.new(
-          "Expected #{expected_text}, got #{current_text}",
-          file,
-          position
-        )
+        raise_expected!(expected_text)
       end
       expr
+    end
+
+    def raise_expected!(expected_text)
+      raise Emerald::SyntaxError.new(
+        "Expected #{expected_text}, got #{current_text}",
+        file,
+        position
+      )
     end
   end
 end
