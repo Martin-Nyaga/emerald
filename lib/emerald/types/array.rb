@@ -1,6 +1,6 @@
 module Emerald
   module Types
-    class Array
+    class Array < Base
       attr_reader :array
 
       def initialize(array)

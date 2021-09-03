@@ -12,6 +12,9 @@ module Emerald
       env.set_constant "Function", Emerald::Types::Function
       env.set_constant "Error", Emerald::Types::Error
 
+      # debug
+      define_function(env, "env", 0) { |env| pp env }
+
       # Math
       [:+, :-, :*, :/, :>, :>=, :<, :<=, :==, :%].each do |op|
         define_function(env, op.to_s, 2) do |env, a, b|
@@ -59,7 +62,7 @@ module Emerald
 
       define_function(env, "super", 1) do |env, value|
         if value.is_a?(Class)
-          Emerald::Types::Type.new(Class.superclass)
+          Emerald::Types::Type.new(value.superclass)
         else
           Emerald::Types::Type.new(value.class.superclass)
         end

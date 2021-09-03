@@ -123,7 +123,7 @@ module Emerald
       when :constant
         env.get_constant(node.child)
       when :deftype
-        (_, (_, type_name)) = node
+        (_, (_, type_name), supertype) = node
         if env.get_constant(type_name, raise_if_not_exists: false)
           raise Emerald::NameError.new(
             "type #{type_name} is already defined",
@@ -131,9 +131,13 @@ module Emerald
             env.current_offset
           )
         end
-        new_type = Class.new(Emerald::Types::Base)
+        supertype = interprete_node(supertype, env)
+        supertype = Emerald::Types::Base if is_nil?(supertype)
+        new_type = Class.new(supertype)
+        new_type.include(Emerald::Types::BaseClassMethods)
         Emerald::Types.const_set(type_name, new_type)
-        env.set_constant type_name, new_type
+        global_env.set_constant type_name, new_type
+        new_type
       else
         raise Emerald::NotImplementedError.new(
           "evaluation of :#{node.type} is not implemented",
@@ -165,6 +169,10 @@ module Emerald
 
     def truthy?(value)
       ![EM_NIL, EM_FALSE].include?(value)
+    end
+
+    def is_nil?(value)
+      value == EM_NIL
     end
 
     def clear_error

@@ -1,6 +1,6 @@
 module Emerald
   module Types
-    class Nil
+    class Nil < Base
       include Singleton
 
       def to_s

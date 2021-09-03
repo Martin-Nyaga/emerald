@@ -1,6 +1,6 @@
 module Emerald
   module Types
-    class Hashmap
+    class Hashmap < Base
       attr_reader :hashmap
 
       def initialize(pairs)

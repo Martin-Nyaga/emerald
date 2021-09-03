@@ -344,7 +344,19 @@ describe Emerald::Parser do
   context "Types" do
     it "can parse an empty type definition" do
       src = "deftype MyError"
-      result = s(:block, s(:deftype, s(:constant, "MyError", offset: 8), offset: 0))
+      result = s(:block,
+        s(:deftype,
+          s(:constant, "MyError", offset: 8),
+          s(:nil, "nil", offset: 8), offset: 0))
+      expect(parse(src)).to eq(result)
+    end
+
+    it "can parse a subtype definition" do
+      src = "deftype MyError Error"
+      result = s(:block,
+        s(:deftype,
+          s(:constant, "MyError", offset: 8),
+          s(:constant, "Error", offset: 16), offset: 0))
       expect(parse(src)).to eq(result)
     end
   end

@@ -1,6 +1,6 @@
 module Emerald
   module Types
-    class Error
+    class Error < Base
       attr_reader :ruby_error_class
 
       def initialize(ruby_error_class = Emerald::Error)

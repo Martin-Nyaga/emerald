@@ -12,14 +12,21 @@ module Emerald
     autoload :Nil, "emerald/types/nil"
     autoload :Error, "emerald/types/error"
 
-    class Base
-      extend Forwardable
-
-      class << self
+    module BaseClassMethods
+      module ClassMethods
         def to_s
           name.delete_prefix("Emerald::Types::")
         end
       end
+
+      def self.included(base)
+        base.extend ClassMethods
+      end
+    end
+
+    class Base
+      extend Forwardable
+      include BaseClassMethods
 
       def assert_type(arg, type, message)
         raise Emerald::TypeError.new(message) unless arg.is_a?(type)

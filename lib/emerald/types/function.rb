@@ -1,6 +1,6 @@
 module Emerald
   module Types
-    class Function
+    class Function < Base
       attr_reader :name, :arity, :callable
 
       def initialize(name, arity, callable)

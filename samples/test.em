@@ -161,8 +161,14 @@ suite (fn do
     end)
 
     it "can define a type" (fn do
-      deftype MyError
-      assert (== Type (type MyError))
+      deftype MyError1
+      assert (== Type (type MyError1))
+    end)
+
+    it "can define a subtype" (fn do
+      deftype MyError2 Error
+      assert (== Type (type MyError2))
+      assert (== Error (super MyError2))
     end)
   end)
 end)

@@ -39,7 +39,13 @@ module Emerald
       if match?(:deftype)
         offset = previous_token.offset
         type_name = consume!(:constant, "type name")
-        s(:deftype, type_name, offset: offset)
+        supertype =
+          if match?(:constant)
+            previous_token
+          else
+            s(:nil, "nil", offset: previous_token.offset)
+          end
+        s(:deftype, type_name, supertype, offset: offset)
       end
     end
 
