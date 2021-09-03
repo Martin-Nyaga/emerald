@@ -6,16 +6,15 @@ describe Emerald::Error do
     file = Emerald::Files::ScriptFile.new("foo @ world")
     raise Emerald::Error.new("test error", file, 4)
   rescue Emerald::Error => e
-    message =
-      error_message = <<~MSG
-        
-        Error: test error
-            in #{file.path} on line 1
-        
-            1| foo @ world
-             |     ^
-                   here
-      MSG
+    message = <<~MSG
+
+      Error: test error
+          in #{file.path} on line 1
+
+          1| foo @ world
+           |     ^
+                 here
+    MSG
     expect(e.to_s).to eq(message)
   end
 
@@ -23,17 +22,16 @@ describe Emerald::Error do
     file = Emerald::Files::ScriptFile.new("foo bar\n@ world")
     raise Emerald::Error.new("test error", file, 8)
   rescue Emerald::Error => e
-    message =
-      error_message = <<~MSG
-        
-        Error: test error
-            in #{file.path} on line 2
-        
-            1| foo bar
-            2| @ world
-             | ^
-               here
-      MSG
+    message = <<~MSG
+
+      Error: test error
+          in #{file.path} on line 2
+
+          1| foo bar
+          2| @ world
+           | ^
+             here
+    MSG
     expect(e.to_s).to eq(message)
   end
 end

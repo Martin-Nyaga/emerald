@@ -135,7 +135,6 @@ module Emerald
           end
 
           def context_bounds(offset, size)
-            line_offset = offset - start_offset
             min = [start_offset, offset - size].max
             max = [end_offset, offset + size].min
             (min..max)

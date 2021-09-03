@@ -6,8 +6,8 @@ module Emerald
           new(name, arity, block)
         end
 
-        def from_lambda(name, _lambda)
-          new(name, _lambda.arity - 1, _lambda)
+        def from_lambda(name, the_lambda)
+          new(name, the_lambda.arity - 1, the_lambda)
         end
       end
 

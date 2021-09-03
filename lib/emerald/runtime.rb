@@ -48,10 +48,8 @@ module Emerald
         env.set "println", (Emerald::Types::Function.from_block("println", 0..) do |env, *args|
           if args.length > 0
             print(*args)
-            puts
-          else
-            puts
           end
+          puts
           Emerald::Types::NIL
         end)
       end

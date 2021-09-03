@@ -17,7 +17,7 @@ module Emerald
       ast = s(:block)
       ast << expr
       while !eof? && match?(:newline)
-        if result = expr
+        if (result = expr)
           ast << result
         end
       end
@@ -70,7 +70,7 @@ module Emerald
 
     def parameters_expr
       ast = s(:params)
-      while result = identifier_expr
+      while (result = identifier_expr)
         ast << result
       end
       ast
@@ -90,7 +90,7 @@ module Emerald
       if match?(:do)
         ast = s(:block)
         skip(:newline)
-        while result = expr
+        while (result = expr)
           skip(:newline)
           ast << result
         end
@@ -141,7 +141,7 @@ module Emerald
       if match?(:do)
         default_branch = s(:block)
         skip(:newline)
-        while result = expr
+        while (result = expr)
           skip(:newline)
           default_branch << result
         end
@@ -149,7 +149,7 @@ module Emerald
         else_branch = s(:block)
         if match?(:else)
           skip(:newline)
-          while result = expr
+          while (result = expr)
             skip(:newline)
             else_branch << result
           end
@@ -171,7 +171,7 @@ module Emerald
     def condition_expr(matcher)
       if match?(matcher)
         condition = call_expr || terminal_expr
-        if result = single_line_body_expr
+        if (result = single_line_body_expr)
           true_branch = result
           false_branch = s(:block)
         else
@@ -212,7 +212,7 @@ module Emerald
 
     def args_expr
       ast = []
-      while !eof? && result = terminal_expr
+      while !eof? && (result = terminal_expr)
         ast << result
       end
       ast
@@ -255,7 +255,7 @@ module Emerald
     def array_expr
       if match?(:left_bracket)
         elements = []
-        while result = terminal_expr
+        while (result = terminal_expr)
           elements << result
         end
         consume!(:right_bracket, "]")
@@ -266,7 +266,7 @@ module Emerald
     def hashmap_expr
       if match?(:left_brace)
         pairs = []
-        while pair = key_value_pair_expr
+        while (pair = key_value_pair_expr)
           key, value = pair
           pairs << key
           pairs << value
@@ -277,7 +277,7 @@ module Emerald
     end
 
     def key_value_pair_expr
-      if key = terminal_expr
+      if (key = terminal_expr)
         value = require_expr!(terminal_expr, "value")
         [key, value]
       end

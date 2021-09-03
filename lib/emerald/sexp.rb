@@ -17,7 +17,7 @@ module Emerald
 
     def offset
       return @offset unless @offset.nil?
-      if child = children.detect { |child| !child.offset.nil? }
+      if (child = children.detect { |child| !child.offset.nil? })
         return child.offset
       end
       nil
@@ -48,7 +48,7 @@ module Emerald
     end
 
     def children
-      array[1..-1]
+      array[1..]
     end
 
     def child(i = 0)

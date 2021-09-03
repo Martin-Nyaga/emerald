@@ -51,7 +51,7 @@ module Emerald
       when :string then Emerald::Types::String.new(node.child)
       when :symbol then Emerald::Types::Symbol.new(node.child.to_sym)
       when :identifier
-        if scope_distance = scoped_locals[node]
+        if (scope_distance = scoped_locals[node])
           env.get_at_distance(scope_distance, node.child)
         else
           global_env.get(node.child)

@@ -11,7 +11,7 @@ module Emerald
     end
 
     def match(str, file, offset)
-      if match = pattern.match(str)
+      if (match = pattern.match(str))
         Token.new(
           type,
           match,
