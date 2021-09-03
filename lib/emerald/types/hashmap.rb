@@ -1,15 +1,6 @@
 module Emerald
   module Types
     class Hashmap
-      class << self
-        def define_builtins(env)
-          env.set "get",
-            (Emerald::Types::Function.from_block("get", 2) do |env, hashmap, key|
-              hashmap[key]
-            end)
-        end
-      end
-
       attr_reader :hashmap
 
       def initialize(pairs)

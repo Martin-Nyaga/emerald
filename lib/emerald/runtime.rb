@@ -12,47 +12,62 @@ module Emerald
       env.set_constant "Function", Emerald::Types::Function
       env.set_constant "Error", Emerald::Types::Error
 
-      env.set "type", (Emerald::Types::Function.from_block("type", 1) do |env, value|
+      # Math
+      [:+, :-, :*, :/, :>, :>=, :<, :<=, :==, :%].each do |op|
+        define_function(env, op.to_s, 2) do |env, a, b|
+          a.send(op, b)
+        end
+      end
+
+      # IO
+      define_function(env, "print", 0..) do |env, *vals|
+        print(*vals)
+        Emerald::Types::NIL
+      end
+
+      define_function(env, "println", 0..) do |env, *args|
+        if args.length > 0
+          print(*args)
+        end
+        puts
+        Emerald::Types::NIL
+      end
+
+      # Array
+      define_function(env, "map", 2) do |env, fn, arr|
+        arr.map { |el| fn.call(env, el) }
+      end
+
+      # hashmap
+      define_function(env, "get", 2) do |env, hashmap, key|
+        hashmap[key]
+      end
+
+      # Error
+      define_function(env, "raise", 1..2) do |env, error_type, message = Emerald::Types::String.new("Runtime error")|
+        raise error_type.new.ruby_error_class.new(message.str, env.file, env.current_offset)
+      end
+
+      # Type
+      define_function(env, "type", 1) do |env, value|
         if value.is_a?(Class)
           Emerald::Types::Type.new(Emerald::Types::Type)
         else
           Emerald::Types::Type.new(value.class)
         end
-      end)
+      end
 
-      Math.define_builtins(env)
-      IO.define_builtins(env)
-      Emerald::Types::Array.define_builtins(env)
-      Emerald::Types::Hashmap.define_builtins(env)
-      Emerald::Types::Error.define_builtins(env)
-    end
-
-    class Math
-      def self.define_builtins(env)
-        [:+, :-, :*, :/, :>, :>=, :<, :<=, :==, :%].each do |op|
-          env.set op.to_s,
-            Emerald::Types::Function.from_lambda(op.to_s, ->(env, a, b) {
-              a.send(op, b)
-            })
+      define_function(env, "super", 1) do |env, value|
+        if value.is_a?(Class)
+          Emerald::Types::Type.new(Class.superclass)
+        else
+          Emerald::Types::Type.new(value.class.superclass)
         end
       end
     end
 
-    class IO
-      def self.define_builtins(env)
-        env.set "print", (Emerald::Types::Function.from_block("print", 0..) do |env, *vals|
-          print(*vals)
-          Emerald::Types::NIL
-        end)
-
-        env.set "println", (Emerald::Types::Function.from_block("println", 0..) do |env, *args|
-          if args.length > 0
-            print(*args)
-          end
-          puts
-          Emerald::Types::NIL
-        end)
-      end
+    def define_function(env, name, arity, &block)
+      env.set name, Emerald::Types::Function.new(name, arity, block)
     end
   end
 end

@@ -1,16 +1,6 @@
 module Emerald
   module Types
     class Function
-      class << self
-        def from_block(name, arity, &block)
-          new(name, arity, block)
-        end
-
-        def from_lambda(name, the_lambda)
-          new(name, the_lambda.arity - 1, the_lambda)
-        end
-      end
-
       attr_reader :name, :arity, :callable
 
       def initialize(name, arity, callable)

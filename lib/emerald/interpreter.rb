@@ -2,14 +2,15 @@ require "pp"
 
 module Emerald
   class Interpreter
-    attr_reader :global_env, :file, :had_error, :exit_on_error
+    attr_reader :global_env, :file, :had_error, :exit_on_error, :runtime
     def initialize(exit_on_error: true)
       @global_env = Environment.new(file: nil)
       @scoped_locals = {}
       @had_error = false
       @exit_on_error = exit_on_error
 
-      define_builtins
+      @runtime = Emerald::Runtime.new
+      runtime.define_builtins(global_env)
     end
 
     def had_error?
@@ -31,10 +32,6 @@ module Emerald
     private
 
     attr_reader :scoped_locals
-
-    def define_builtins
-      Emerald::Runtime.new.define_builtins(global_env)
-    end
 
     EM_TRUE = Emerald::Types::TRUE
     EM_FALSE = Emerald::Types::FALSE
@@ -154,7 +151,7 @@ module Emerald
 
     def define_function(defining_env, name, params, body)
       arity = params.children.size
-      Emerald::Types::Function.from_block(name, arity) do |_calling_env, *args|
+      Emerald::Types::Function.new(name, arity, proc { |_calling_env, *args|
         block_env = Environment.new(
           params.children.zip(args).map { |((_, arg_name), arg_value)| [arg_name, arg_value] }.to_h,
           file: defining_env.file,
@@ -163,7 +160,7 @@ module Emerald
         block_env.current_offset = defining_env.current_offset
         result = interprete_node(body, block_env)
         result
-      end
+      })
     end
 
     def truthy?(value)

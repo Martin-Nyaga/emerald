@@ -1,15 +1,6 @@
 module Emerald
   module Types
     class Array
-      class << self
-        def define_builtins(env)
-          env.set("map",
-            Emerald::Types::Function.from_block("map", 2) do |env, fn, arr|
-              arr.map { |el| fn.call(env, el) }
-            end)
-        end
-      end
-
       attr_reader :array
 
       def initialize(array)
