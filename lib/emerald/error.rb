@@ -42,9 +42,7 @@ module Emerald
     end
 
     def formatted_backtrace
-      frames = stack_frames.reverse.map do |frame|
-        "in #{frame.file_path}:#{frame.line_number} at `#{frame.function.name}`"
-      end.join("\n")
+      frames = stack_frames.reverse.map(&:to_formatted_s).join("\n")
       indent(frames, amount: indentation)
     end
 

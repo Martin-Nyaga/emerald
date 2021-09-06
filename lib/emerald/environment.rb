@@ -72,6 +72,10 @@ class Emerald::Environment
     def column_number
       file.line(offset).line_offset(offset)
     end
+
+    def to_formatted_s
+      "in #{file_path}:#{line_number} at `#{function.name}`"
+    end
   end
 
   def new_stack_frame(function)
