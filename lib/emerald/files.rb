@@ -27,6 +27,10 @@ module Emerald
         number
       end
 
+      def line(offset)
+        Line.from_offset(self, offset)
+      end
+
       def start_of_line(offset)
         offset -= 1 if contents[offset] == "\n"
         while offset > 0 && contents[offset] != "\n"
@@ -52,8 +56,8 @@ module Emerald
           @file = file
           @line_number = line_number
           @offset = offset
-          @line = Line.from_offset(file, offset)
-          @previous_line = Line.from_offset(file, line.start_offset - 2)
+          @current_line = Line.from_offset(file, offset)
+          @previous_line = Line.from_offset(file, current_line.start_offset - 2)
         end
 
         CONTEXT_SIZE = 40
@@ -66,7 +70,7 @@ module Emerald
 
         private
 
-        attr_reader :file, :line, :offset, :previous_line, :line_number, :padding
+        attr_reader :file, :current_line, :offset, :previous_line, :line_number, :padding
 
         def previous_line_text
           return "" if line_number == 1
@@ -78,7 +82,7 @@ module Emerald
         end
 
         def context_pointer_text
-          prefix_length = offset - current_line_context_bounds.first
+          prefix_length = offset - current_line.context_bounds(offset, CONTEXT_SIZE).first
           empty_prefix_space = " " * prefix_length
           arrow_up = empty_prefix_space + "^"
           here_text = empty_prefix_space + "here"
@@ -88,22 +92,11 @@ module Emerald
         end
 
         def current_line_context
-          file.contents[current_line_context_bounds].chomp
-        end
-
-        def current_line_context_bounds
-          line.context_bounds(offset, CONTEXT_SIZE)
+          current_line.context_around(offset, CONTEXT_SIZE)
         end
 
         def previous_line_context
-          file.contents[previous_line_context_bounds].chomp
-        end
-
-        def previous_line_context_bounds
-          previous_line.context_bounds(
-            previous_line.start_offset + line.line_offset(offset),
-            CONTEXT_SIZE
-          )
+          previous_line.context_around(previous_line.start_offset + current_line.line_offset(offset), CONTEXT_SIZE)
         end
 
         def line_number_padding_size
@@ -120,29 +113,34 @@ module Emerald
           end
           str
         end
+      end
 
-        class Line
-          class << self
-            def from_offset(file, offset)
-              new(file.start_of_line(offset), file.end_of_line(offset))
-            end
+      class Line
+        class << self
+          def from_offset(file, offset)
+            new(file, file.start_of_line(offset), file.end_of_line(offset))
           end
+        end
 
-          attr_reader :start_offset, :end_offset
-          def initialize(start_offset, end_offset)
-            @start_offset = start_offset
-            @end_offset = end_offset
-          end
+        attr_reader :file, :start_offset, :end_offset
+        def initialize(file, start_offset, end_offset)
+          @file = file
+          @start_offset = start_offset
+          @end_offset = end_offset
+        end
 
-          def context_bounds(offset, size)
-            min = [start_offset, offset - size].max
-            max = [end_offset, offset + size].min
-            (min..max)
-          end
+        def context_around(offset, size)
+          file.contents[context_bounds(offset, size)]
+        end
 
-          def line_offset(absolute_offset)
-            absolute_offset - start_offset
-          end
+        def context_bounds(offset, size)
+          min = [start_offset, offset - size].max
+          max = [end_offset, offset + size].min
+          (min..max)
+        end
+
+        def line_offset(absolute_offset)
+          absolute_offset - start_offset
         end
       end
     end

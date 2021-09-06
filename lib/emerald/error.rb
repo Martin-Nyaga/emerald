@@ -1,11 +1,12 @@
 module Emerald
   class Error < StandardError
-    attr_reader :message, :file, :offset
+    attr_reader :message, :file, :offset, :stack_frames
 
-    def initialize(message, file = nil, offset = nil)
+    def initialize(message, file = nil, offset = nil, stack_frames = [])
       @message = message
       @file = file
       @offset = offset
+      @stack_frames = stack_frames
     end
 
     def to_s
@@ -31,7 +32,7 @@ module Emerald
     end
 
     def location
-      text = "in #{file.path} on line #{line_number}"
+      text = "in #{file.path}:#{line_number}"
       indent(text, amount: indentation)
     end
 
@@ -40,9 +41,11 @@ module Emerald
       indent(text, amount: indentation)
     end
 
-    # TODO: Add backtrace
     def formatted_backtrace
-      ""
+      frames = stack_frames.reverse.map do |frame|
+        "in #{frame.file_path}:#{frame.line_number} at `#{frame.function.name}`"
+      end.join("\n")
+      indent(frames, amount: indentation)
     end
 
     def name

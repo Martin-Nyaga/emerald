@@ -9,6 +9,7 @@ class Emerald::Environment
     @env = env
     @file = file
     @outer = outer
+    @stack_frames = []
   end
 
   def set(name, value)
@@ -57,6 +58,48 @@ class Emerald::Environment
     parent_at_distance(distance).get(
       name, raise_if_not_exists: raise_if_not_exists
     )
+  end
+
+  StackFrame = Struct.new(:file, :offset, :function) do
+    def file_path
+      file.path
+    end
+
+    def line_number
+      file.line_number(offset)
+    end
+
+    def column_number
+      file.line(offset).line_offset(offset)
+    end
+  end
+
+  def new_stack_frame(function)
+    StackFrame.new(file, current_offset, function)
+  end
+
+  def push_stack_frame(frame)
+    if outer.nil?
+      @stack_frames.push(frame)
+    else
+      outer.push_stack_frame(frame)
+    end
+  end
+
+  def pop_stack_frame
+    if outer.nil?
+      @stack_frames.pop
+    else
+      outer.pop_stack_frame
+    end
+  end
+
+  def stack_frames
+    if outer.nil?
+      @stack_frames
+    else
+      outer.stack_frames
+    end
   end
 
   private

@@ -14,11 +14,15 @@ module Emerald
           raise Emerald::ArgumentError.new(
             "Invalid number of arguments for #{inspect}, expected #{arity.inspect}, got #{args.count}",
             env.file,
-            env.current_offset
+            env.current_offset,
+            env.stack_frames
           )
         end
 
-        callable.call(env, *args)
+        env.push_stack_frame(env.new_stack_frame(self))
+        result = callable.call(env, *args)
+        env.pop_stack_frame
+        result
       end
       alias_method :[], :call
 

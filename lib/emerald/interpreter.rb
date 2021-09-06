@@ -104,7 +104,8 @@ module Emerald
           raise Emerald::NoMatchingGuardError.new(
             "No guard matched",
             env.file,
-            env.current_offset
+            env.current_offset,
+            env.stack_frames
           )
         end
         (_, _, body) = matching_guard
@@ -134,7 +135,8 @@ module Emerald
           raise Emerald::NameError.new(
             "type #{type_name} is already defined",
             env.file,
-            env.current_offset
+            env.current_offset,
+            env.stack_frames
           )
         end
         supertype = interprete_node(supertype, env)
@@ -156,12 +158,18 @@ module Emerald
         raise Emerald::NotImplementedError.new(
           "evaluation of :#{node.type} is not implemented",
           env.file,
-          env.current_offset
+          env.current_offset,
+          env.stack_frames
         )
       end
     rescue Emerald::Error => e
       if e.file.nil? || e.offset.nil?
-        raise e.class.new(e.message, env.file, env.current_offset)
+        raise e.class.new(
+          e.message,
+          env.file,
+          env.current_offset,
+          env.stack_frames
+        )
       else
         raise
       end
@@ -169,7 +177,7 @@ module Emerald
 
     def define_function(defining_env, name, params, body)
       arity = params.children.size
-      Emerald::Types::Function.new(name, arity, proc { |_calling_env, *args|
+      Emerald::Types::Function.new(name, arity, proc { |calling_env, *args|
         block_env = Environment.new(
           params.children.zip(args).map { |((_, arg_name), arg_value)| [arg_name, arg_value] }.to_h,
           file: defining_env.file,

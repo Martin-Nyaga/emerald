@@ -8,7 +8,12 @@ module Emerald
       end
 
       def ruby_error(env)
-        Emerald::Error.new(message.str, env.file, env.current_offset)
+        Emerald::Error.new(
+          message.str,
+          env.file,
+          env.current_offset,
+          env.stack_frames
+        )
       end
     end
   end
