@@ -202,7 +202,7 @@ module Emerald
     end
 
     def call_expr
-      identifier_call_expr || symbol_call_expr
+      identifier_call_expr || symbol_call_expr || type_constructor_call_expr
     end
 
     def identifier_call_expr
@@ -226,6 +226,14 @@ module Emerald
       end
     end
 
+    def type_constructor_call_expr
+      if match?(:constant)
+        type = previous_token
+        args = args_expr
+        s(:constructor, type, *args, offset: type.offset)
+      end
+    end
+
     def symbol_callable_expr
       identifier_expr || hashmap_expr || parenthesized_expr
     end
@@ -241,7 +249,7 @@ module Emerald
     def terminal_expr
       identifier_expr || boolean_expr || nil_expr || integer_expr ||
         parenthesized_expr || array_expr || hashmap_expr || string_expr ||
-        symbol_expr || constant_expr || ref_expr
+        symbol_expr || ref_expr
     end
 
     def boolean_expr
@@ -414,7 +422,7 @@ module Emerald
       raise Emerald::SyntaxError.new(
         "Expected #{expected_text}, got #{current_text}",
         file,
-        position
+        current_token.offset
       )
     end
   end

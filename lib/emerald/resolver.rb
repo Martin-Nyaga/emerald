@@ -70,7 +70,7 @@ module Emerald
         resolve_node(condition)
         resolve_node(body)
         resolve_node(else_body) if else_body.any?
-      when :integer, :string, :symbol, :true, :false, :nil, :constant, :deftype, :ref
+      when :integer, :string, :symbol, :true, :false, :nil, :constant, :deftype, :ref, :constructor
         # noop
       when :identifier
         (_, name) = node

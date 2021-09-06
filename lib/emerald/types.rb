@@ -24,6 +24,18 @@ module Emerald
       end
     end
 
+    module UserDefinedTypeClassMethods
+      module ClassMethods
+        def constructable?
+          true
+        end
+      end
+
+      def self.included(base)
+        base.extend ClassMethods
+      end
+    end
+
     class Base
       extend Forwardable
       include BaseClassMethods
@@ -32,27 +44,24 @@ module Emerald
         klass.include(BaseClassMethods)
       end
 
-      def assert_type(arg, type, message)
-        raise Emerald::TypeError.new(message) unless arg.is_a?(type)
+      def self.constructable?
+        false
+      end
+
+      def assert_type(env, arg, type, message = nil)
+       unless arg.is_a?(type)
+          raise Emerald::TypeError.new(
+            message || "expected #{type} got #{arg.class}",
+            env.file,
+            env.current_offset,
+            env.stack_frames
+          )
+        end
       end
 
       def to_key
         inspect
       end
-    end
-
-    class Type < Base
-      attr_reader :type
-
-      def initialize(type)
-        @type = type
-      end
-
-      def ==(other)
-        other.is_a?(self.class) && type == other.type
-      end
-
-      def_delegators :type, :to_s, :inspect
     end
 
     TRUE = Emerald::Types::Boolean::True.instance

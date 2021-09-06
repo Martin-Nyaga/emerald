@@ -60,7 +60,7 @@ module Emerald
           @previous_line = Line.from_offset(file, current_line.start_offset - 2)
         end
 
-        CONTEXT_SIZE = 40
+        CONTEXT_SIZE = 80
         def to_s
           str = previous_line_text
           str << current_line_text

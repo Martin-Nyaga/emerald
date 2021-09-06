@@ -1,6 +1,7 @@
 deftype AssertionError Error
+
 defn assert assertion do
-  unless assertion -> raise AssertionError "Assertion failed"
+  unless assertion -> raise (AssertionError "Assertion failed")
 end
 
 defn test str test_fn do
@@ -142,13 +143,11 @@ suite (fn do
     end)
 
     it "understands basic types" (fn do
-      assert (== String (type "hello"))
-      assert (== Integer (type 1))
-      assert (== Array (type [1 2 3]))
-      assert (== Function (type (fn do end)))
-      assert (== Boolean (type true))
-      assert (== Boolean (type false))
-      assert (== Nil (type nil))
+      assert (== &String (type "hello"))
+      assert (== &Integer (type 1))
+      assert (== &Array (type [1 2 3]))
+      assert (== &Function (type (fn do end)))
+      assert (== &Nil (type nil))
     end)
 
     it "can parse hashmaps" (fn do
@@ -163,22 +162,19 @@ suite (fn do
 
     it "can define a type" (fn do
       deftype MyError1
-      assert (== Type (type MyError1))
+      # TODO: Revisit once we have some kind of base Type
     end)
 
     it "can define a subtype" (fn do
       deftype MyError2 Error
-      assert (== Type (type MyError2))
-      assert (== Error (super MyError2))
+      assert (== &Error (super &MyError2))
     end)
 
     it "can reference a function" (fn do
       defn foo -> nil
       def foo_ref &foo
-      println ("------------")
-      assert (== &Function &Nil)
-      assert (== Function (type &foo))
-      assert (== Function (type &foo_ref))
+      assert (== &Function (type &foo))
+      assert (== &Function (type &foo_ref))
     end)
   end)
 end)

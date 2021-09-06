@@ -1,7 +1,6 @@
 module Emerald
   class Runtime
     def define_builtins(env)
-      env.set_constant "Type", Emerald::Types::Type
       env.set_constant "String", Emerald::Types::String
       env.set_constant "Array", Emerald::Types::Array
       env.set_constant "Hashmap", Emerald::Types::Hashmap
@@ -53,24 +52,24 @@ module Emerald
       end
 
       # Error
-      define_function(env, "raise", 1..2) do |env, error_type, message = Emerald::Types::String.new("Runtime error")|
-        raise error_type.new(message).ruby_error(env)
+      define_function(env, "raise", 1) do |env, error|
+        raise error.ruby_error(env)
       end
 
       # Type
       define_function(env, "type", 1) do |env, value|
         if value.is_a?(Class)
-          Emerald::Types::Type.new(Emerald::Types::Type)
+          value
         else
-          Emerald::Types::Type.new(value.class)
+          value.class
         end
       end
 
       define_function(env, "super", 1) do |env, value|
         if value.is_a?(Class)
-          Emerald::Types::Type.new(value.superclass)
+          value.superclass
         else
-          Emerald::Types::Type.new(value.class.superclass)
+          value.class.superclass
         end
       end
     end

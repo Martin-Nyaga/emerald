@@ -4,7 +4,7 @@ module Emerald
       attr_reader :hashmap
 
       def initialize(pairs)
-        @hashmap = pairs.each_cons(2).to_a.map do |key, value|
+        @hashmap = pairs.each_slice(2).to_a.map do |key, value|
           [key.to_key, value]
         end.to_h
       end

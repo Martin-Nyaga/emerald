@@ -2,7 +2,12 @@ module Emerald
   class Error < StandardError
     attr_reader :message, :file, :offset, :stack_frames
 
-    def initialize(message, file = nil, offset = nil, stack_frames = [])
+    def initialize(
+      message,
+      file = nil,
+      offset = nil,
+      stack_frames = []
+    )
       @message = message
       @file = file
       @offset = offset

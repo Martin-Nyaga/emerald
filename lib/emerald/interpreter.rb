@@ -69,16 +69,20 @@ module Emerald
         ident
       when :call
         (_, fn, *args) = node
-        fn = interprete_node(s(:ref, fn), env)
-        case fn
-        when Emerald::Types::Function
-          if args.length > 0
-            args = args.map { |arg| interprete_node(arg, env) }
-            fn.call(env, *args)
-          else
-            fn.call(env)
+        case fn.type
+        when :identifier
+          fn = interprete_node(s(:ref, fn), env)
+          if fn.is_a?(Emerald::Types::Function)
+            if args.length > 0
+              args = args.map { |arg| interprete_node(arg, env) }
+              env.current_offset = node.offset
+              fn.call(env, *args)
+            else
+              fn.call(env)
+            end
           end
-        when Emerald::Types::Symbol
+        when :symbol
+          fn = interprete_node(fn, env)
           callee = interprete_node(args[0], env)
           callee[fn]
         else
@@ -98,7 +102,7 @@ module Emerald
       when :guards
         (_, *guards) = node
         matching_guard = guards.detect do |(_, condition, _body)|
-          interprete_node(condition, env)
+          interprete_node(condition, env) == EM_TRUE
         end
         unless matching_guard
           raise Emerald::NoMatchingGuardError.new(
@@ -127,8 +131,6 @@ module Emerald
           else_body.any? ? interprete_node(else_body, env) : EM_NIL
         end
         # standard:enable Style/UnlessElse
-      when :constant
-        env.get_constant(node.child)
       when :deftype
         (_, (_, type_name), supertype) = node
         if env.get_constant(type_name, raise_if_not_exists: false)
@@ -139,10 +141,15 @@ module Emerald
             env.stack_frames
           )
         end
-        supertype = interprete_node(supertype, env)
-        supertype = Emerald::Types::Base if is_nil?(supertype)
+        supertype =
+          if supertype.type == :nil
+            Emerald::Types::Base
+          else
+            interprete_node(s(:ref, supertype), env)
+          end
         new_type = Class.new(supertype)
         new_type.include(Emerald::Types::BaseClassMethods)
+        new_type.include(Emerald::Types::UserDefinedTypeClassMethods)
         Emerald::Types.const_set(type_name, new_type)
         global_env.set_constant type_name, new_type
         new_type
@@ -153,6 +160,24 @@ module Emerald
           env.get(referred_value.child)
         when :constant
           env.get_constant(referred_value.child)
+        end
+      when :constructor
+        (_, (_, type_name), *args) = node
+        type = env.get_constant(type_name)
+        if type.constructable?
+          if args.length > 0
+            args = args.map { |arg| interprete_node(arg, env) }
+            type.new(env, *args)
+            else
+            type.new(env)
+          end
+        else
+          raise Emerald::TypeError.new(
+            "Type `#{type_name}` is not constructable",
+            env.file,
+            env.current_offset,
+            env.stack_frames
+          )
         end
       else
         raise Emerald::NotImplementedError.new(

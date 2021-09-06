@@ -3,8 +3,16 @@ module Emerald
     class Error < Base
       attr_reader :message
 
-      def initialize(message)
+      class << self
+        def constructable?
+          true
+        end
+      end
+
+      def initialize(env, message = Emerald::Types::String.new("Runtime error"))
+        assert_type(env, message, Emerald::Types::String)
         @message = message
+        @error = self.class.name
       end
 
       def ruby_error(env)

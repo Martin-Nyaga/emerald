@@ -18,7 +18,6 @@ module Emerald
 
       [:+, :-, :*, :/, :%].each do |method_name|
         define_method(method_name) do |other|
-          assert_type other, Integer, "#{other} cannot be coerced to #{self.class.name}"
           self.class.new int.send(method_name, other.int)
         end
       end

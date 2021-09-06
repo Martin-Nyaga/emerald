@@ -333,14 +333,6 @@ describe Emerald::Parser do
     end
   end
 
-  context "constants" do
-    it "can parse constants" do
-      src = "String"
-      result = s(:block, s(:constant, "String", offset: 0))
-      expect(parse(src)).to eq(result)
-    end
-  end
-
   context "Types" do
     it "can parse an empty type definition" do
       src = "deftype MyError"
@@ -357,6 +349,17 @@ describe Emerald::Parser do
         s(:deftype,
           s(:constant, "MyError", offset: 8),
           s(:constant, "Error", offset: 16), offset: 0))
+      expect(parse(src)).to eq(result)
+    end
+
+    it "can parse type constructors" do
+      src = %(Error "an error occured")
+      result = s(:block,
+        s(:constructor,
+          s(:constant, "Error", offset: 0),
+          s(:string, "an error occured", offset: 6),
+          offset: 0),
+        offset: 0)
       expect(parse(src)).to eq(result)
     end
   end
@@ -376,4 +379,5 @@ describe Emerald::Parser do
       expect { parse src }.to raise_error(Emerald::SyntaxError)
     end
   end
+
 end

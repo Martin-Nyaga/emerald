@@ -15,15 +15,17 @@ single_line_body -> :arrow expr
 multiline_body   -> :do prog :end
 multiline_body_with_possible_else
                  -> :do prog (:else prog)? :end
-call             -> identifier_call | symbol_call
+call             -> identifier_call | symbol_call | type_constructor_call
 identifier_call  -> identifier args
+type_constructor_call
+                 -> constant args
 symbol_call      -> symbol symbol_callable_expr
 symbol_callable_expr
                  -> identifier | hashmap | parenthesized
 args             -> terminal (terminal)*
 if               -> :if (terminal | call) (single_line_body | multiline_body_with_possible_else)
 unless           -> :unless (terminal | call) (single_line_body | multiline_body_with_possible_else)
-terminal         -> identifier | integer | boolean | nil | parenthesized | array | hashmap | string | symbol | constant | ref
+terminal         -> identifier | integer | boolean | nil | parenthesized | array | hashmap | string | symbol | ref
 ref              -> :ref (identifier | constant)
 identifier       -> :identifier
 boolean          -> :true | :false
