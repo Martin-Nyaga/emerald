@@ -4,6 +4,8 @@ module Emerald
   module Types
     module Boolean
       def self.from(value)
+        return value if value == True.instance || value == False.instance
+
         if value
           True.instance
         else

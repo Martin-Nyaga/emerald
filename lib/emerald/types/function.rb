@@ -22,9 +22,10 @@ module Emerald
       end
       alias_method :[], :call
 
-      def inspect
+      def to_s
         "<fn: #{name} (#{arity.inspect})>"
       end
+      alias_method :inspect, :to_s
 
       class Arity
         def initialize(arity)

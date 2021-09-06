@@ -14,11 +14,17 @@ module Emerald
 
       # debug
       define_function(env, "env", 0) { |env| pp env }
+      define_function(env, "ruby", 1) { |env, str| eval str.str } # standard:disable Security/Eval
 
       # Math
-      [:+, :-, :*, :/, :>, :>=, :<, :<=, :==, :%].each do |op|
+      [:+, :-, :*, :/, :%].each do |op|
         define_function(env, op.to_s, 2) do |env, a, b|
           a.send(op, b)
+        end
+      end
+      [:>, :>=, :<, :<=, :==].each do |op|
+        define_function(env, op.to_s, 2) do |env, a, b|
+          Emerald::Types::Boolean.from(a.send(op, b))
         end
       end
 
@@ -48,7 +54,7 @@ module Emerald
 
       # Error
       define_function(env, "raise", 1..2) do |env, error_type, message = Emerald::Types::String.new("Runtime error")|
-        raise error_type.new.ruby_error_class.new(message.str, env.file, env.current_offset)
+        raise error_type.new(message).ruby_error(env)
       end
 
       # Type

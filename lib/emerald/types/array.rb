@@ -20,7 +20,6 @@ module Emerald
       def to_s
         "[" + array.map(&:inspect).join(" ") + "]"
       end
-      alias_method :inspect, :to_s
     end
   end
 end

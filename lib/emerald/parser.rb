@@ -241,7 +241,7 @@ module Emerald
     def terminal_expr
       identifier_expr || boolean_expr || nil_expr || integer_expr ||
         parenthesized_expr || array_expr || hashmap_expr || string_expr ||
-        symbol_expr || constant_expr
+        symbol_expr || constant_expr || ref_expr
     end
 
     def boolean_expr
@@ -311,6 +311,14 @@ module Emerald
 
     def symbol_expr
       return previous_token if match?(:symbol)
+    end
+
+    def ref_expr
+      if match?(:ref)
+        offset = previous_token.offset
+        referred_value = identifier_expr || constant_expr
+        s(:ref, require_expr!(referred_value, "reference"), offset: offset)
+      end
     end
 
     private

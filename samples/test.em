@@ -1,5 +1,6 @@
+deftype AssertionError Error
 defn assert assertion do
-  unless assertion -> raise "Assertion failed"
+  unless assertion -> raise AssertionError "Assertion failed"
 end
 
 defn test str test_fn do
@@ -11,8 +12,8 @@ end
 defn xtest str test_fn -> print "S"
 
 # define it/xit as an alias to test/xtest
-def it test
-def xit xtest
+def it &test
+def xit &xtest
 
 defn describe str describe_fn do
   describe_fn
@@ -57,8 +58,8 @@ suite (fn do
         (- n 1)
       end)
       def arr [1 2 3]
-      assert (== (map inc arr) [2 3 4])
-      assert (== (map dec arr) [0 1 2])
+      assert (== (map &inc arr) [2 3 4])
+      assert (== (map &dec arr) [0 1 2])
       assert (== (map (fn a do (* a a) end) arr) [1 4 9])
       assert (== (map (fn a -> * a a) arr) [1 4 9])
     end)
@@ -69,8 +70,8 @@ suite (fn do
         (- n 1)
       end
       def arr [1 2 3]
-      assert (== (map inc arr) [2 3 4])
-      assert (== (map dec arr) [0 1 2])
+      assert (== (map &inc arr) [2 3 4])
+      assert (== (map &dec arr) [0 1 2])
     end)
 
     it "it can evaluate true false and nil" (fn do
@@ -169,6 +170,15 @@ suite (fn do
       deftype MyError2 Error
       assert (== Type (type MyError2))
       assert (== Error (super MyError2))
+    end)
+
+    it "can reference a function" (fn do
+      defn foo -> nil
+      def foo_ref &foo
+      println ("------------")
+      assert (== &Function &Nil)
+      assert (== Function (type &foo))
+      assert (== Function (type &foo_ref))
     end)
   end)
 end)

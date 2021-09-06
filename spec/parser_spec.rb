@@ -360,4 +360,20 @@ describe Emerald::Parser do
       expect(parse(src)).to eq(result)
     end
   end
+
+  context "References" do
+    it "can parse a reference" do
+      src = "&String"
+      result = s(:block, s(:ref, s(:constant, "String", offset: 1), offset: 0), offset: 0)
+      expect(parse(src)).to eq(result)
+    end
+
+    it "raises a syntax error on an invalid reference" do
+      src = "&"
+      expect { parse src }.to raise_error(Emerald::SyntaxError)
+
+      src = "&[1 2 3]"
+      expect { parse src }.to raise_error(Emerald::SyntaxError)
+    end
+  end
 end

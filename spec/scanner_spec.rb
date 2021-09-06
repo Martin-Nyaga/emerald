@@ -376,4 +376,12 @@ describe Emerald::Scanner do
       expect(tokens).to eq(result)
     end
   end
+
+  context "References" do
+    it "can tokenise &refernce" do
+      _, tokens = tokenise "&String"
+      result = [s(:ref, "&", offset: 0), s(:constant, "String", offset: 1)]
+      expect(tokens).to eq(result)
+    end
+  end
 end

@@ -28,6 +28,10 @@ module Emerald
       extend Forwardable
       include BaseClassMethods
 
+      def self.inherited(klass)
+        klass.include(BaseClassMethods)
+      end
+
       def assert_type(arg, type, message)
         raise Emerald::TypeError.new(message) unless arg.is_a?(type)
       end

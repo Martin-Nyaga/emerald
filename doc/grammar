@@ -23,7 +23,8 @@ symbol_callable_expr
 args             -> terminal (terminal)*
 if               -> :if (terminal | call) (single_line_body | multiline_body_with_possible_else)
 unless           -> :unless (terminal | call) (single_line_body | multiline_body_with_possible_else)
-terminal         -> identifier | integer | boolean | nil | parenthesized | array | hashmap | string | symbol | constant
+terminal         -> identifier | integer | boolean | nil | parenthesized | array | hashmap | string | symbol | constant | ref
+ref              -> :ref (identifier | constant)
 identifier       -> :identifier
 boolean          -> :true | :false
 string           -> :string

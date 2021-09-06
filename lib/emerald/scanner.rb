@@ -92,6 +92,7 @@ module Emerald
     TokenType.new(:left_brace, /\A\{/),
     TokenType.new(:right_brace, /\A\}/),
     TokenType.new(:arrow, /\A->/),
+    TokenType.new(:ref, /\A&/),
     TokenType.new(:comma, /\A,/),
     TokenType.new(:space, /\A[ \t]/)
   ]

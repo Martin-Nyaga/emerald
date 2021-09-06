@@ -1,10 +1,14 @@
 module Emerald
   module Types
     class Error < Base
-      attr_reader :ruby_error_class
+      attr_reader :message
 
-      def initialize(ruby_error_class = Emerald::Error)
-        @ruby_error_class = ruby_error_class
+      def initialize(message)
+        @message = message
+      end
+
+      def ruby_error(env)
+        Emerald::Error.new(message.str, env.file, env.current_offset)
       end
     end
   end

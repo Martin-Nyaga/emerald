@@ -48,10 +48,16 @@ module Emerald
       when :string then Emerald::Types::String.new(node.child)
       when :symbol then Emerald::Types::Symbol.new(node.child.to_sym)
       when :identifier
-        if (scope_distance = scoped_locals[node])
-          env.get_at_distance(scope_distance, node.child)
+        result =
+          if (scope_distance = scoped_locals[node])
+            env.get_at_distance(scope_distance, node.child)
+          else
+            global_env.get(node.child)
+          end
+        if result.is_a?(Emerald::Types::Function)
+          result[env]
         else
-          global_env.get(node.child)
+          result
         end
       when :true then EM_TRUE
       when :false then EM_FALSE
@@ -63,7 +69,7 @@ module Emerald
         ident
       when :call
         (_, fn, *args) = node
-        fn = interprete_node(fn, env)
+        fn = interprete_node(s(:ref, fn), env)
         case fn
         when Emerald::Types::Function
           if args.length > 0
@@ -138,6 +144,14 @@ module Emerald
         Emerald::Types.const_set(type_name, new_type)
         global_env.set_constant type_name, new_type
         new_type
+      when :ref
+        (_, referred_value) = node
+        case referred_value.type
+        when :identifier
+          env.get(referred_value.child)
+        when :constant
+          env.get_constant(referred_value.child)
+        end
       else
         raise Emerald::NotImplementedError.new(
           "evaluation of :#{node.type} is not implemented",
