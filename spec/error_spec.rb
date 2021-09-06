@@ -9,7 +9,7 @@ describe Emerald::Error do
     message = <<~MSG
 
       Error: test error
-          in #{file.path} on line 1
+          in #{file.path}:1
 
           1| foo @ world
            |     ^
@@ -25,7 +25,7 @@ describe Emerald::Error do
     message = <<~MSG
 
       Error: test error
-          in #{file.path} on line 2
+          in #{file.path}:2
 
           1| foo bar
           2| @ world
