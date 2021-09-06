@@ -168,7 +168,7 @@ module Emerald
           if args.length > 0
             args = args.map { |arg| interprete_node(arg, env) }
             type.new(env, *args)
-            else
+          else
             type.new(env)
           end
         else

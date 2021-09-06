@@ -379,5 +379,4 @@ describe Emerald::Parser do
       expect { parse src }.to raise_error(Emerald::SyntaxError)
     end
   end
-
 end

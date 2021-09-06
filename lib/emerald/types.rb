@@ -49,7 +49,7 @@ module Emerald
       end
 
       def assert_type(env, arg, type, message = nil)
-       unless arg.is_a?(type)
+        unless arg.is_a?(type)
           raise Emerald::TypeError.new(
             message || "expected #{type} got #{arg.class}",
             env.file,
