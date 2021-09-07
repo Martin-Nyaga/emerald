@@ -76,4 +76,6 @@ module Emerald
   class NotImplementedError < Error; end
 
   class NoMatchingGuardError < Error; end
+
+  class LoadError < Error; end
 end

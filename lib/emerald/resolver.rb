@@ -111,6 +111,7 @@ module Emerald
     alias_method :resolve_deftype, :resolve_noop
     alias_method :resolve_ref, :resolve_noop
     alias_method :resolve_constructor, :resolve_noop
+    alias_method :resolve_import, :resolve_noop
 
     def resolve_identifier(node)
       (_, name) = node

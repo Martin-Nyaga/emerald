@@ -46,8 +46,8 @@ module Emerald
     def import_expr
       if match?(:import)
         offset = previous_token.offset
-        file = require_expr!(string_expr, "file path")
-        s(:import, file, offset: offset)
+        path = require_expr!(string_expr, "file path")
+        s(:import, path, offset: offset)
       end
     end
 

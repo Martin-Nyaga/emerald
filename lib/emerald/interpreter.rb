@@ -1,4 +1,5 @@
 require "pp"
+require "pathname"
 
 module Emerald
   class Interpreter
@@ -255,6 +256,31 @@ module Emerald
           env.stack_frames
         )
       end
+    end
+
+    STDLIB_PATH = File.join(File.expand_path(__dir__), "../../emerald/lib")
+    def interprete_import(node, env)
+      (_, (_, path)) = node
+      path_with_extension = Pathname.new(path).sub_ext(".em")
+      candidates = Dir[File.join(STDLIB_PATH, path_with_extension)] + Dir[path_with_extension]
+      unless candidates.any?
+        raise Emerald::LoadError.new(
+          "Could not find file: #{path}",
+          env.file,
+          env.current_offset,
+          env.stack_frames
+        )
+      end
+      target_file = Emerald::Files::RealFile.new(candidates.first)
+
+      tokens = Emerald::Scanner.new(target_file).tokens
+      ast = Emerald::Parser.new(target_file, tokens).parse
+      ast, locals = Emerald::Resolver.new(target_file, ast).resolve_locals
+      # file_env = Environment.new(file: target_file)
+      # file_env.scoped_locals = locals
+      # env.add_imported_env(file_env)
+      pp ast
+      EM_NIL
     end
 
     def define_function(defining_env, name, params, body)
