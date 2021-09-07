@@ -84,7 +84,7 @@ module Emerald
         when :symbol
           fn = interprete_node(fn, env)
           callee = interprete_node(args[0], env)
-          callee[fn]
+          callee[env, fn]
         else
           fn
         end
@@ -132,7 +132,7 @@ module Emerald
         end
         # standard:enable Style/UnlessElse
       when :deftype
-        (_, (_, type_name), supertype) = node
+        (_, (_, type_name), supertype, fields) = node
         if env.get_constant(type_name, raise_if_not_exists: false)
           raise Emerald::NameError.new(
             "type #{type_name} is already defined",
@@ -150,6 +150,13 @@ module Emerald
         new_type = Class.new(supertype)
         new_type.include(Emerald::Types::BaseClassMethods)
         new_type.include(Emerald::Types::UserDefinedTypeClassMethods)
+
+        fields = interprete_node(fields, env)
+        fields.each do |field|
+          Emerald::Types.assert_type(env, field, Emerald::Types::Symbol)
+        end
+        new_type.add_fields(fields.array)
+
         Emerald::Types.const_set(type_name, new_type)
         global_env.set_constant type_name, new_type
         new_type
@@ -167,7 +174,11 @@ module Emerald
         if type.constructable?
           if args.length > 0
             args = args.map { |arg| interprete_node(arg, env) }
-            type.new(env, *args)
+            if args.length == 1 && args[0].is_a?(Emerald::Types::Hashmap)
+              type.new(env, args[0])
+            else
+              type.new(env, args)
+            end
           else
             type.new(env)
           end

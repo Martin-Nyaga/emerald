@@ -11,6 +11,10 @@ module Emerald
         Emerald::Types::Array.new(array.map { |el| yield el })
       end
 
+      def each
+        array.each { |el| yield el }
+      end
+
       def ==(other)
         Emerald::Types::Boolean.from(
           other.is_a?(self.class) && array == other.array

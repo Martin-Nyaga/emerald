@@ -15,7 +15,7 @@ module Emerald
         )
       end
 
-      def [](key)
+      def [](_env, key)
         hashmap[key.to_key]
       end
 

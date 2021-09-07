@@ -176,5 +176,19 @@ suite (fn do
       assert (== &Function (type &foo))
       assert (== &Function (type &foo_ref))
     end)
+
+    it "can define a type with fields and construct it" (fn do
+      deftype User [:name :email]
+      def user1 (User "Test" "test@example.com")
+      def user2 (User {:name "Test2", :email "test2@example.com"})
+      
+      defn assert_valid_user user name email do
+        assert (== name (:name user))
+        assert (== email (:email user))
+      end
+
+      assert_valid_user user1 "Test" "test@example.com"
+      assert_valid_user user2 "Test2" "test2@example.com"
+    end)
   end)
 end)

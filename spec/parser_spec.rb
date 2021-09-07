@@ -339,7 +339,8 @@ describe Emerald::Parser do
       result = s(:block,
         s(:deftype,
           s(:constant, "MyError", offset: 8),
-          s(:nil, "nil", offset: 8), offset: 0))
+          s(:nil, "nil", offset: 14),
+          s(:array, offset: 14), offset: 0))
       expect(parse(src)).to eq(result)
     end
 
@@ -348,7 +349,20 @@ describe Emerald::Parser do
       result = s(:block,
         s(:deftype,
           s(:constant, "MyError", offset: 8),
-          s(:constant, "Error", offset: 16), offset: 0))
+          s(:constant, "Error", offset: 16),
+          s(:array, offset: 20), offset: 0))
+      expect(parse(src)).to eq(result)
+    end
+
+    it "can parse a type definition with fields" do
+      src = "deftype User [:name :email]"
+      result = s(:block,
+        s(:deftype,
+          s(:constant, "User", offset: 8),
+          s(:nil, "nil", offset: 13),
+          s(:array,
+            s(:symbol, "name", offset: 14),
+            s(:symbol, "email", offset: 20), offset: 13), offset: 0))
       expect(parse(src)).to eq(result)
     end
 

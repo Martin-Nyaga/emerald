@@ -43,9 +43,10 @@ module Emerald
           if match?(:constant)
             previous_token
           else
-            s(:nil, "nil", offset: previous_token.offset)
+            s(:nil, "nil", offset: current_token.offset)
           end
-        s(:deftype, type_name, supertype, offset: offset)
+        fields = array_expr || s(:array, offset: current_token.offset)
+        s(:deftype, type_name, supertype, fields, offset: offset)
       end
     end
 
