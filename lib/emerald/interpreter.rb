@@ -36,168 +36,17 @@ module Emerald
     EM_TRUE = Emerald::Types::TRUE
     EM_FALSE = Emerald::Types::FALSE
     EM_NIL = Emerald::Types::NIL
+
     def interprete_node(node, env)
       env.current_offset = node.offset
-      case node.type
-      when :block
-        return nil if node.children.size == 0
-        node.children.map do |node|
-          interprete_node(node, env)
-        end.last
-      when :integer then Emerald::Types::Integer.new(node.child.to_i)
-      when :string then Emerald::Types::String.new(node.child)
-      when :symbol then Emerald::Types::Symbol.new(node.child.to_sym)
-      when :identifier
-        result =
-          if (scope_distance = scoped_locals[node])
-            env.get_at_distance(scope_distance, node.child)
-          else
-            global_env.get(node.child)
-          end
-        if result.is_a?(Emerald::Types::Function)
-          result[env]
-        else
-          result
-        end
-      when :true then EM_TRUE
-      when :false then EM_FALSE
-      when :nil then EM_NIL
-      when :def
-        (_, (_, ident), value_node) = node
-        value = interprete_node(value_node, env)
-        env.set(ident, value)
-        ident
-      when :call
-        (_, fn, *args) = node
-        case fn.type
-        when :identifier
-          fn = interprete_node(s(:ref, fn), env)
-          if fn.is_a?(Emerald::Types::Function)
-            if args.length > 0
-              args = args.map { |arg| interprete_node(arg, env) }
-              env.current_offset = node.offset
-              fn.call(env, *args)
-            else
-              fn.call(env)
-            end
-          end
-        when :symbol
-          fn = interprete_node(fn, env)
-          callee = interprete_node(args[0], env)
-          callee[env, fn]
-        else
-          fn
-        end
-      when :array
-        Emerald::Types::Array.new(node.children.map { |e| interprete_node(e, env) })
-      when :hashmap
-        Emerald::Types::Hashmap.new(node.children.map { |e| interprete_node(e, env) })
-      when :fn
-        (_, params, body) = node
-        define_function(env, "anonymous", params, body)
-      when :defn
-        (_, (_, name), params, body) = node
-        fn = define_function(env, name, params, body)
-        env.set name, fn
-      when :guards
-        (_, *guards) = node
-        matching_guard = guards.detect do |(_, condition, _body)|
-          interprete_node(condition, env) == EM_TRUE
-        end
-        unless matching_guard
-          raise Emerald::NoMatchingGuardError.new(
-            "No guard matched",
-            env.file,
-            env.current_offset,
-            env.stack_frames
-          )
-        end
-        (_, _, body) = matching_guard
-        interprete_node(body, env)
-      when :if
-        (_, condition, body, else_body) = node
-        if truthy?(interprete_node(condition, env))
-          interprete_node(body, env)
-        else
-          else_body.any? ? interprete_node(else_body, env) : EM_NIL
-        end
-      when :unless
-        (_, condition, body, else_body) = node
-        # standard:disable Style/UnlessElse
-        unless truthy?(interprete_node(condition, env))
-          interprete_node(body, env)
-
-        else
-          else_body.any? ? interprete_node(else_body, env) : EM_NIL
-        end
-        # standard:enable Style/UnlessElse
-      when :deftype
-        (_, (_, type_name), supertype, fields) = node
-        if env.get_constant(type_name, raise_if_not_exists: false)
-          raise Emerald::NameError.new(
-            "type #{type_name} is already defined",
-            env.file,
-            env.current_offset,
-            env.stack_frames
-          )
-        end
-        supertype =
-          if supertype.type == :nil
-            Emerald::Types::Base
-          else
-            interprete_node(s(:ref, supertype), env)
-          end
-        new_type = Class.new(supertype)
-        new_type.include(Emerald::Types::BaseClassMethods)
-        new_type.include(Emerald::Types::UserDefinedTypeClassMethods)
-
-        fields = interprete_node(fields, env)
-        fields.each do |field|
-          Emerald::Types.assert_type(env, field, Emerald::Types::Symbol)
-        end
-        new_type.add_fields(fields.array)
-
-        Emerald::Types.const_set(type_name, new_type)
-        global_env.set_constant type_name, new_type
-        new_type
-      when :ref
-        (_, referred_value) = node
-        case referred_value.type
-        when :identifier
-          env.get(referred_value.child)
-        when :constant
-          env.get_constant(referred_value.child)
-        end
-      when :constructor
-        (_, (_, type_name), *args) = node
-        type = env.get_constant(type_name)
-        if type.constructable?
-          if args.length > 0
-            args = args.map { |arg| interprete_node(arg, env) }
-            if args.length == 1 && args[0].is_a?(Emerald::Types::Hashmap)
-              type.new(env, args[0])
-            else
-              type.new(env, args)
-            end
-          else
-            type.new(env)
-          end
-        else
-          raise Emerald::TypeError.new(
-            "Type `#{type_name}` is not constructable",
-            env.file,
-            env.current_offset,
-            env.stack_frames
-          )
-        end
-      else
-        raise Emerald::NotImplementedError.new(
-          "evaluation of :#{node.type} is not implemented",
-          env.file,
-          env.current_offset,
-          env.stack_frames
-        )
-      end
+      send("interprete_#{node.type}", node, env)
+    rescue NoMethodError
+      raise Emerald::NotImplementedError.new(
+        "evaluation of :#{node.type} is not implemented",
+        env.file,
+        env.current_offset,
+        env.stack_frames
+      )
     rescue Emerald::Error => e
       if e.file.nil? || e.offset.nil?
         raise e.class.new(
@@ -208,6 +57,203 @@ module Emerald
         )
       else
         raise
+      end
+    end
+
+    def interprete_block(node, env)
+      return nil if node.children.size == 0
+      node.children.map do |node|
+        interprete_node(node, env)
+      end.last
+    end
+
+    def interprete_integer(node, env)
+      Emerald::Types::Integer.new(node.child.to_i)
+    end
+
+    def interprete_string(node, env)
+      Emerald::Types::String.new(node.child)
+    end
+
+    def interprete_symbol(node, env)
+      Emerald::Types::Symbol.new(node.child.to_sym)
+    end
+
+    def interprete_identifier(node, env)
+      result =
+        if (scope_distance = scoped_locals[node])
+          env.get_at_distance(scope_distance, node.child)
+        else
+          global_env.get(node.child)
+        end
+      if result.is_a?(Emerald::Types::Function)
+        result[env]
+      else
+        result
+      end
+    end
+
+    def interprete_true(node, env)
+      EM_TRUE
+    end
+
+    def interprete_false(node, env)
+      EM_FALSE
+    end
+
+    def interprete_nil(node, env)
+      EM_NIL
+    end
+
+    def interprete_def(node, env)
+      (_, (_, ident), value_node) = node
+      value = interprete_node(value_node, env)
+      env.set(ident, value)
+      ident
+    end
+
+    def interprete_call(node, env)
+      (_, fn, *args) = node
+      case fn.type
+      when :identifier
+        fn = interprete_node(s(:ref, fn), env)
+        if fn.is_a?(Emerald::Types::Function)
+          if args.length > 0
+            args = args.map { |arg| interprete_node(arg, env) }
+            env.current_offset = node.offset
+            fn.call(env, *args)
+          else
+            fn.call(env)
+          end
+        end
+      when :symbol
+        fn = interprete_node(fn, env)
+        callee = interprete_node(args[0], env)
+        callee[env, fn]
+      else
+        fn
+      end
+    end
+
+    def interprete_array(node, env)
+      Emerald::Types::Array.new(node.children.map { |e| interprete_node(e, env) })
+    end
+
+    def interprete_hashmap(node, env)
+      Emerald::Types::Hashmap.new(node.children.map { |e| interprete_node(e, env) })
+    end
+
+    def interprete_fn(node, env)
+      (_, params, body) = node
+      define_function(env, "anonymous", params, body)
+    end
+
+    def interprete_defn(node, env)
+      (_, (_, name), params, body) = node
+      fn = define_function(env, name, params, body)
+      env.set name, fn
+    end
+
+    def interprete_guards(node, env)
+      (_, *guards) = node
+      matching_guard = guards.detect do |(_, condition, _body)|
+        interprete_node(condition, env) == EM_TRUE
+      end
+      unless matching_guard
+        raise Emerald::NoMatchingGuardError.new(
+          "No guard matched",
+          env.file,
+          env.current_offset,
+          env.stack_frames
+        )
+      end
+      (_, _, body) = matching_guard
+      interprete_node(body, env)
+    end
+
+    def interprete_if(node, env)
+      (_, condition, body, else_body) = node
+      if truthy?(interprete_node(condition, env))
+        interprete_node(body, env)
+      else
+        else_body.any? ? interprete_node(else_body, env) : EM_NIL
+      end
+    end
+
+    def interprete_unless(node, env)
+      (_, condition, body, else_body) = node
+      # standard:disable Style/UnlessElse
+      unless truthy?(interprete_node(condition, env))
+        interprete_node(body, env)
+
+      else
+        else_body.any? ? interprete_node(else_body, env) : EM_NIL
+      end
+      # standard:enable Style/UnlessElse
+    end
+
+    def interprete_deftype(node, env)
+      (_, (_, type_name), supertype, fields) = node
+      if env.get_constant(type_name, raise_if_not_exists: false)
+        raise Emerald::NameError.new(
+          "type #{type_name} is already defined",
+          env.file,
+          env.current_offset,
+          env.stack_frames
+        )
+      end
+      supertype =
+        if supertype.type == :nil
+          Emerald::Types::Base
+        else
+          interprete_node(s(:ref, supertype), env)
+        end
+      new_type = Class.new(supertype)
+      new_type.include(Emerald::Types::BaseClassMethods)
+      new_type.include(Emerald::Types::UserDefinedTypeClassMethods)
+
+      fields = interprete_node(fields, env)
+      fields.each do |field|
+        Emerald::Types.assert_type(env, field, Emerald::Types::Symbol)
+      end
+      new_type.add_fields(fields.array)
+
+      Emerald::Types.const_set(type_name, new_type)
+      global_env.set_constant type_name, new_type
+      new_type
+    end
+
+    def interprete_ref(node, env)
+      (_, referred_value) = node
+      case referred_value.type
+      when :identifier
+        env.get(referred_value.child)
+      when :constant
+        env.get_constant(referred_value.child)
+      end
+    end
+
+    def interprete_constructor(node, env)
+      (_, (_, type_name), *args) = node
+      type = env.get_constant(type_name)
+      if type.constructable?
+        if args.length > 0
+          args = args.map { |arg| interprete_node(arg, env) }
+          if args.length == 1 && args[0].is_a?(Emerald::Types::Hashmap)
+            type.new(env, args[0])
+          else
+            type.new(env, args)
+          end
+        else
+          type.new(env)
+        end
+      else
+        raise Emerald::TypeError.new(
+          "Type `#{type_name}` is not constructable",
+          env.file,
+          env.current_offset,
+          env.stack_frames
+        )
       end
     end
 
