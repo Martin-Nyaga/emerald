@@ -20,13 +20,13 @@ module Emerald
       skip(:newline)
       while check?(:import)
         ast << import_expr
-        consume!(:newline, "end of expression", skip_tokens: true) if !eof?
+        consume!(:newline, "end of expression", skip_tokens: true) unless eof?
       end
 
       loop do
         break if eof?
         ast << require_expr!(expr, "expression")
-        consume!(:newline, "end of expression", skip_tokens: true) if !eof?
+        consume!(:newline, "end of expression", skip_tokens: true) unless eof?
       end
 
       if !eof?
