@@ -15,12 +15,20 @@ module Emerald
 
     def prog
       ast = s(:block, offset: position)
-      ast << expr
-      while !eof? && match?(:newline)
-        if (result = expr)
-          ast << result
-        end
+      return ast if tokens.empty?
+
+      skip(:newline)
+      while check?(:import)
+        ast << import_expr
+        consume!(:newline, "end of expression", skip_tokens: true) if !eof?
       end
+
+      loop do
+        break if eof?
+        ast << require_expr!(expr, "expression")
+        consume!(:newline, "end of expression", skip_tokens: true) if !eof?
+      end
+
       if !eof?
         raise Emerald::SyntaxError.new(
           "Unexpected input #{current_text}",
@@ -28,11 +36,19 @@ module Emerald
           current_token.offset
         )
       end
-      ast.compact!
+      ast
     end
 
     def expr
       deftype_expr || def_expr || defn_expr || fn_expr || if_expr || unless_expr || call_expr || terminal_expr
+    end
+
+    def import_expr
+      if match?(:import)
+        offset = previous_token.offset
+        file = require_expr!(string_expr, "file path")
+        s(:import, file, offset: offset)
+      end
     end
 
     def deftype_expr
@@ -368,11 +384,12 @@ module Emerald
       @position += 1
     end
 
-    def consume!(type, expected_text)
+    def consume!(type, expected_text, skip_tokens: false)
       assert_not_eof!
       unless match?(type)
         raise_expected!(expected_text)
       end
+      skip(type) if skip_tokens
       previous_token
     end
 

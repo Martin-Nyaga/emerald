@@ -70,6 +70,7 @@ module Emerald
     TokenType.new(:false, /\Afalse/, true),
     TokenType.new(:fn, /\Afn/, true),
     TokenType.new(:if, /\Aif/, true),
+    TokenType.new(:import, /\Aimport/, true),
     TokenType.new(:nil, /\Anil/, true),
     TokenType.new(:true, /\Atrue/, true),
     TokenType.new(:unless, /\Aunless/, true),

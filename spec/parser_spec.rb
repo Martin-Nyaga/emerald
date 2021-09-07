@@ -393,4 +393,12 @@ describe Emerald::Parser do
       expect { parse src }.to raise_error(Emerald::SyntaxError)
     end
   end
+
+  context "Imports" do
+    it "can parse imports" do
+      src = %(import "test")
+      result = s(:block, s(:import, s(:string, "test", offset: 7), offset: 0))
+      expect(parse(src)).to eq(result)
+    end
+  end
 end

@@ -1,4 +1,7 @@
-prog             -> expr (newline+ expr)* newline*
+prog             -> newline* imports? prog_body?
+imports          -> import (newline+ import)* newline*
+import           -> :import string
+prog_body        -> expr (newline+ expr)* newline*
 expr             -> deftype | def | defn | fn | if | unless | call | terminal
 deftype          -> :deftype constant constant? array?
 def              -> :def identifier terminal

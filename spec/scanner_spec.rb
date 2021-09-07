@@ -384,4 +384,12 @@ describe Emerald::Scanner do
       expect(tokens).to eq(result)
     end
   end
+
+  context "Imports" do
+    it "can tokenise import as a keyword" do
+      _, tokens = tokenise %(import "test")
+      result = [s(:import, "import", offset: 0), s(:string, "test", offset: 7)]
+      expect(tokens).to eq(result)
+    end
+  end
 end
