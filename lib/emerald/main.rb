@@ -27,14 +27,14 @@ module Emerald
       end
 
       def print_ast(file)
-        tokens = Emerald::Scanner.new(file).tokens
+        tokens = Emerald::Lexer.new(file).tokens
         pp Emerald::Parser.new(file, tokens).parse
       rescue Emerald::Error => e
         puts e.to_s
       end
 
       def print_tokens(file)
-        pp Emerald::Scanner.new(file).tokens
+        pp Emerald::Lexer.new(file).tokens
       rescue Emerald::Error => e
         puts e.to_s
       end

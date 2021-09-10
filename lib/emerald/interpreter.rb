@@ -19,7 +19,7 @@ module Emerald
 
     def interprete(file)
       clear_error
-      tokens = Emerald::Scanner.new(file).tokens
+      tokens = Emerald::Lexer.new(file).tokens
       ast = Emerald::Parser.new(file, tokens).parse
       ast, locals = Emerald::Resolver.new(file, ast).resolve_locals
       global_env.scoped_locals = locals
@@ -261,7 +261,7 @@ module Emerald
       end
       target_file = Emerald::Files::RealFile.new(candidates.first)
 
-      tokens = Emerald::Scanner.new(target_file).tokens
+      tokens = Emerald::Lexer.new(target_file).tokens
       ast = Emerald::Parser.new(target_file, tokens).parse
       ast, locals = Emerald::Resolver.new(target_file, ast).resolve_locals
       file_env = Environment.new(file: target_file, outer: global_env, scoped_locals: locals)

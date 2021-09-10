@@ -20,7 +20,7 @@ map sum_square_and_root [1 2 3]
 
 # Modules & symbols
 it "can tokenise a parenthesized call" (fn do
-  def tokens Emerald::Scanner.tokenise "foo"
+  def tokens Emerald::Lexer.tokenise "foo"
   def result [:identifier "foo"]
   Assert.equal tokens result
 end)

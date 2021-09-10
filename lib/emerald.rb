@@ -1,7 +1,7 @@
 module Emerald
   autoload :Main, "emerald/main"
 
-  autoload :Scanner, "emerald/scanner"
+  autoload :Lexer, "emerald/lexer"
   autoload :Parser, "emerald/parser"
   autoload :Interpreter, "emerald/interpreter"
   autoload :Resolver, "emerald/resolver"

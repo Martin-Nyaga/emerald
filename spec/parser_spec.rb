@@ -3,7 +3,7 @@ require "spec_helper"
 describe Emerald::Parser do
   def parse str
     file = Emerald::Files::ScriptFile.new(str)
-    tokens = Emerald::Scanner.new(file).tokens
+    tokens = Emerald::Lexer.new(file).tokens
     Emerald::Parser.new(file, tokens).parse
   end
 

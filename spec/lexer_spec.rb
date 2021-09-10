@@ -1,10 +1,10 @@
 require "spec_helper"
-require "emerald/scanner"
+require "emerald/lexer"
 
-describe Emerald::Scanner do
+describe Emerald::Lexer do
   def tokenise(str)
     file = Emerald::Files::ScriptFile.new(str)
-    [file, Emerald::Scanner.new(file).tokens]
+    [file, Emerald::Lexer.new(file).tokens]
   end
 
   it "can tokenise integers" do
@@ -348,7 +348,7 @@ describe Emerald::Scanner do
   end
 
   context "comments" do
-    it "can skip over comments in the scanner" do
+    it "can skip over comments in the Lexer" do
       _, tokens = tokenise "# this is a comment"
       result = []
       expect(tokens).to eq(result)

@@ -99,7 +99,7 @@ module Emerald
   ]
 
   SKIP_TOKENS = Set[:space, :comment, :comma]
-  class Scanner
+  class Lexer
     attr_reader :file
     attr_accessor :src, :offset
 
