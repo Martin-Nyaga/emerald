@@ -1,20 +1,16 @@
 class Emerald::Environment
-  attr_reader :outer, :env, :constants, :current_offset
+  attr_reader :outer, :env, :constants
 
-  attr_accessor :file
+  attr_accessor :file, :current_offset, :scoped_locals
 
-  def initialize(env = {}, outer: nil, file: nil, current_offset: 0)
+  def initialize(env: {}, outer: nil, file: nil, current_offset: 0, scoped_locals: {})
     @constants = {}
     @current_offset = current_offset
+    @scoped_locals = scoped_locals
     @env = env
     @file = file
     @outer = outer
     @stack_frames = []
-  end
-
-  def current_offset=(new_offset)
-    @current_offset = new_offset
-    outer.current_offset = new_offset unless outer.nil?
   end
 
   def set(name, value)

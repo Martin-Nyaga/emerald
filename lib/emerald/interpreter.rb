@@ -6,7 +6,6 @@ module Emerald
     attr_reader :global_env, :file, :had_error, :exit_on_error, :runtime
     def initialize(exit_on_error: true)
       @global_env = Environment.new(file: nil)
-      @scoped_locals = {}
       @had_error = false
       @exit_on_error = exit_on_error
 
@@ -23,7 +22,7 @@ module Emerald
       tokens = Emerald::Scanner.new(file).tokens
       ast = Emerald::Parser.new(file, tokens).parse
       ast, locals = Emerald::Resolver.new(file, ast).resolve_locals
-      @scoped_locals = locals
+      global_env.scoped_locals = locals
       global_env.file = file
       interprete_node(ast, global_env)
     rescue Emerald::Error => e
@@ -31,8 +30,6 @@ module Emerald
     end
 
     private
-
-    attr_reader :scoped_locals
 
     EM_TRUE = Emerald::Types::TRUE
     EM_FALSE = Emerald::Types::FALSE
@@ -48,17 +45,6 @@ module Emerald
         env.current_offset,
         env.stack_frames
       )
-    rescue Emerald::Error => e
-      if e.file.nil? || e.offset.nil?
-        raise e.class.new(
-          e.message,
-          env.file,
-          env.current_offset,
-          env.stack_frames
-        )
-      else
-        raise
-      end
     end
 
     def interprete_block(node, env)
@@ -82,7 +68,7 @@ module Emerald
 
     def interprete_identifier(node, env)
       result =
-        if (scope_distance = scoped_locals[node])
+        if (scope_distance = global_env.scoped_locals[node])
           env.get_at_distance(scope_distance, node.child)
         else
           global_env.get(node.child)
@@ -276,10 +262,10 @@ module Emerald
       tokens = Emerald::Scanner.new(target_file).tokens
       ast = Emerald::Parser.new(target_file, tokens).parse
       ast, locals = Emerald::Resolver.new(target_file, ast).resolve_locals
-      # file_env = Environment.new(file: target_file)
-      # file_env.scoped_locals = locals
-      # env.add_imported_env(file_env)
-      pp ast
+      file_env = Environment.new(file: target_file, outer: global_env, scoped_locals: locals)
+      interprete_node(ast, file_env)
+      # FIXME: This is a hack
+      global_env.env.merge!(file_env.env)
       EM_NIL
     end
 
@@ -287,7 +273,7 @@ module Emerald
       arity = params.children.size
       Emerald::Types::Function.new(name, arity, proc { |calling_env, *args|
         block_env = Environment.new(
-          params.children.zip(args).map { |((_, arg_name), arg_value)| [arg_name, arg_value] }.to_h,
+          env: params.children.zip(args).map { |((_, arg_name), arg_value)| [arg_name, arg_value] }.to_h,
           file: defining_env.file,
           outer: defining_env
         )
