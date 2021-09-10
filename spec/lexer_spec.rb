@@ -377,6 +377,39 @@ describe Emerald::Lexer do
     end
   end
 
+  context "Modules" do
+    it "can tokenise defmodule as a keyword" do
+      _, tokens = tokenise "defmodule M do end"
+      result = [
+        s(:defmodule, "defmodule", offset: 0),
+        s(:constant, "M", offset: 10),
+        s(:do, "do", offset: 12),
+        s(:end, "end", offset: 15)
+      ]
+      expect(tokens).to eq(result)
+    end
+
+    it "can tokenise module scoped identifiers" do
+      _, tokens = tokenise "M.foo"
+      result = [
+        s(:constant, "M", offset: 0),
+        s(:dot, ".", offset: 1),
+        s(:identifier, "foo", offset: 2)
+      ]
+      expect(tokens).to eq(result)
+    end
+
+    it "can tokenise module scoped constants" do
+      _, tokens = tokenise "M::Foo"
+      result = [
+        s(:constant, "M", offset: 0),
+        s(:double_colon, "::", offset: 1),
+        s(:constant, "Foo", offset: 3)
+      ]
+      expect(tokens).to eq(result)
+    end
+  end
+
   context "References" do
     it "can tokenise &refernce" do
       _, tokens = tokenise "&String"

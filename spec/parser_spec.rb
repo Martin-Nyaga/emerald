@@ -161,7 +161,10 @@ describe Emerald::Parser do
           s(:params, s(:identifier, "a", offset: 3), s(:identifier, "b", offset: 5)),
           s(:block,
             s(:call, s(:identifier, "print", offset: 11), s(:identifier, "a", offset: 17)),
-            s(:call, s(:identifier, "print", offset: 19), s(:identifier, "b", offset: 25))), offset: 0), offset: 0)
+            s(:call, s(:identifier, "print", offset: 19), s(:identifier, "b", offset: 25)),
+            offset: 7),
+          offset: 0),
+        offset: 0)
       expect(parse(src)).to eq(result)
     end
 
@@ -173,7 +176,10 @@ describe Emerald::Parser do
           s(:params, s(:identifier, "a", offset: 9), s(:identifier, "b", offset: 11)),
           s(:block,
             s(:call, s(:identifier, "print", offset: 17), s(:identifier, "a", offset: 23)),
-            s(:call, s(:identifier, "print", offset: 27), s(:identifier, "b", offset: 33))), offset: 0), offset: 0)
+            s(:call, s(:identifier, "print", offset: 27), s(:identifier, "b", offset: 33)),
+            offset: 13),
+          offset: 0),
+        offset: 0)
       expect(parse(src)).to eq(result)
     end
 
@@ -398,6 +404,52 @@ describe Emerald::Parser do
     it "can parse imports" do
       src = %(import "test")
       result = s(:block, s(:import, s(:string, "test", offset: 7), offset: 0))
+      expect(parse(src)).to eq(result)
+    end
+  end
+
+  context "Module" do
+    it "can parse a module definition" do
+      src = "defmodule M do end"
+      result = s(:block,
+        s(:defmodule,
+          s(:constant, "M", offset: 10),
+          s(:block, offset: 12), offset: 0), offset: 0)
+      expect(parse(src)).to eq(result)
+    end
+
+    it "can parse a module scoped identifier" do
+      src = "M.foo"
+      result = s(:block,
+        s(:call,
+          s(:module_scoped_identifier,
+            s(:constant, "M", offset: 0),
+            s(:identifier, "foo", offset: 2),
+            offset: 0),
+          offset: 0),
+        offset: 0)
+      expect(parse(src)).to eq(result)
+    end
+
+    it "can parse a module scoped identifier in a symbol call" do
+      src = ":a M.foo"
+      result =
+        s(:block,
+          s(:call,
+            s(:symbol, "a", offset: 0),
+            s(:module_scoped_identifier,
+              s(:constant, "M", offset: 3),
+              s(:identifier, "foo", offset: 5))))
+      expect(parse(src)).to eq(result)
+    end
+
+    it "can parse a module scoped constant" do
+      src = "M::Foo"
+      result = s(:block,
+        s(:constructor,
+        s(:module_scoped_constant,
+          s(:constant, "M", offset: 0),
+          s(:constant, "Foo", offset: 3))))
       expect(parse(src)).to eq(result)
     end
   end

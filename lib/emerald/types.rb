@@ -12,6 +12,7 @@ module Emerald
     autoload :Boolean, "emerald/types/boolean"
     autoload :Nil, "emerald/types/nil"
     autoload :Error, "emerald/types/error"
+    autoload :Module, "emerald/types/module"
 
     TRUE = Emerald::Types::Boolean::True.instance
     FALSE = Emerald::Types::Boolean::False.instance
@@ -27,6 +28,5 @@ module Emerald
         )
       end
     end
-
   end
 end

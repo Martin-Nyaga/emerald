@@ -64,6 +64,7 @@ module Emerald
     TokenType.new(:def, /\Adef/, true),
     TokenType.new(:defn, /\Adefn/, true),
     TokenType.new(:deftype, /\Adeftype/, true),
+    TokenType.new(:defmodule, /\Adefmodule/, true),
     TokenType.new(:do, /\Ado/, true),
     TokenType.new(:else, /\Aelse/, true),
     TokenType.new(:end, /\Aend/, true),
@@ -95,6 +96,8 @@ module Emerald
     TokenType.new(:arrow, /\A->/),
     TokenType.new(:ref, /\A&/),
     TokenType.new(:comma, /\A,/),
+    TokenType.new(:dot, /\A\./),
+    TokenType.new(:double_colon, /\A::/),
     TokenType.new(:space, /\A[ \t]/)
   ]
 

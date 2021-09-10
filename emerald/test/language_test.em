@@ -163,6 +163,19 @@ describe "Emerald" (fn do
     assert_valid_user user1 "Test" "test@example.com"
     assert_valid_user user2 "Test2" "test2@example.com"
   end)
+
+  it "can define a module with some children and call them" (fn do
+    defmodule Foo do
+      def test_string "String"
+      defn test_fn -> 1
+      deftype Bar
+    end
+
+    assert (== "String" Foo.test_string)
+    assert (== 1 Foo.test_fn)
+    def bar_instance (Foo::Bar)
+    assert (== &Foo::Bar (type bar_instance))
+  end)
 end)
 
 println

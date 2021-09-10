@@ -208,7 +208,7 @@ module Emerald
       new_type.add_fields(fields.array)
 
       Emerald::Types.const_set(type_name, new_type)
-      global_env.set_constant type_name, new_type
+      env.set_constant type_name, new_type
       new_type
     end
 
@@ -269,6 +269,15 @@ module Emerald
       # FIXME: This is a hack
       global_env.env.merge!(file_env.env)
       EM_NIL
+    end
+
+    def interprete_defmodule(node, env)
+      (_, (_, module_name), module_body) = node
+      module_env = Environment.new(outer: env)
+      interprete_node(module_body, module_env)
+      module_constant = Emerald::Types::Module.new(module_env)
+      env.set_constant module_name, module_constant
+      module_constant
     end
 
     def define_function(defining_env, name, params, body)
