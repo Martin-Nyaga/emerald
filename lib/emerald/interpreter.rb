@@ -39,6 +39,8 @@ module Emerald
       env.current_offset = node.offset
       send("interprete_#{node.type}", node, env)
     rescue NoMethodError
+      # FIXME: check for existence of the method so we don't overwrite other
+      # legitimate NoMethodErrors
       raise Emerald::NotImplementedError.new(
         "evaluation of :#{node.type} is not implemented",
         env.file,

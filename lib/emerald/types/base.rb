@@ -1,16 +1,5 @@
 module Emerald
   module Types
-    def self.assert_type(env, arg, type, message = nil)
-      unless arg.is_a?(type)
-        raise Emerald::TypeError.new(
-          message || "expected #{type} got #{arg.class}",
-          env.file,
-          env.current_offset,
-          env.stack_frames
-        )
-      end
-    end
-
     module BaseClassMethods
       module ClassMethods
         def to_s

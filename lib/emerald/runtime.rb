@@ -53,6 +53,7 @@ module Emerald
 
       # Error
       define_function(env, "raise", 1) do |env, error|
+        Emerald::Types.assert_type(env, error, Emerald::Types::Error)
         raise error.ruby_error(env)
       end
 

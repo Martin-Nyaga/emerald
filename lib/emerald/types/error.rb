@@ -9,7 +9,8 @@ module Emerald
         end
       end
 
-      def initialize(env, message = Emerald::Types::String.new("Runtime error"))
+      def initialize(env, args)
+        message = args[0] || Emerald::Types::String.new("Runtime error")
         Emerald::Types.assert_type(env, message, Emerald::Types::String)
         @message = message
         @error = self.class.name
