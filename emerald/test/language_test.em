@@ -1,4 +1,5 @@
 import "test"
+import "test/aliases"
 
 println "Running tests:"
 

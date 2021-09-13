@@ -39,6 +39,7 @@ module Emerald
       env.current_offset = node.offset
       send("interprete_#{node.type}", node, env)
     rescue NoMethodError => e
+      pp e.message
       # FIXME: check for existence of the method so we don't overwrite other
       # legitimate NoMethodErrors
       raise Emerald::NotImplementedError.new(
@@ -217,6 +218,10 @@ module Emerald
       case referred_value.type
       when :identifier
         env.get(referred_value.child)
+      when :module_scoped_identifier
+        (_, mod, (_, ident)) = referred_value
+        mod = interprete_node(s(:ref, mod), env)
+        result = mod.env.get(ident)
       when :module_scoped_constant
         interprete_node(referred_value, env)
       when :constant
@@ -270,6 +275,7 @@ module Emerald
       interprete_node(ast, file_env)
       # FIXME: This is a hack
       global_env.env.merge!(file_env.env)
+      global_env.constants.merge!(file_env.constants)
       EM_NIL
     end
 
