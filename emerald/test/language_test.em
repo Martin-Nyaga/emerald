@@ -25,7 +25,6 @@ describe "Emerald" (fn do
     assert true
   end)
 
-  # TODO: Fix this
   it "can evaluate anonymous single and multline functions" (fn do
     def inc (fn n -> + n 1)
     def dec (fn n do 
@@ -173,6 +172,7 @@ describe "Emerald" (fn do
 
     assert (== "String" Foo.test_string)
     assert (== 1 Foo.test_fn)
+    assert (== &Function (type &Foo.test_fn))
     def bar_instance (Foo::Bar)
     assert (== &Foo::Bar (type bar_instance))
   end)

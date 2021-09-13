@@ -33,7 +33,7 @@ module Emerald
         base.instance_eval { @fields = [] }
       end
 
-      def initialize(env, args)
+      def initialize(env, args = [])
         if args.is_a?(Emerald::Types::Hashmap)
           args.hashmap.each do |field, value|
             self[Emerald::Types::Symbol.new(field)] = value

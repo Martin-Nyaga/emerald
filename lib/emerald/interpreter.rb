@@ -38,7 +38,7 @@ module Emerald
     def interprete_node(node, env)
       env.current_offset = node.offset
       send("interprete_#{node.type}", node, env)
-    rescue NoMethodError
+    rescue NoMethodError => e
       # FIXME: check for existence of the method so we don't overwrite other
       # legitimate NoMethodErrors
       raise Emerald::NotImplementedError.new(
@@ -217,14 +217,16 @@ module Emerald
       case referred_value.type
       when :identifier
         env.get(referred_value.child)
+      when :module_scoped_constant
+        interprete_node(referred_value, env)
       when :constant
         env.get_constant(referred_value.child)
       end
     end
 
     def interprete_constructor(node, env)
-      (_, (_, type_name), *args) = node
-      type = env.get_constant(type_name)
+      (_, constant, *args) = node
+      type = interprete_node(s(:ref, constant), env)
       if type.constructable?
         if args.length > 0
           args = args.map { |arg| interprete_node(arg, env) }
@@ -278,6 +280,24 @@ module Emerald
       module_constant = Emerald::Types::Module.new(module_env)
       env.set_constant module_name, module_constant
       module_constant
+    end
+
+    def interprete_module_scoped_identifier(node, env)
+      (_, mod, (_, ident)) = node
+      mod = interprete_node(s(:ref, mod), env)
+      result = mod.env.get(ident)
+      # TODO: Resolve this duplication with #interprete_identifier
+      if result.is_a?(Emerald::Types::Function)
+        result[env]
+      else
+        result
+      end
+    end
+
+    def interprete_module_scoped_constant(node, env)
+      (_, mod, constant) = node
+      mod = interprete_node(s(:ref, mod), env)
+      mod.env.get_constant(constant.child)
     end
 
     def define_function(defining_env, name, params, body)
