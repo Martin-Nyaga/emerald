@@ -4,6 +4,7 @@ require "pathname"
 module Emerald
   class Interpreter
     attr_reader :global_env, :file, :had_error, :exit_on_error, :runtime
+
     def initialize(exit_on_error: true)
       @global_env = Environment.new(file: nil)
       @had_error = false

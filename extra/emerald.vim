@@ -9,7 +9,7 @@ endif
 " Comments and TODOs
 syn keyword emTodo contained TODO FIXME XXX NOTE
 syn match emComment "#.*$" contains=emTodo
-syn keyword emKeyword def fn def defn do end true false nil if unless else when
+syn keyword emKeyword def fn def defn do end true false nil if unless else when deftype defmodule
 syn match emNumber '\<[-+]\?\d\+\>'
 syn match emConstant '\<[A-Z]\+[a-zA-Z_0-9::]*\>'
 syn match emSymbol '\<:[a-z]\+[a-zA-Z_0-9]*\>'
