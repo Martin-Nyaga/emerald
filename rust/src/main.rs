@@ -9,5 +9,5 @@ fn main() {
 
     println!("interpreting bytecode");
     let vm = VM::new();
-    println!("{}", vm.disassemble(Chunk::new(bytes), "main"));
+    println!("{}", vm.disassemble(&Chunk::new(bytes), "main"));
 }

@@ -127,42 +127,61 @@ impl<'a> VM<'a> {
         }
     }
 
-    pub fn disassemble(&self, chunk: Chunk, name: &str) -> String {
-        disassembler::disassemble_chunk(chunk, name)
+    pub fn disassemble(&self, chunk: &Chunk, name: &'static str) -> String {
+        disassembler::disassemble_chunk(&chunk, name)
     }
 }
 
 mod disassembler {
     use super::*;
 
-    pub fn disassemble_chunk(chunk: Chunk, name: &str) -> String {
-        let mut result = format!("-- {} --\n", name);
+    struct Disassembler<'a> {
+        chunk: &'a Chunk,
+        chunk_name: &'static str,
+        ip: usize,
+    }
 
-        let mut index = 0;
-        while index < chunk.code.len() {
-            let byte = chunk.code[index];
-            let str = match byte {
-                byte if byte == Op::Return as u8 => {
-                    let instruction = format!("{:04} {:08}\n", index, "Return");
-                    index += 1;
-                    instruction
-                }
-                byte if byte == Op::LoadLiteral as u8 => {
-                    let instruction = format!(
-                        "{:04} {:08} {:04}\n",
-                        index,
-                        "LoadLit",
-                        chunk.code[index + 1]
-                    );
-                    index += 2;
-                    instruction
-                }
-                _ => panic!("Unknown opcode: {} at index {}", byte, index),
-            };
-
-            result += &str;
+    impl<'a> Disassembler<'a> {
+        pub fn new(chunk: &'a Chunk, chunk_name: &'static str) -> Self {
+            Disassembler {
+                ip: 0,
+                chunk_name,
+                chunk,
+            }
         }
 
-        result
+        fn disassemble(mut self) -> String {
+            let mut result = format!("-- {} --\n", self.chunk_name);
+
+            while self.ip < self.chunk.code.len() {
+                let byte = self.chunk.code[self.ip];
+                result += &match byte {
+                    byte if byte == Op::Return as u8 => self.disassemble_instruction("Return", 0),
+                    byte if byte == Op::LoadLiteral as u8 => {
+                        self.disassemble_instruction("LoadLit", 1)
+                    }
+                    _ => panic!("Unknown opcode: {} at index {}", byte, self.ip),
+                };
+            }
+
+            result
+        }
+
+        fn disassemble_instruction(
+            &mut self,
+            instruction: &'static str,
+            args_count: usize,
+        ) -> String {
+            let mut text = format!("{:04} {:08}", self.ip, instruction);
+            for i in 0..args_count {
+                text += &format!(" {:04}", self.ip + i);
+            }
+            self.ip += self.ip + 1;
+            text + "\n"
+        }
+    }
+
+    pub fn disassemble_chunk(chunk: &Chunk, chunk_name: &'static str) -> String {
+        Disassembler::new(chunk, chunk_name).disassemble()
     }
 }
