@@ -5,31 +5,6 @@ pub struct Chunk {
     literals: Vec<Value>,
 }
 
-mod memory {
-    // Convert from byte arrays to unsigned integers. Big endian byte order assumed.
-    pub fn to_u64(byte_array: &[u8; 8]) -> u64 {
-        ((byte_array[0] as u64) << 56)
-            | ((byte_array[1] as u64) << 48)
-            | ((byte_array[2] as u64) << 40)
-            | ((byte_array[3] as u64) << 32)
-            | ((byte_array[4] as u64) << 24)
-            | ((byte_array[5] as u64) << 16)
-            | ((byte_array[6] as u64) << 8)
-            | ((byte_array[7] as u64) << 0)
-    }
-
-    pub fn to_u32(byte_array: &[u8; 4]) -> u32 {
-        ((byte_array[0] as u32) << 24)
-            | ((byte_array[1] as u32) << 16)
-            | ((byte_array[2] as u32) << 8)
-            | ((byte_array[3] as u32) << 0)
-    }
-
-    pub fn to_u16(byte_array: &[u8; 2]) -> u16 {
-        ((byte_array[0] as u16) << 8) | ((byte_array[1] as u16) << 0)
-    }
-}
-
 struct LiteralsParser<'a> {
     pub literal_count: u16,
     pub index: usize,
@@ -55,7 +30,7 @@ impl<'a> LiteralsParser<'a> {
     }
 
     fn read_literal_count(&mut self) {
-        self.literal_count = memory::to_u16(&self.code[0..2].try_into().unwrap());
+        self.literal_count = u16::from_be_bytes(self.code[0..2].try_into().unwrap());
         self.index += 2;
     }
 
@@ -71,9 +46,10 @@ impl<'a> LiteralsParser<'a> {
 
     fn read_integer(&mut self) -> Value {
         self.index += 1;
-        let integer = memory::to_u64(&self.code[self.index..(self.index + 8)].try_into().unwrap());
+        let integer =
+            u64::from_be_bytes(self.code[self.index..(self.index + 8)].try_into().unwrap());
         let value = Value {
-            value_type: Type::Integer,
+            type_: Type::Integer,
             data: ValueData { integer },
         };
         self.index += 8;
@@ -117,16 +93,16 @@ enum Type {
 }
 
 struct Value {
-    value_type: Type,
+    type_: Type,
     data: ValueData,
 }
 
 impl std::fmt::Debug for Value {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self.value_type {
+        match self.type_ {
             Type::Integer => f
                 .debug_struct("Value")
-                .field("type", &self.value_type)
+                .field("type", &self.type_)
                 .field("data", unsafe { &self.data.integer })
                 .finish(),
         }
