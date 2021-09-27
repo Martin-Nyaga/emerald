@@ -1,5 +1,6 @@
 mod vm;
-use vm::{Chunk, VM};
+use vm::chunk::Chunk;
+use vm::VM;
 
 fn example_bytecode() -> Vec<u8> {
     let mut code = vec![];
