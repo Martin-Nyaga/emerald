@@ -1,6 +1,5 @@
 pub mod chunk;
 mod disassembler;
-mod literals_parser;
 pub mod value;
 
 use chunk::*;
@@ -8,7 +7,7 @@ use value::*;
 
 #[derive(Clone, Copy)]
 #[repr(u8)]
-enum Op {
+pub enum Op {
     Return = 0,
     LoadLiteral,
 }

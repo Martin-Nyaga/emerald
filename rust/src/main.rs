@@ -5,18 +5,31 @@ use vm::VM;
 fn example_bytecode() -> Vec<u8> {
     let mut code = vec![];
 
-    // Constants
-    code.push(0);
-    code.push(1);
+    // Magic
+    code.extend(vm::chunk::MAGIC.to_be_bytes());
 
-    code.push(1);
+    // Source file
+    let source_file_path = "test/file.emx";
+    code.extend((source_file_path.len() as u16).to_be_bytes());
+    code.extend(source_file_path.bytes().collect::<Vec<u8>>());
+
+    // Line number array
+    code.extend((0 as u32).to_be_bytes());
+
+    // Literals
+    code.extend((2 as u32).to_be_bytes());
+
+    code.push(vm::value::Type::Integer as u8);
     code.extend((120 as u64).to_be_bytes());
 
-    // Operations
-    code.push(1);
-    code.push(0);
+    code.push(vm::value::Type::Integer as u8);
+    code.extend((120 as u64).to_be_bytes());
 
-    code.push(0);
+    // Bytecode
+    code.extend([vm::Op::LoadLiteral as u8, 0]); // LoadLit 0
+    code.extend([vm::Op::Return as u8]);
+
+    println!("Code: {:?}", code);
     code
 }
 
