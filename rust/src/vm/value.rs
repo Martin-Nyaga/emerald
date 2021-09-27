@@ -24,6 +24,15 @@ impl std::fmt::Debug for Value {
     }
 }
 
+impl std::fmt::Display for Value {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self.type_ {
+            Type::Integer => write!(f, "{}", unsafe { &self.data.integer }),
+            Type::String => write!(f, "\"{}\"", unsafe { &*self.data.string }),
+        }
+    }
+}
+
 impl Value {
     pub fn integer(integer: u64) -> Value {
         Value {
