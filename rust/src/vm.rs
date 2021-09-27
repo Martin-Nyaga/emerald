@@ -26,7 +26,7 @@ impl<'a> VM<'a> {
     }
 
     pub fn interprete(&mut self, chunk: Chunk) -> () {
-        for byte in chunk.code {
+        for byte in chunk.bytecode {
             println!("Found byte: {}", byte);
         }
     }

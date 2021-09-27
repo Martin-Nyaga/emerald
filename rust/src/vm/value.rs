@@ -1,6 +1,7 @@
 #[derive(Clone, Copy, Debug)]
 pub enum Type {
-    Integer = 1,
+    Integer = 0,
+    String,
 }
 
 pub struct Value {
@@ -10,16 +11,38 @@ pub struct Value {
 
 impl std::fmt::Debug for Value {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self.type_ {
-            Type::Integer => f
-                .debug_struct("Value")
-                .field("type", &self.type_)
-                .field("data", unsafe { &self.data.integer })
-                .finish(),
+        f.debug_struct("Value")
+            .field("type", &self.type_)
+            .field(
+                "data",
+                match self.type_ {
+                    Type::Integer => unsafe { &self.data.integer },
+                    Type::String => unsafe { &self.data.string },
+                },
+            )
+            .finish()
+    }
+}
+
+impl Value {
+    pub fn integer(integer: u64) -> Value {
+        Value {
+            type_: Type::Integer,
+            data: ValueData { integer },
+        }
+    }
+
+    pub fn string(string: String) -> Value {
+        Value {
+            type_: Type::String,
+            data: ValueData {
+                string: std::mem::ManuallyDrop::new(string),
+            },
         }
     }
 }
 
 pub union ValueData {
     pub integer: u64,
+    pub string: std::mem::ManuallyDrop<String>,
 }

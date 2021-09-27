@@ -18,8 +18,8 @@ impl<'a> Disassembler<'a> {
     fn disassemble(mut self) -> String {
         let mut result = format!("-- {} --\n", self.chunk_name);
 
-        while self.ip < self.chunk.code.len() {
-            let byte = self.chunk.code[self.ip];
+        while self.ip < self.chunk.bytecode.len() {
+            let byte = self.chunk.bytecode[self.ip];
             result += &match byte {
                 byte if byte == Op::Return as u8 => self.disassemble_instruction("Return", 0),
                 byte if byte == Op::LoadLiteral as u8 => self.disassemble_instruction("LoadLit", 1),
