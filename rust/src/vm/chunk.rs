@@ -133,8 +133,7 @@ mod bytecode_parser {
 
         fn read_integer(&mut self) -> Result<Value, String> {
             self.advance(1); // tag
-            let integer = self.current_u64();
-            let value = Value::integer(self.current_u64());
+            let value = Value::Integer(self.current_u64());
             self.advance(8); // u64
             Ok(value)
         }
@@ -142,10 +141,10 @@ mod bytecode_parser {
         fn read_string(&mut self) -> Result<Value, String> {
             self.advance(1); // tag
             let size = self.current_u64() as usize;
-            self.advance(8); // u64
+            self.advance(8); // u64: size
             let string = std::str::from_utf8(&self.bytecode[self.offset..self.offset + size])
                 .map_err(|_| "failed to read string")?;
-            let value = Value::string(string.to_owned());
+            let value = Value::String(string.to_owned());
             self.advance(size); // string data
             Ok(value)
         }
