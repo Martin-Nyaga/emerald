@@ -14,8 +14,9 @@ fn example_bytecode() -> Vec<u8> {
     chunk.literals.push(Value::Integer(120));
 
     // Bytecode
-    chunk.bytecode.extend([vm::Op::LoadLiteral as u8, 0]); // LoadLit 0
-    chunk.bytecode.extend([vm::Op::Return as u8]);
+    // [instruction, ...args, offset]
+    chunk.bytecode.extend([vm::Op::LoadLiteral as u8, 0, 0]);
+    chunk.bytecode.extend([vm::Op::Return as u8, 1]);
 
     let code = chunk.to_bytecode();
     println!("Code: {:?}", code);

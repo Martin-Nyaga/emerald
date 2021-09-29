@@ -44,11 +44,24 @@ impl<'a> Disassembler<'a> {
     }
 
     fn disassemble_instruction(&mut self, instruction: &'static str, args_count: usize) -> String {
+        // Instruction
         let mut text = format!("  {:04} {:08}", self.ip, instruction);
+        self.ip += 1;
+
+        // Arguments
         for i in 0..args_count {
-            text += &format!(" {:04}", self.ip + i);
+            text += &format!(" {:04}", self.chunk.bytecode[self.ip + i]);
+            self.ip += 1;
         }
-        self.ip += self.ip + 1;
+
+        // Padding
+        for i in 0..(MAX_INSTRUCTION_ARGS_COUNT - args_count) {
+            text += &format!(" {:04}", "");
+        }
+
+        // Offset
+        text += &format!(" <{:04}>", self.chunk.bytecode[self.ip]);
+        self.ip += 1;
         text + "\n"
     }
 }

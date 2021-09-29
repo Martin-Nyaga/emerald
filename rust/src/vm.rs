@@ -13,6 +13,8 @@ pub enum Op {
     LoadLiteral,
 }
 
+pub const MAX_INSTRUCTION_ARGS_COUNT: usize = 3;
+
 pub struct VM<'a> {
     stack: Vec<&'a Value>,
     heap: Vec<Value>,
