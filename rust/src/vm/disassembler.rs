@@ -34,10 +34,11 @@ impl<'a> Disassembler<'a> {
         let mut result = format!("{}.code:\n", self.chunk_name);
         while self.ip < self.chunk.bytecode.len() {
             let byte = self.chunk.bytecode[self.ip];
-            result += &match byte {
-                byte if byte == Op::Return as u8 => self.disassemble_instruction("Return", 0),
-                byte if byte == Op::LoadLiteral as u8 => self.disassemble_instruction("LoadLit", 1),
-                _ => panic!("Unknown opcode: {} at offset {}", byte, self.ip),
+            let op: Op = byte.try_into().unwrap();
+            result += &match op {
+                Op::Return => self.disassemble_instruction("Return", 0),
+                Op::LoadLiteral => self.disassemble_instruction("LoadLit", 1),
+                Op::Add => self.disassemble_instruction("Add", 0),
             };
         }
         result + "\n"
@@ -49,19 +50,25 @@ impl<'a> Disassembler<'a> {
         self.ip += 1;
 
         // Arguments
-        for i in 0..args_count {
-            text += &format!(" {:04}", self.chunk.bytecode[self.ip + i]);
-            self.ip += 1;
+        for _ in 0..args_count {
+            text += &format!(
+                " {:04}",
+                byte_reader::read_u32(&self.chunk.bytecode[self.ip..]).unwrap()
+            );
+            self.ip += 4;
         }
 
         // Padding
-        for i in 0..(MAX_INSTRUCTION_ARGS_COUNT - args_count) {
+        for _ in 0..(MAX_INSTRUCTION_ARGS_COUNT - args_count) {
             text += &format!(" {:04}", "");
         }
 
         // Offset
-        text += &format!(" <{:04}>", self.chunk.bytecode[self.ip]);
-        self.ip += 1;
+        text += &format!(
+            " <{:04}>",
+            byte_reader::read_u32(&self.chunk.bytecode[self.ip..]).unwrap()
+        );
+        self.ip += 4;
         text + "\n"
     }
 }

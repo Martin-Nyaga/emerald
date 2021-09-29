@@ -11,15 +11,25 @@ fn example_bytecode() -> Vec<u8> {
         .literals
         .push(Value::String("test/file.emx".to_owned()));
     chunk.literals.push(Value::Integer(120));
-    chunk.literals.push(Value::Integer(120));
+    chunk.literals.push(Value::Integer(130));
 
     // Bytecode
     // [instruction, ...args, offset]
-    chunk.bytecode.extend([vm::Op::LoadLiteral as u8, 0, 0]);
-    chunk.bytecode.extend([vm::Op::Return as u8, 1]);
+    chunk.bytecode.push(vm::Op::LoadLiteral as u8);
+    chunk.bytecode.extend((1 as u32).to_be_bytes());
+    chunk.bytecode.extend((0 as u32).to_be_bytes());
+
+    chunk.bytecode.push(vm::Op::LoadLiteral as u8);
+    chunk.bytecode.extend((2 as u32).to_be_bytes());
+    chunk.bytecode.extend((0 as u32).to_be_bytes());
+
+    chunk.bytecode.push(vm::Op::Add as u8);
+    chunk.bytecode.extend((0 as u32).to_be_bytes());
+
+    chunk.bytecode.push(vm::Op::Return as u8);
+    chunk.bytecode.extend((1 as u32).to_be_bytes());
 
     let code = chunk.to_bytecode();
-    println!("Code: {:?}", code);
     code
 }
 
@@ -29,8 +39,15 @@ fn main() {
     // println!("reading file: {}", path);
     // let bytes = std::fs::read(path).map_err(|e| format!("{}", e)).unwrap();
     let bytes = example_bytecode();
+    let chunk = Chunk::from_bytecode(bytes);
+    let mut vm = VM::new();
 
-    println!("interpreting bytecode");
-    let vm = VM::new();
-    println!("{}", vm.disassemble(&Chunk::from_bytecode(bytes), "main"));
+    println!("Disassembling bytecode...\n");
+    println!("{}", vm.disassemble(&chunk, "main"));
+
+    println!("Interpreting bytecode...\n");
+    let result = vm.interprete(chunk);
+    if let Err(error) = result {
+        eprintln!("{:?}", error);
+    }
 }

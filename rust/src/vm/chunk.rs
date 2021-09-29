@@ -26,9 +26,9 @@ impl Chunk {
         chunk_parser::dump_chunk(self)
     }
 
-    pub fn source_file_path(&self) -> &Value {
-        &self.literals[0]
-    }
+    //     pub fn source_file_path(&self) -> &Value {
+    //         &self.literals[0]
+    //     }
 }
 
 mod chunk_parser {
