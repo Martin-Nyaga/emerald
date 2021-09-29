@@ -1,19 +1,29 @@
+use crate::vm::byte_reader;
 use crate::vm::Value;
 use std::result::Result;
 
 pub const MAGIC: u32 = 0xFFFFFFFE;
 
+#[derive(Default)]
 pub struct Chunk {
     pub literals: Vec<Value>,
     pub bytecode: Vec<u8>,
 }
 
 impl Chunk {
-    pub fn new(bytecode: Vec<u8>) -> Chunk {
-        match bytecode_parser::parse_chunk(bytecode) {
+    pub fn new() -> Self {
+        Chunk::default()
+    }
+
+    pub fn from_bytecode(bytecode: Vec<u8>) -> Self {
+        match chunk_parser::parse_chunk(bytecode) {
             Ok(chunk) => chunk,
             Err(e) => panic!("{}", e),
         }
+    }
+
+    pub fn to_bytecode(&self) -> Vec<u8> {
+        chunk_parser::dump_chunk(self)
     }
 
     pub fn source_file_path(&self) -> &Value {
@@ -21,13 +31,23 @@ impl Chunk {
     }
 }
 
-mod bytecode_parser {
+mod chunk_parser {
     use super::*;
     use crate::vm::value::*;
-    use std::convert::TryInto;
 
     pub fn parse_chunk(bytecode: Vec<u8>) -> Result<Chunk, String> {
         BytecodeParser::new(bytecode).parse_chunk()
+    }
+
+    pub fn dump_chunk(chunk: &Chunk) -> Vec<u8> {
+        let mut code = vec![];
+        code.extend(MAGIC.to_be_bytes());
+        code.extend((chunk.literals.len() as u32).to_be_bytes());
+        for lit in &chunk.literals {
+            code.extend(lit.to_bytes());
+        }
+        code.extend(&chunk.bytecode);
+        code
     }
 
     struct BytecodeParser {
@@ -71,36 +91,12 @@ mod bytecode_parser {
             Ok(chunk)
         }
 
-        fn current_byte(&self) -> u8 {
-            self.bytecode[self.offset]
-        }
-
-        fn current_u32(&self) -> u32 {
-            u32::from_be_bytes(
-                self.bytecode[self.offset..self.offset + 4]
-                    .try_into()
-                    .unwrap(),
-            )
-        }
-
-        fn current_u16(&self) -> u16 {
-            u16::from_be_bytes(
-                self.bytecode[self.offset..self.offset + 2]
-                    .try_into()
-                    .unwrap(),
-            )
-        }
-
-        fn current_u64(&self) -> u64 {
-            u64::from_be_bytes(
-                self.bytecode[self.offset..(self.offset + 8)]
-                    .try_into()
-                    .unwrap(),
-            )
+        fn current_u32(&self) -> Option<u32> {
+            byte_reader::read_u32(&self.bytecode[self.offset..])
         }
 
         fn read_magic(&mut self) -> Result<(), String> {
-            if self.current_u32() == MAGIC {
+            if let Some(MAGIC) = self.current_u32() {
                 self.advance(4);
                 Ok(())
             } else {
@@ -109,7 +105,7 @@ mod bytecode_parser {
         }
 
         fn read_literals(&mut self) -> Result<Vec<Value>, String> {
-            let size = self.current_u32() as usize;
+            let size = self.current_u32().unwrap() as usize;
             self.advance(4);
             let mut literals = Vec::with_capacity(size);
             if size > 0 {
@@ -121,31 +117,8 @@ mod bytecode_parser {
         }
 
         fn read_literal(&mut self) -> Result<Value, String> {
-            match self.current_byte() {
-                byte if byte == Type::Integer as u8 => self.read_integer(),
-                byte if byte == Type::String as u8 => self.read_string(),
-                _ => Err(format!(
-                    "Unknown literal type found in bytecode: {}",
-                    self.bytecode[self.offset]
-                )),
-            }
-        }
-
-        fn read_integer(&mut self) -> Result<Value, String> {
-            self.advance(1); // tag
-            let value = Value::Integer(self.current_u64());
-            self.advance(8); // u64
-            Ok(value)
-        }
-
-        fn read_string(&mut self) -> Result<Value, String> {
-            self.advance(1); // tag
-            let size = self.current_u64() as usize;
-            self.advance(8); // u64: size
-            let string = std::str::from_utf8(&self.bytecode[self.offset..self.offset + size])
-                .map_err(|_| "failed to read string")?;
-            let value = Value::String(string.to_owned());
-            self.advance(size); // string data
+            let (bytes_read, value) = Value::from_bytes(&self.bytecode[self.offset..])?;
+            self.advance(bytes_read);
             Ok(value)
         }
 

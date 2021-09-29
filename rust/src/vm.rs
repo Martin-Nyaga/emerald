@@ -1,3 +1,4 @@
+pub mod byte_reader;
 pub mod chunk;
 mod disassembler;
 pub mod value;

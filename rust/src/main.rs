@@ -1,32 +1,23 @@
 mod vm;
 use vm::chunk::Chunk;
+use vm::value::Value;
 use vm::VM;
 
 fn example_bytecode() -> Vec<u8> {
-    let mut code = vec![];
-
-    // Magic
-    code.extend(vm::chunk::MAGIC.to_be_bytes());
-
-    // Literals
-    code.extend((3 as u32).to_be_bytes());
+    let mut chunk = Chunk::new();
 
     // Source file path
-    let source_file_path = "test/file.emx";
-    code.push(vm::value::Type::String as u8);
-    code.extend((source_file_path.len() as u64).to_be_bytes());
-    code.extend(source_file_path.bytes().collect::<Vec<u8>>());
-
-    code.push(vm::value::Type::Integer as u8);
-    code.extend((120 as u64).to_be_bytes());
-
-    code.push(vm::value::Type::Integer as u8);
-    code.extend((120 as u64).to_be_bytes());
+    chunk
+        .literals
+        .push(Value::String("test/file.emx".to_owned()));
+    chunk.literals.push(Value::Integer(120));
+    chunk.literals.push(Value::Integer(120));
 
     // Bytecode
-    code.extend([vm::Op::LoadLiteral as u8, 0]); // LoadLit 0
-    code.extend([vm::Op::Return as u8]);
+    chunk.bytecode.extend([vm::Op::LoadLiteral as u8, 0]); // LoadLit 0
+    chunk.bytecode.extend([vm::Op::Return as u8]);
 
+    let code = chunk.to_bytecode();
     println!("Code: {:?}", code);
     code
 }
@@ -40,5 +31,5 @@ fn main() {
 
     println!("interpreting bytecode");
     let vm = VM::new();
-    println!("{}", vm.disassemble(&Chunk::new(bytes), "main"));
+    println!("{}", vm.disassemble(&Chunk::from_bytecode(bytes), "main"));
 }
