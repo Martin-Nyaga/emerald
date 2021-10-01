@@ -1,4 +1,8 @@
+extern crate regex;
+
+mod compiler;
 mod vm;
+use compiler::file;
 use vm::chunk::Chunk;
 use vm::value::Value;
 use vm::VM;
@@ -33,11 +37,7 @@ fn example_bytecode() -> Vec<u8> {
     code
 }
 
-fn main() {
-    // let path = std::env::args().nth(1).expect("filename must be provided");
-
-    // println!("reading file: {}", path);
-    // let bytes = std::fs::read(path).map_err(|e| format!("{}", e)).unwrap();
+fn interprete_example_bytecode() {
     let bytes = example_bytecode();
     let chunk = Chunk::from_bytecode(bytes);
     let mut vm = VM::new();
@@ -49,5 +49,22 @@ fn main() {
     let result = vm.interprete(chunk);
     if let Err(error) = result {
         eprintln!("{:?}", error);
+    }
+}
+
+fn main() {
+    let args = Args::new(std::env::args());
+    let mut file = file::RealFile::new(args.file_path.clone());
+    compiler::compile(&mut file);
+}
+
+struct Args {
+    file_path: String,
+}
+
+impl Args {
+    pub fn new(mut args: std::env::Args) -> Self {
+        let file_path = args.nth(1).expect("path to file must be provided");
+        Args { file_path }
     }
 }
