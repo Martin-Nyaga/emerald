@@ -4,47 +4,74 @@ use std::slice::Iter;
 
 use regex::Regex;
 
-pub fn tokenise<'a, F>(file: &'a mut F) -> Vec<Sexp<'a, TokenType>>
+pub fn tokenise<'a, F>(file: &'a F) -> Vec<Sexp<'a, TokenType>>
 where
     F: file::File<'a>,
 {
     Lexer::new(file.contents()).tokenise()
 }
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum TokenType {
     Integer,
     Space,
     Newline,
+    Identifier,
 }
 
 impl TokenType {
-    pub fn iter() -> Iter<'static, TokenType> {
-        static TOKEN_TYPES: [TokenType; 3] =
-            [TokenType::Integer, TokenType::Space, TokenType::Newline];
+    fn iter() -> Iter<'static, TokenType> {
+        static TOKEN_TYPES: [TokenType; 4] = [
+            TokenType::Integer,
+            TokenType::Space,
+            TokenType::Newline,
+            TokenType::Identifier,
+        ];
         TOKEN_TYPES.iter()
     }
 
-    pub fn matches<'a>(&self, text: &'a str, offset: usize) -> Option<Sexp<'a, TokenType>> {
+    fn skip(&self) -> bool {
         match self {
-            TokenType::Integer => self.matches_with(TokenType::Integer, text, offset, r"\A[0-9]+"),
-            TokenType::Space => self.matches_with(TokenType::Space, text, offset, r"\A[ \t]+"),
-            TokenType::Newline => {
-                self.matches_with(TokenType::Newline, text, offset, r"\A\n|\A\r\n")
-            }
+            TokenType::Space => true,
+            _ => false,
         }
     }
 
-    fn matches_with<'a>(
-        &self,
-        type_: Self,
-        text: &'a str,
-        offset: usize,
-        matcher: &'static str,
-    ) -> Option<Sexp<'a, TokenType>> {
-        let mut re: Regex = Regex::new(matcher).unwrap();
-        let match_ = re.find(&text[offset..])?;
-        Some(t(type_, match_.as_str(), offset))
+    fn regex(&self) -> Regex {
+        match self {
+            TokenType::Integer => Regex::new(r"\A[0-9]+"),
+            TokenType::Space => Regex::new(r"\A[ \t]+"),
+            TokenType::Newline => Regex::new(r"\A\n|\A\r\n"),
+            TokenType::Identifier => {
+                Regex::new(r"\A[+\-\\/*%]|\A[><]=?|\A==|\A[a-z]+[a-zA-Z_0-9]*\??")
+            }
+        }
+        .unwrap()
+    }
+
+    fn matches<'a>(&self, text: &'a str, offset: usize) -> Option<Match<'a>> {
+        let match_ = self.regex().find(&text[offset..])?;
+        Some(Match::new(*self, match_.as_str(), offset))
+    }
+}
+
+struct Match<'a> {
+    token_type: TokenType,
+    text: &'a str,
+    offset: usize,
+}
+
+impl<'a> Match<'a> {
+    fn new(token_type: TokenType, text: &'a str, offset: usize) -> Match<'a> {
+        Match {
+            token_type,
+            text,
+            offset,
+        }
+    }
+
+    fn len(&self) -> usize {
+        self.text.len()
     }
 }
 
@@ -58,13 +85,15 @@ impl<'a> Lexer<'a> {
         Lexer { source, offset: 0 }
     }
 
-    pub fn tokenise(&mut self) -> Vec<Sexp<'a, TokenType>> {
+    fn tokenise(&mut self) -> Vec<Sexp<'a, TokenType>> {
         let mut result = vec![];
 
         while !self.at_end() {
-            if let Some(token) = self.sorted_matches().pop() {
-                self.offset += token.len();
-                result.push(token);
+            if let Some(match_) = self.sorted_matches().pop() {
+                self.offset += match_.len();
+                if !match_.token_type.skip() {
+                    result.push(t(match_.token_type, match_.text, match_.offset));
+                }
             } else {
                 panic!("Couldn't parse source!");
             }
@@ -73,12 +102,10 @@ impl<'a> Lexer<'a> {
         result
     }
 
-    fn sorted_matches(&self) -> Vec<Sexp<'a, TokenType>> {
-        let mut matches = TokenType::iter()
-            .map(|t| t.matches(&self.source, self.offset))
-            .filter(|t| t.is_some())
-            .map(|t| t.unwrap())
-            .collect::<Vec<Sexp<'a, TokenType>>>();
+    fn sorted_matches(&self) -> Vec<Match<'a>> {
+        let mut matches: Vec<Match<'a>> = TokenType::iter()
+            .filter_map(|t| t.matches(&self.source, self.offset))
+            .collect();
         matches.sort_by(|a, b| a.len().cmp(&b.len()));
         matches
     }

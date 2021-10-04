@@ -54,8 +54,8 @@ fn interprete_example_bytecode() {
 
 fn main() {
     let args = Args::new(std::env::args());
-    let mut file = file::RealFile::new(args.file_path.clone());
-    compiler::compile(&mut file);
+    let file = file::RealFile::new(args.file_path.clone());
+    compiler::compile(&file);
 }
 
 struct Args {

@@ -6,7 +6,7 @@ pub enum Sexp<'a, T> {
     NonTerminal(NonTerminal<'a, T>),
 }
 
-impl<'a, T: Debug> Sexp<'a, T> {
+impl<'a, T: Debug + Copy> Sexp<'a, T> {
     pub fn len(&'a self) -> usize {
         match self {
             Sexp::Terminal(terminal) => terminal.contents.len(),
@@ -14,6 +14,37 @@ impl<'a, T: Debug> Sexp<'a, T> {
                 .contents
                 .iter()
                 .fold(0, |acc, sexp| acc + sexp.len()),
+        }
+    }
+
+    pub fn text_content(&self) -> Option<&str> {
+        match self {
+            Sexp::Terminal(terminal) => Some(terminal.contents),
+            Sexp::NonTerminal(non_terminal) => None,
+        }
+    }
+
+    pub fn offset(&self) -> usize {
+        match self {
+            Sexp::Terminal(terminal) => terminal.offset,
+            Sexp::NonTerminal(non_terminal) => non_terminal.offset,
+        }
+    }
+
+    pub fn type_(&self) -> T {
+        match self {
+            Sexp::Terminal(terminal) => terminal.type_,
+            Sexp::NonTerminal(non_terminal) => non_terminal.type_,
+        }
+    }
+
+    pub fn push(&mut self, value: Sexp<'a, T>) -> Result<(), ()> {
+        match self {
+            Sexp::Terminal(_) => Err(()),
+            Sexp::NonTerminal(non_terminal) => {
+                non_terminal.contents.push(value);
+                Ok(())
+            }
         }
     }
 }
